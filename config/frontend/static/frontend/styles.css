@@ -1,0 +1,116 @@
+/* Palette */
+/* Global */
+body {
+  background-color: #fff;
+  color: #111;
+}
+
+/* Navbar */
+.navbar {
+  background-color: #fff;
+}
+.navbar.border-bottom {
+  border-bottom: 1px solid #eee !important;
+}
+.navbar .navbar-brand {
+  font-weight: 700;
+  color: #0b2d5c;
+}
+.navbar .navbar-brand:hover {
+  color: #0b2d5c;
+  opacity: 0.9;
+}
+.navbar .nav-link {
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #1f2d3d;
+}
+.navbar .nav-link:hover {
+  color: #0b2d5c;
+}
+.navbar .nav-link.active {
+  color: #0b2d5c !important;
+  font-weight: 700;
+}
+
+/* Hero */
+.hero-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #0b2d5c;
+}
+
+.hero-subtitle {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #0b2d5c;
+  margin-top: 1rem;
+}
+
+.hero-text {
+  color: #555;
+  max-width: 750px;
+  margin: 1.5rem auto 0;
+  line-height: 1.6;
+}
+
+/* Assembly card */
+.assembly-card {
+  border: 3px solid #ff914d;
+  border-radius: 15px;
+  padding: 2rem;
+  background-color: #fffaf5;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+}
+
+.assembly-title {
+  color: #ff914d;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+/* Custom button */
+.btn-assembly {
+  background-color: #ff914d;
+  border: none;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  font-weight: 700;
+  border-radius: 10px;
+  display: inline-block;
+  text-decoration: none;
+}
+.btn-assembly:hover, .btn-assembly:focus {
+  background-color: #e97f3e;
+  color: #fff;
+}
+
+/* Footer */
+footer {
+  border-top: 1px solid #eee;
+  margin-top: 5rem;
+  padding: 1.5rem 0;
+  color: #777;
+  font-size: 0.9rem;
+}
+
+footer a {
+  color: #0b2d5c;
+}
+footer a:hover {
+  color: #0b2d5c;
+  text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2rem;
+  }
+  .hero-subtitle {
+    font-size: 1.2rem;
+  }
+  .assembly-card {
+    padding: 1.5rem;
+  }
+}/*# sourceMappingURL=styles.css.map */
