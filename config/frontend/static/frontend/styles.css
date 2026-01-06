@@ -114,3 +114,24 @@ footer a:hover {
     padding: 1.5rem;
   }
 }/*# sourceMappingURL=styles.css.map */
+
+.assembly-types {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.type-chip {
+  border: 2px solid #ff914d;
+  color: #ff914d;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background-color: transparent;
+}
+
+
