@@ -56,22 +56,22 @@ body {
 
 /* Assembly card */
 .assembly-card {
-  border: 3px solid #0b2d5c;
+  border: 3px solid #ff914d;
   border-radius: 15px;
   padding: 2rem;
-  background-color: #f5f8ff;
+  background-color: #fffaf5;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
 }
 
 .assembly-title {
-  color: #0b2d5c;
+  color: #ff914d;
   font-weight: 800;
   letter-spacing: 0.06em;
 }
 
 /* Custom button */
 .btn-assembly {
-  background-color: #0b2d5c;
+  background-color: #ff914d;
   border: none;
   color: #fff;
   padding: 0.75rem 1.5rem;
@@ -80,23 +80,9 @@ body {
   display: inline-block;
   text-decoration: none;
 }
-.btn-assembly:hover,
-.btn-assembly:focus {
-  background-color: #09305f;
+.btn-assembly:hover, .btn-assembly:focus {
+  background-color: #e97f3e;
   color: #fff;
-}
-
-/* Login button (override Bootstrap warning) */
-.btn-warning {
-  background-color: #0b2d5c !important;
-  border-color: #0b2d5c !important;
-  color: #fff !important;
-}
-.btn-warning:hover,
-.btn-warning:focus {
-  background-color: #09305f !important;
-  border-color: #09305f !important;
-  color: #fff !important;
 }
 
 /* Footer */
@@ -127,4 +113,19 @@ footer a:hover {
   .assembly-card {
     padding: 1.5rem;
   }
+}
+/* Badges */
+.badge {
+  color: #111;
+}
+
+.designer-badge {
+  color: #ff914d;
+  background-color: transparent;
+  border: 2px solid #ff914d;
+  border-radius: 20px;
+  padding: 0.35em 0.75em;
+  font-weight: 600;
+  font-size: 0.85rem;
+  display: inline-block;
 }/*# sourceMappingURL=styles.css.map */
