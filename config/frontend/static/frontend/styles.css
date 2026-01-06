@@ -56,22 +56,22 @@ body {
 
 /* Assembly card */
 .assembly-card {
-  border: 3px solid #ff914d;
+  border: 3px solid #0b2d5c;
   border-radius: 15px;
   padding: 2rem;
-  background-color: #fffaf5;
+  background-color: #f5f8ff;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
 }
 
 .assembly-title {
-  color: #ff914d;
+  color: #0b2d5c;
   font-weight: 800;
   letter-spacing: 0.06em;
 }
 
 /* Custom button */
 .btn-assembly {
-  background-color: #ff914d;
+  background-color: #0b2d5c;
   border: none;
   color: #fff;
   padding: 0.75rem 1.5rem;
@@ -80,9 +80,23 @@ body {
   display: inline-block;
   text-decoration: none;
 }
-.btn-assembly:hover, .btn-assembly:focus {
-  background-color: #e97f3e;
+.btn-assembly:hover,
+.btn-assembly:focus {
+  background-color: #09305f;
   color: #fff;
+}
+
+/* Login button (override Bootstrap warning) */
+.btn-warning {
+  background-color: #0b2d5c !important;
+  border-color: #0b2d5c !important;
+  color: #fff !important;
+}
+.btn-warning:hover,
+.btn-warning:focus {
+  background-color: #09305f !important;
+  border-color: #09305f !important;
+  color: #fff !important;
 }
 
 /* Footer */
@@ -114,24 +128,3 @@ footer a:hover {
     padding: 1.5rem;
   }
 }/*# sourceMappingURL=styles.css.map */
-
-.assembly-types {
-  list-style: none;
-  padding: 0;
-  margin: 0.5rem 0 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.type-chip {
-  border: 2px solid #ff914d;
-  color: #ff914d;
-  padding: 0.35rem 0.8rem;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  background-color: transparent;
-}
-
-
