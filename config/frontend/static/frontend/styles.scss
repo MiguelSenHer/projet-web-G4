@@ -130,3 +130,18 @@ footer a {
     padding: 1.5rem;
   }
 }
+/* Badges */
+.badge {
+  color: #111; // override Bootstrap white text
+}
+
+.designer-badge {
+  color: $brand-orange;
+  background-color: transparent;
+  border: 2px solid $brand-orange;
+  border-radius: 20px;
+  padding: 0.35em 0.75em;
+  font-weight: 600;
+  font-size: 0.85rem;
+  display: inline-block;
+}
