@@ -1,7 +1,7 @@
 /* Palette */
 $brand-blue: #0b2d5c;
-$brand-orange: #ff914d;
-$brand-orange-hover: #e97f3e;
+$brand-orange: #0b2d5c;
+$brand-orange-hover: #0b2d5c;
 $bg-soft: #fffaf5;
 $text-muted: #555;
 $border-light: #eee;
@@ -130,3 +130,46 @@ footer a {
     padding: 1.5rem;
   }
 }
+<<<<<<< Updated upstream
+=======
+/* Badges */
+.badge {
+  color: #111; // override Bootstrap white text
+}
+
+.designer-badge {
+  color: $brand-orange;
+  background-color: transparent;
+  border: 2px solid $brand-orange;
+  border-radius: 20px;
+  padding: 0.35em 0.75em;
+  font-weight: 600;
+  font-size: 0.85rem;
+  display: inline-block;
+}
+
+a.btn.btn-warning {
+  margin-left: -0.3rem;
+}
+
+a.btn.btn-warning.fw-semibold {
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+
+  background-color: #31475f;
+  border: none;
+  color: #fff;
+
+  transition: all 0.25s ease-in-out;
+
+  &:hover {
+    background-color: #ffbb00;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+>>>>>>> Stashed changes

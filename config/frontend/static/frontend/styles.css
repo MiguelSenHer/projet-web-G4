@@ -56,7 +56,7 @@ body {
 
 /* Assembly card */
 .assembly-card {
-  border: 3px solid #ff914d;
+  border: 3px solid #0b2d5c;
   border-radius: 15px;
   padding: 2rem;
   background-color: #fffaf5;
@@ -64,14 +64,14 @@ body {
 }
 
 .assembly-title {
-  color: #ff914d;
+  color: #0b2d5c;
   font-weight: 800;
   letter-spacing: 0.06em;
 }
 
 /* Custom button */
 .btn-assembly {
-  background-color: #ff914d;
+  background-color: #0b2d5c;
   border: none;
   color: #fff;
   padding: 0.75rem 1.5rem;
@@ -81,7 +81,7 @@ body {
   text-decoration: none;
 }
 .btn-assembly:hover, .btn-assembly:focus {
-  background-color: #e97f3e;
+  background-color: #0b2d5c;
   color: #fff;
 }
 
@@ -113,4 +113,43 @@ footer a:hover {
   .assembly-card {
     padding: 1.5rem;
   }
+<<<<<<< Updated upstream
+=======
+}
+/* Badges */
+.badge {
+  color: #111;
+}
+
+.designer-badge {
+  color: #0b2d5c;
+  background-color: transparent;
+  border: 2px solid #0b2d5c;
+  border-radius: 20px;
+  padding: 0.35em 0.75em;
+  font-weight: 600;
+  font-size: 0.85rem;
+  display: inline-block;
+}
+
+a.btn.btn-warning {
+  margin-left: -0.3rem;
+}
+
+a.btn.btn-warning.fw-semibold {
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: #31475f;
+  border: none;
+  color: #fff;
+  transition: all 0.25s ease-in-out;
+}
+a.btn.btn-warning.fw-semibold:hover {
+  background-color: #ffbb00;
+  transform: translateY(-1px);
+}
+a.btn.btn-warning.fw-semibold:active {
+  transform: translateY(0);
+>>>>>>> Stashed changes
 }/*# sourceMappingURL=styles.css.map */
