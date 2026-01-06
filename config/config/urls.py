@@ -22,5 +22,5 @@ urlpatterns = [
     path("", include("frontend.urls")),
     path("", include("accounts.urls")),
     path("", include("plasmids.urls")),
-    path("", include("campaigns.urls")),
+    path("campaigns/", include("campaigns.urls")),
 ]
