@@ -39,22 +39,30 @@ projet-web-G4/
 
 ### 1. Create a virtual environment
 
+```
 python3.11 -m venv .venv
+```
 
 ### 2. Activate the virtual environment
 
+```
 source .venv/bin/activate
+```
 
 ### 3. Upgrade pip and install dependencies
 
+```
 python -m pip install --upgrade pip  
 python -m pip install -r requirements.txt
+```
 
 ---
 
 ## Run the development server
 
+```
 python config/manage.py runserver
+```
 
 Open your browser at:
 
