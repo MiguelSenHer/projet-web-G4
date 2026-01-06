@@ -6,6 +6,7 @@ Django-based web application for in silico plasmid assembly simulation.
 
 ## Project structure
 
+```text
 projet-web-G4/
 ├── config/
 │   ├── manage.py
@@ -23,7 +24,7 @@ projet-web-G4/
 │
 ├── db.sqlite3
 └── requirements.txt
-
+```
 ---
 
 ## Requirements
@@ -68,6 +69,3 @@ http://127.0.0.1:8000/
 - **plasmids**: plasmid-related features
 - **accounts**: user authentication and permissions
 
-
-Institut Pasteur – InSillyClo  
-Academic year 2025–2026
