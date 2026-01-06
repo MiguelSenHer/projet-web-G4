@@ -1,3 +1,17 @@
-<h2>Load your plasmid assembly template</h2>
-<p>Placeholder: on ajoutera le formulaire upload ici.</p>
-<a href="/campaigns/simulator/">← Back</a>
+<h2>Load your plasmid assembly template (.xlsx)</h2>
+
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <input type="file" name="template_file" accept=".xlsx" required>
+  <button type="submit">Upload</button>
+</form>
+
+{% if error %}
+  <p style="color:red;">{{ error }}</p>
+{% endif %}
+
+{% if uploaded_name %}
+  <p style="color:green;">Uploaded: {{ uploaded_name }}</p>
+{% endif %}
+
+<p><a href="/campaigns/simulator/">← Back</a></p>

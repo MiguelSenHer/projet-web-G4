@@ -1,5 +1,6 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.conf import settings
+from pathlib import Path
 
 def simulator_home(request):
     options = [
@@ -9,9 +10,28 @@ def simulator_home(request):
     return render(request, "campaigns/template.html", {"options": options})
 
 def load_template(request):
-    # Page placeholder (on fera l'upload ensuite)
-    return render(request, "campaigns/load.html")
+    uploaded_name = None
+    error = None
+
+    if request.method == "POST" and request.FILES.get("template_file"):
+        f = request.FILES["template_file"]
+
+        # optionnel mais utile : on force le .xlsx
+        if not f.name.lower().endswith(".xlsx"):
+            error = "Only .xlsx files are allowed."
+        else:
+            out_dir = Path(settings.MEDIA_ROOT) / "templates"
+            out_dir.mkdir(parents=True, exist_ok=True)
+            dest = out_dir / f.name
+
+            with open(dest, "wb") as w:
+                for chunk in f.chunks():
+                    w.write(chunk)
+
+            uploaded_name = f.name
+
+    return render(request, "campaigns/load.html", {"uploaded_name": uploaded_name, "error": error})
 
 def browse_templates(request):
-    # Page placeholder (on fera la liste ensuite)
+    # placeholder pour l’instant
     return render(request, "campaigns/browse.html")
