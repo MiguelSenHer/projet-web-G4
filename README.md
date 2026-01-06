@@ -1,12 +1,14 @@
-# projet-web-G4
-# InSillyClo
+# InSillyClo – Web Project (M2 AMI2B) - Group 4
 
-## Project Layout
+Django-based web application for in silico plasmid assembly simulation.
+
+---
+
+## Project structure
 
 projet-web-G4/
-│
 ├── config/
-│   ├── manage.py          
+│   ├── manage.py
 │   ├── config/
 │   │   ├── __init__.py
 │   │   ├── settings.py
@@ -22,15 +24,50 @@ projet-web-G4/
 ├── db.sqlite3
 └── requirements.txt
 
-#Install dependencies via venv
-'''
-python3.11 -m venv .venv
-'''
-'''
-source .venv/bin/activate
-'''
-'''
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-'''
+---
 
+## Requirements
+
+- Python 3.11
+- pip
+- virtualenv support
+
+---
+
+## Installation
+
+### 1. Create a virtual environment
+
+python3.11 -m venv .venv
+
+### 2. Activate the virtual environment
+
+source .venv/bin/activate
+
+### 3. Upgrade pip and install dependencies
+
+python -m pip install --upgrade pip  
+python -m pip install -r requirements.txt
+
+---
+
+## Run the development server
+
+python config/manage.py runserver
+
+Open your browser at:
+
+http://127.0.0.1:8000/
+
+---
+
+## Applications
+
+- **frontend**: landing page and navigation
+- **campaigns**: campaign simulation workflow (template upload, validation, inputs)
+- **plasmids**: plasmid-related features
+- **accounts**: user authentication and permissions
+
+
+Institut Pasteur – InSillyClo  
+Academic year 2025–2026
