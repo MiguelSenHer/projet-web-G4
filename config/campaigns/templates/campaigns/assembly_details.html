@@ -1,0 +1,28 @@
+{% load static %}
+<div class="assembly-details">
+
+  <div>
+    <strong>Separator:</strong>
+    {{ assembly.separator|default:"—" }}
+  </div>
+
+  <div>
+    <strong>Restriction enzyme:</strong>
+    {{ assembly.restriction_enzyme|default:"—" }}
+  </div>
+
+  <div class="mt-2">
+    <strong>Input parts:</strong>
+
+    {% if assembly.input_parts.exists %}
+      {% for part in assembly.input_parts.all %}
+        <span class="part-pill">{{ part.part_name }}</span>
+      {% endfor %}
+    {% else %}
+      <span class="text-muted fst-italic">
+        No input parts defined yet
+      </span>
+    {% endif %}
+  </div>
+
+</div>

@@ -8,7 +8,6 @@ class Assembly(models.Model):
     creation_date = models.DateTimeField("Created At")
     separator = models.CharField(max_length=20)
     restriction_enzyme = models.CharField(max_length=50)
-    input_parts = models.ManyToManyField('InputParts', related_name='assemblies')
     file = models.FileField(
         upload_to="assemblies/",
         blank=True,

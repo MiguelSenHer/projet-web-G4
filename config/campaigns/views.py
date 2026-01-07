@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.conf import settings
 from pathlib import Path
+from django.http import FileResponse, Http404
+from django.shortcuts import get_object_or_404
 from .models import Assembly
 
 def simulator_home(request):
@@ -41,3 +43,20 @@ def browse_templates(request):
         'campaigns/browse.html',
         {'assemblies': assemblies}
     )
+
+
+def assembly_download(request, pk):
+    assembly = get_object_or_404(Assembly, pk=pk)
+    if not assembly.file:
+        raise Http404("No file associated with this assembly")
+    response = FileResponse(
+        assembly.file.open('rb'),
+        as_attachment=True,
+        filename=assembly.file.name.split('/')[-1]
+    )
+    return response
+
+def assembly_detail(request, pk):
+    return render(request, 'campaigns/assembly_details.html', {
+        'assembly': get_object_or_404(Assembly, pk=pk)
+    })
