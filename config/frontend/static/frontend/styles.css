@@ -56,7 +56,7 @@ body {
 
 /* Assembly card */
 .assembly-card {
-  border: 3px solid #ff914d;
+  border: 3px solid #0b2d5c;
   border-radius: 15px;
   padding: 2rem;
   background-color: #fffaf5;
@@ -64,14 +64,14 @@ body {
 }
 
 .assembly-title {
-  color: #ff914d;
+  color: #0b2d5c;
   font-weight: 800;
   letter-spacing: 0.06em;
 }
 
 /* Custom button */
 .btn-assembly {
-  background-color: #ff914d;
+  background-color: #0b2d5c;
   border: none;
   color: #fff;
   padding: 0.75rem 1.5rem;
@@ -128,4 +128,173 @@ footer a:hover {
   font-weight: 600;
   font-size: 0.85rem;
   display: inline-block;
+}
+
+/* Login Page */
+.login-section {
+  background-color: #f5f5f5;
+  min-height: calc(100vh - 200px);
+  padding: 4rem 0;
+}
+
+.login-container {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.login-panel {
+  background-color: #fff;
+  border-radius: 15px;
+  padding: 2.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  min-width: 300px;
+  max-width: 450px;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #111;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+  letter-spacing: 0.05em;
+}
+
+.login-panel-right {
+  justify-content: flex-start;
+  align-self: center;
+  height: auto;
+}
+
+.panel-title-right {
+  margin-bottom: 0.75rem;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #111;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.required {
+  color: #dc3545;
+}
+
+.form-input {
+  padding: 0.75rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+.form-input:focus {
+  outline: none;
+  border-color: #87CEEB;
+}
+
+.btn-login {
+  background-color: #87CEEB;
+  border: none;
+  color: #fff;
+  padding: 0.875rem 2rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  border-radius: 8px;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: 100%;
+  margin-top: auto;
+}
+.btn-login:hover {
+  background-color: #6BB6D6;
+}
+
+.btn-create {
+  background-color: #87CEEB;
+  border: none;
+  color: #fff;
+  padding: 0.875rem 2rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  border-radius: 8px;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: 100%;
+}
+.btn-create:hover {
+  background-color: #6BB6D6;
+}
+
+.btn-reset {
+  background-color: transparent;
+  border: 2px solid #87CEEB;
+  color: #87CEEB;
+  padding: 0.875rem 2rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  border-radius: 8px;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.3s;
+  width: 100%;
+}
+.btn-reset:hover {
+  background-color: #87CEEB;
+  color: #fff;
+}
+
+/* Navbar login button */
+.btn-simulator {
+  background-color: #0b2d5c;
+  border: none;
+  color: #fff;
+  padding: 0.5rem 1.25rem;
+  font-weight: 600;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+.btn-simulator:hover {
+  background-color: #06172e;
+  color: #fff;
+}
+
+/* Responsive adjustments for login */
+@media (max-width: 768px) {
+  .login-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  .login-panel {
+    max-width: 100%;
+  }
+  .login-section {
+    padding: 2rem 0;
+  }
 }/*# sourceMappingURL=styles.css.map */
