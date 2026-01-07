@@ -7,10 +7,10 @@ body {
 
 /* Navbar */
 .navbar {
-  background-color: #fff;
+  background-color: #ffffffde;
 }
 .navbar.border-bottom {
-  border-bottom: 1px solid #eee !important;
+  border-bottom: 4px solid #0f0f0f93 !important;
 }
 .navbar .navbar-brand {
   font-weight: 700;
@@ -81,7 +81,7 @@ body {
   text-decoration: none;
 }
 .btn-assembly:hover, .btn-assembly:focus {
-  background-color: #e97f3e;
+  background-color: #6c89b2;;
   color: #fff;
 }
 

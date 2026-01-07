@@ -1,7 +1,6 @@
 /* Palette */
 $brand-blue: #0b2d5c;
-$brand-orange: #ff914d;
-$brand-orange-hover: #e97f3e;
+$brand-blue-hover: #6c89b2;
 $bg-soft: #fffaf5;
 $text-muted: #555;
 $border-light: #eee;
@@ -25,7 +24,7 @@ body {
     color: $brand-blue;
 
     &:hover {
-      color: $brand-blue;
+      color: $brand-blue-hover;
       opacity: 0.9;
     }
   }
@@ -36,7 +35,7 @@ body {
     color: #1f2d3d;
 
     &:hover {
-      color: $brand-blue;
+      color: $brand-blue-hover;
     }
 
     &.active {
@@ -147,8 +146,8 @@ footer a {
 }
 
 /* Login Page */
-$login-blue: #87CEEB;
-$login-blue-hover: #6BB6D6;
+$login-blue: #0b2d5c;
+$login-blue-hover: #6c89b2;
 $login-bg: #f5f5f5;
 
 .login-section {
