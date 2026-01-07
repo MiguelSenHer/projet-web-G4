@@ -1,5 +1,10 @@
 # InSillyClo – Web Project (M2 AMI2B) - Group 4
 
+- Julie FARES
+- Cherif SEDDIK
+- Miguel SENOVILLA
+- Dylane MAUREL
+---
 Django-based web application for in silico plasmid assembly simulation.
 
 ---
