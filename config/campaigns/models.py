@@ -1,14 +1,19 @@
+from contextlib import nullcontext
 from django.db import models
 
 
 class Assembly(models.Model):
-    id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=200)
     comment = models.TextField()
     creation_date = models.DateTimeField("Created At")
     separator = models.CharField(max_length=20)
     restriction_enzyme = models.CharField(max_length=50)
     input_parts = models.ManyToManyField('InputParts', related_name='assemblies')
+    file = models.FileField(
+        upload_to="assemblies/",
+        blank=True,
+        null=True
+    )
 
 
 class InputParts(models.Model):

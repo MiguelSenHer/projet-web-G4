@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.conf import settings
 from pathlib import Path
+from .models import Assembly
 
 def simulator_home(request):
     options = [
@@ -32,6 +33,11 @@ def load_template(request):
 
     return render(request, "campaigns/load.html", {"uploaded_name": uploaded_name, "error": error})
 
+
 def browse_templates(request):
-    # placeholder pour l’instant
-    return render(request, "campaigns/browse.html")
+    assemblies = Assembly.objects.prefetch_related('inputparts_set')
+    return render(
+        request,
+        'campaigns/browse.html',
+        {'assemblies': assemblies}
+    )

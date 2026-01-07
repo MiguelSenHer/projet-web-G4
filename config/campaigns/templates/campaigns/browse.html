@@ -39,46 +39,71 @@
     </div>
 </nav>
 
-<!-- MAIN -->
+<!-- MAIN CONTENT -->
 <main class="flex-grow-1">
-    <div class="container py-4">
+  <div class="container py-4">
 
-        <h1 class="text-center text-uppercase mb-4">Assemblies</h1>
+    <h1 class="text-center text-uppercase mb-4">Assemblies</h1>
 
-        <!-- Assembly card -->
-        <div class="card public-assembly mb-4">
-            <div class="card-body row align-items-center">
+    {% for assembly in assemblies %}
+    <div class="card public-assembly mb-4">
+      <div class="card-body row">
 
-                <!-- Left -->
-                <a href="#" class="col-12 col-md-3 text-decoration-none">
-                    <div class="fw-bold fs-5">Vnat_L1</div>
-                    <small class="text-muted">Updated: Oct 06, 2025</small>
-                </a>
+        <!-- LEFT: Assembly name -->
+        <a class="col-12 col-xl-2 col-lg-3 col-md-3 me-md-4 text-decoration-none"
+           href="{% url 'assembly_detail' assembly.id %}">
 
-                <!-- Middle -->
-                <div class="col border-start border-3 border-primary ps-md-4 mt-3 mt-md-0">
-                    <div><strong>Output separator:</strong> Hyphen</div>
-                    <div><strong>Restriction enzyme:</strong> BsaI</div>
+          <div class="fw-bolder">
+            {{ assembly.name }}
+          </div>
 
-                    <ul class="assembly-types mt-2">
-                        <li class="type-chip">Promoter</li>
-                        <li class="type-chip">CDS</li>
-                        <li class="type-chip">Terminator</li>
-                        <li class="type-chip">Backbone</li>
-                    </ul>   
-                </div>
+          <small class="text-secondary">
+            Updated At:
+            {{ assembly.creation_date|date:"M d, Y" }}
+          </small>
+        </a>
 
-                <!-- Right -->
-                <div class="col-auto mt-3 mt-md-0">
-                    <a href="#" class="btn btn-designer">
-                        <i class="bi bi-cloud-arrow-down fs-4"></i>
-                    </a>
-                </div>
+        <!-- MIDDLE: Assembly metadata -->
+        <div class="col border-10 border-start border-primary ps-md-4">
 
-            </div>
+          <div class="d-block">
+            <span class="fw-bolder">Output Separator :</span>
+            {{ assembly.separator }}
+          </div>
+
+          <div class="d-block">
+            <span class="fw-bolder">Restriction Enzyme :</span>
+            {{ assembly.restriction_enzyme }}
+          </div>
+
+          <!-- INPUT PARTS -->
+          <div class="d-block mt-1">
+            {% for part in assembly.inputparts_set.all %}
+              <div class="d-inline-flex px-3 py-0 mb-1 border border-3
+                          rounded-5 border-designer">
+                {{ part.part_name }}
+              </div>
+            {% empty %}
+              <span class="text-muted small">No input parts defined</span>
+            {% endfor %}
+          </div>
         </div>
 
+        <!-- RIGHT: Download -->
+        <div class="col-auto">
+          <a href="{% url 'assembly_download' assembly.id %}"
+             class="btn btn-designer btn-md">
+            <i class="bi bi-cloud-arrow-down fs-3"></i>
+          </a>
+        </div>
+
+      </div>
     </div>
+    {% empty %}
+      <p class="text-muted text-center">No assemblies available.</p>
+    {% endfor %}
+
+  </div>
 </main>
 
 <!-- FOOTER -->
