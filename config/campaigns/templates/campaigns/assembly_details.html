@@ -1,28 +1,153 @@
 {% load static %}
-<div class="assembly-details">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Assemblies</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <div>
-    <strong>Separator:</strong>
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Google font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'frontend/styles.css' %}">
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-md navbar-light bg-light border-bottom border-3">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="/">InSillyClo</a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav ms-auto mb-2 mb-md-0">
+                <li class="nav-item"><a class="nav-link active" href="/">Home</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/campaigns/simulator/browse/">Assemblies</a></li>
+                <li class="nav-item"><a class="nav-link" href="/campaigns/simulator/">Simulations</a></li>
+                <li class="nav-item"><a class="btn btn-simulator ms-md-3" href="/accounts/login/">Login</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="flex-grow-1">
+  <div class="container py-4">
+<h3>Assembly properties</h3>
+
+<dl class="row">
+
+  <dt class="col-12 col-md-3">Name :</dt>
+  <dd class="col-12 col-md-9">
+    {{ assembly.name }}
+  </dd>
+
+  <dt class="col-12 col-md-3">Comment :</dt>
+  <dd class="col-12 col-md-9">
+    {{ assembly.comment|default:"—" }}
+  </dd>
+
+  <dt class="col-12 col-md-3 text-secondary">Created At :</dt>
+  <dd class="col-12 col-md-9 text-secondary">
+    {{ assembly.creation_date }}
+  </dd>
+
+  <dt class="col-12 col-md-3">Output Separator :</dt>
+  <dd class="col-12 col-md-9">
     {{ assembly.separator|default:"—" }}
-  </div>
+  </dd>
 
-  <div>
-    <strong>Restriction enzyme:</strong>
+  <dt class="col-12 col-md-3">Restriction Enzyme :</dt>
+  <dd class="col-12 col-md-9">
     {{ assembly.restriction_enzyme|default:"—" }}
+  </dd>
+
+</dl>
+
+<h3>Input parts</h3>
+
+{% if input_parts %}
+  {% for part in input_parts %}
+
+    <div class="card context-designer border-designer mb-3">
+      <div class="card-body row">
+
+        <!-- Left -->
+        <div class="col-12 col-xl-2 col-lg-3 col-md-3 me-md-4">
+          <div class="text-designer fw-bolder">
+            {{ part.part_name }}
+            {% if part.mandatory %}
+              <span class="text-danger">*</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Middle -->
+        <div class="col border-10 border-start border-auto ps-md-4">
+            <div class="d-block">
+                    {% if part.mandatory %}
+                        The input part is <b>mandatory</b>
+                    {% else %}
+                        The input part is <b>optional</b>
+                    {% endif %}
+                </div>
+
+                {% if part.typed %}
+                <div class="d-block">
+                    The input part is <b>typed</b>
+                </div>
+                {% endif %}
+
+                {% if part.separator %}
+                <div class="d-block">
+                    <span class="fw-bolder">Subpart Separator:</span>
+                    {{ part.separator }}
+                </div>
+                {% endif %}
+          
+          {% if part.allowed_types.exists %}
+            <div class="d-block mt-1">
+              <span class="fw-bolder">Allowed types:</span>
+
+              {% for t in part.allowed_types.all %}
+                <span class="border border-1 border-designer
+                             rounded-5 px-3 mx-1 bg-designer-light">
+                  {{ t.type_name }}
+                </span>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+        </div>
+
+      </div>
+    </div>
+
+  {% endfor %}
+{% else %}
+  <div class="placeholder-box">
+    No input parts defined for this assembly
   </div>
+{% endif %}
 
-  <div class="mt-2">
-    <strong>Input parts:</strong>
-
-    {% if assembly.input_parts.exists %}
-      {% for part in assembly.input_parts.all %}
-        <span class="part-pill">{{ part.part_name }}</span>
-      {% endfor %}
-    {% else %}
-      <span class="text-muted fst-italic">
-        No input parts defined yet
-      </span>
-    {% endif %}
+<!-- FOOTER -->
+<footer>
+  <div class="container text-center">
+    M2 AMI2B – Web Programming Project – 2025/2026
+    <br>
+    Institut Pasteur / InSillyClo – Educational use
   </div>
+</footer>
 
-</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

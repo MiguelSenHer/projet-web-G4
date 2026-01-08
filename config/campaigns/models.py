@@ -16,14 +16,13 @@ class Assembly(models.Model):
 
 
 class InputParts(models.Model):
-    assembly = models.ForeignKey(Assembly, on_delete=models.CASCADE)
+    assembly = models.ForeignKey(Assembly, on_delete=models.CASCADE, related_name='inputparts_set')
     part_name = models.CharField(max_length=200)
-    allowed_types = models.ManyToManyField('Type', related_name='input_parts')
-    optional = models.BooleanField(default=False)
+    typed = models.BooleanField(default=False)
     mandatory = models.BooleanField(default=True)
-    separator = models.CharField(max_length=20)
+    separator = models.CharField(max_length=20, blank=True, null=True)
+    allowed_types = models.ManyToManyField('Type', blank=True)
 
 class Type(models.Model):
-    part = models.ForeignKey(InputParts, on_delete=models.CASCADE)
     type_name = models.CharField(max_length=50)
     

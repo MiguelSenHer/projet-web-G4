@@ -3,7 +3,7 @@ from django.conf import settings
 from pathlib import Path
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404
-from .models import Assembly
+from .models import Assembly, InputParts, Type
 
 def simulator_home(request):
     options = [
@@ -56,7 +56,14 @@ def assembly_download(request, pk):
     )
     return response
 
+
 def assembly_detail(request, pk):
-    return render(request, 'campaigns/assembly_details.html', {
-        'assembly': get_object_or_404(Assembly, pk=pk)
-    })
+    assembly = get_object_or_404(Assembly, id=pk)
+    input_parts = assembly.inputparts_set.prefetch_related("allowed_types")
+    context = {
+        "assembly": assembly,
+        "input_parts": input_parts,
+    }
+    return render(request, "campaigns/assembly_details.html", context)
+
+
