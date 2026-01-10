@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "plasmids",
     "campaigns",
     "accounts.apps.AccountsConfig",
+    "django_extensions",
 ]
 
 MIDDLEWARE = [
