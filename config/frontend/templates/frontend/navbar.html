@@ -1,0 +1,29 @@
+{% load static %}
+<nav class="navbar navbar-expand-md navbar-light bg-light border-bottom border-3">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="/">InSillyClo</a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav ms-auto mb-2 mb-md-0">
+                <li class="nav-item"><a class="nav-link active" href="/">Home</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/campaigns/simulator/browse/">Assemblies</a></li>
+                <li class="nav-item"><a class="nav-link" href="/campaigns/simulator/">Simulations</a></li>
+                {% if user.is_authenticated %}
+                    <li class="nav-item"><a class="nav-link active" href="/accounts/profile/">Profile</a></li>
+                    <li class="nav-item">
+                        <form method="post" action="{% url 'logout' %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-simulator ms-md-3">Logout</button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li class="nav-item"><a class="btn btn-simulator ms-md-3" href="/accounts/login/">Login</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
