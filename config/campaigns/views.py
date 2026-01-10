@@ -67,16 +67,32 @@ def _find_part_names(ws, max_rows=120, max_cols=40):
 # ============================================================
 # Upload template (xlsx)
 # ============================================================
-def load_template(request):
+def upload_template(request):
     error = None
 
+    # CLEAR TEMPLATE
+    if request.method == "POST" and request.POST.get("clear_template") == "1":
+        path = request.session.get("uploaded_template_path")
+        if path:
+            p = Path(path)
+            if p.exists():
+                p.unlink()
+
+        request.session.pop("uploaded_template_path", None)
+        request.session.pop("uploaded_template_name", None)
+        request.session.pop("template_is_valid", None)
+        request.session.pop("assembly_preview", None)
+
+        return redirect("/campaigns/simulator/upload/")
+
+    # UPLOAD TEMPLATE
     if request.method == "POST" and request.FILES.get("template_file"):
         f = request.FILES["template_file"]
 
         if not f.name.lower().endswith(".xlsx"):
             error = "Only .xlsx files are allowed."
         else:
-            out_dir = Path(settings.MEDIA_ROOT) / "templates"
+            out_dir = Path(settings.MEDIA_ROOT) / "simulator" / "templates"
             out_dir.mkdir(parents=True, exist_ok=True)
 
             dest = out_dir / f.name
@@ -89,15 +105,7 @@ def load_template(request):
 
             return redirect("/campaigns/simulator/upload/")
 
-    return render(
-        request,
-        "campaigns/upload.html",
-        {
-            "error": error,
-            "active_page": "simulator",
-        },
-    )
-
+    return render(request, "campaigns/upload.html", {"error": error})
 
 # ============================================================
 # Upload template preview / validation
@@ -170,23 +178,48 @@ def upload_template_next(request):
 # Simulator inputs (GenBank + mapping)
 # ============================================================
 def simulator_inputs(request):
-    # Template must be validated
     if not request.session.get("template_is_valid", False):
         return redirect("/campaigns/simulator/upload/next/")
 
     assembly = request.session.get("assembly_preview")
-
     error = None
-    ok_genbank = request.session.get("ok_genbank")
-    ok_mapping = request.session.get("ok_mapping")
 
+    # CLEAR GENBANK
+    if request.method == "POST" and request.POST.get("clear_genbank") == "1":
+        path = request.session.get("genbank_path")
+        if path:
+            p = Path(path)
+            if p.exists():
+                p.unlink()
+
+        request.session.pop("genbank_path", None)
+        request.session.pop("genbank_name", None)
+        request.session.pop("ok_genbank", None)
+
+        return redirect("/campaigns/simulator/inputs/")
+
+    # CLEAR MAPPING
+    if request.method == "POST" and request.POST.get("clear_mapping") == "1":
+        path = request.session.get("mapping_path")
+        if path:
+            p = Path(path)
+            if p.exists():
+                p.unlink()
+
+        request.session.pop("mapping_path", None)
+        request.session.pop("mapping_name", None)
+        request.session.pop("ok_mapping", None)
+
+        return redirect("/campaigns/simulator/inputs/")
+
+    # UPLOAD FILES
     if request.method == "POST":
         out_dir = Path(settings.MEDIA_ROOT) / "simulator" / "inputs"
         out_dir.mkdir(parents=True, exist_ok=True)
 
-        # --- Upload GenBank ZIP ---
         if request.FILES.get("genbank_zip"):
             f = request.FILES["genbank_zip"]
+
             if not f.name.lower().endswith(".zip"):
                 error = "GenBank input must be a .zip archive."
             else:
@@ -194,13 +227,15 @@ def simulator_inputs(request):
                 with open(dest, "wb") as w:
                     for chunk in f.chunks():
                         w.write(chunk)
-                request.session["ok_genbank"] = f"GenBank archive uploaded: {f.name}"
-                ok_genbank = request.session["ok_genbank"]
 
-        # --- Upload Mapping ---
+                request.session["genbank_path"] = str(dest)
+                request.session["genbank_name"] = f.name
+                request.session["ok_genbank"] = True
+
         if request.FILES.get("mapping_file"):
             f = request.FILES["mapping_file"]
             allowed = (".csv", ".tsv", ".txt", ".zip")
+
             if not f.name.lower().endswith(allowed):
                 error = "Mapping file must be .csv, .tsv, .txt, or .zip."
             else:
@@ -208,8 +243,10 @@ def simulator_inputs(request):
                 with open(dest, "wb") as w:
                     for chunk in f.chunks():
                         w.write(chunk)
-                request.session["ok_mapping"] = f"Mapping uploaded: {f.name}"
-                ok_mapping = request.session["ok_mapping"]
+
+                request.session["mapping_path"] = str(dest)
+                request.session["mapping_name"] = f.name
+                request.session["ok_mapping"] = True
 
     return render(
         request,
@@ -217,9 +254,10 @@ def simulator_inputs(request):
         {
             "assembly": assembly,
             "error": error,
-            "ok_genbank": ok_genbank,
-            "ok_mapping": ok_mapping,
-            "active_page": "simulator",
+            "ok_genbank": request.session.get("ok_genbank"),
+            "ok_mapping": request.session.get("ok_mapping"),
+            "genbank_name": request.session.get("genbank_name"),
+            "mapping_name": request.session.get("mapping_name"),
         },
     )
 

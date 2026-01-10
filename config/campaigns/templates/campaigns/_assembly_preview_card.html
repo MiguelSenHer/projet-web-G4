@@ -1,0 +1,50 @@
+{# templates/campaigns/_assembly_preview_card.html #}
+{% if assembly %}
+  <div class="card public-assembly mb-4">
+    <div class="card-body row">
+
+      <!-- LEFT -->
+      <div class="col-12 col-xl-2 col-lg-3 col-md-3 me-md-4">
+        <div class="fw-bolder">
+          {{ assembly.name }}
+        </div>
+      </div>
+
+      <!-- METADATA -->
+      <div class="col border-10 border-start border-primary ps-md-4">
+
+        <div class="d-block">
+          <span class="fw-bolder">Output Separator :</span>
+
+          {% if assembly.separator == "~" %}
+            Tilde ~
+          {% elif assembly.separator == "." %}
+            Dot .
+          {% elif assembly.separator == "_" %}
+            Underscore _
+          {% elif assembly.separator == "-" %}
+            Hyphen -
+          {% else %}
+            {{ assembly.separator }}
+          {% endif %}
+        </div>
+
+        <div class="d-block">
+          <span class="fw-bolder">Restriction Enzyme :</span>
+          {{ assembly.restriction_enzyme}}
+        </div>
+
+        <div class="d-block mt-1">
+          {% for part in assembly.input_parts %}
+            <div class="d-inline-flex px-3 py-0 mb-1 border border-3 rounded-5 border-designer">
+              {{ part }}
+            </div>
+          {% empty %}
+            <span class="text-muted small">No input parts defined</span>
+          {% endfor %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+{% endif %}

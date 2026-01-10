@@ -71,14 +71,23 @@
             <div class="alert alert-success mt-3 mb-0">
               Template uploaded: <strong>{{ request.session.uploaded_template_name }}</strong>
             </div>
-          {% endif %}
 
+            <br>
+            <!-- Clear -->
+            <form method="post" class="m-0 text-end">
+             {% csrf_token %}
+              <button type="submit" name="clear_template" value="1" class="btn btn-outline-danger d-inline-flex align-items-center">
+                Clear template upload
+             </button>
+           </form>
+          {% endif %}
         </div>
 
+        <!--Action buttons -->
         <div class="d-flex justify-content-center gap-3 mt-4 flex-wrap">
 
           <!-- Back -->
-          <a href="/campaigns/simulator/" class="btn btn-outline-secondary">
+          <a href="/campaigns/simulator/" class="btn btn-outline-secondary d-inline-flex align-items-center">
             Back
           </a>
 
@@ -88,7 +97,7 @@
               Continue
             </a>
           {% else %}
-            <a class="btn btn-assembly disabled" aria-disabled="true">
+            <a class="btn btn-assembly disabled d-inline-flex align-items-center" aria-disabled="true">
               Continue
             </a>
           {% endif %}

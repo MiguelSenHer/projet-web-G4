@@ -38,48 +38,7 @@
   <div class="container py-4">
 
     <!-- PREVIEW CARD -->
-    {% if assembly %}
-      <div class="card public-assembly mb-4">
-        <div class="card-body row">
-
-          <!-- LEFT -->
-          <div class="col-12 col-xl-2 col-lg-3 col-md-3 me-md-4">
-            <div class="fw-bolder">
-              {{ assembly.name }}
-            </div>
-            <small class="text-secondary">
-              Updated At:
-              {{ assembly.creation_date|date:"M d, Y" }}
-            </small>
-          </div>
-
-          <!-- METADATA -->
-          <div class="col border-10 border-start border-primary ps-md-4">
-
-            <div class="d-block">
-              <span class="fw-bolder">Output Separator :</span>
-              {{ assembly.separator_label|default:assembly.separator|default:"—" }}
-            </div>
-
-            <div class="d-block">
-              <span class="fw-bolder">Restriction Enzyme :</span>
-              {{ assembly.restriction_enzyme|default:"—" }}
-            </div>
-
-            <div class="d-block mt-1">
-              {% for part in assembly.input_parts %}
-                <div class="d-inline-flex px-3 py-0 mb-1 border border-3 rounded-5 border-designer">
-                  {{ part }}
-                </div>
-              {% empty %}
-                <span class="text-muted small">No input parts defined</span>
-              {% endfor %}
-            </div>
-
-          </div>
-        </div>
-      </div>
-    {% endif %}
+    {% include "campaigns/_assembly_preview_card.html" with assembly=assembly %}
 
     <!-- INPUT FILES CARD -->
     <div class="assembly-card mt-4">
@@ -117,9 +76,23 @@
         </form>
 
         {% if ok_genbank %}
-          <div class="alert alert-success mt-2 mb-0">
-            {{ ok_genbank }}
+          <div class="alert alert-success">
+            Plasmid sequences archive uploaded: <strong>{{ genbank_name }}</strong>
           </div>
+
+          <br>
+          <!-- Clear GenBank -->
+          <form method="post" class="m-0 text-end">
+            {% csrf_token %}
+            <button
+              type="submit"
+              name="clear_genbank"
+              value="1"
+              class="btn btn-outline-danger d-inline-flex align-items-center"
+            >
+              Clear plasmid sequences upload
+            </button>
+          </form>
         {% endif %}
       </div>
 
@@ -148,9 +121,23 @@
         </form>
 
         {% if ok_mapping %}
-          <div class="alert alert-success mt-2 mb-0">
-            {{ ok_mapping }}
+          <div class="alert alert-success">
+            Table mapping uploaded: <strong>{{ mapping_name }}</strong>
           </div>
+
+          <br>
+          <!-- Clear Mapping -->
+          <form method="post" class="m-0 text-end">
+            {% csrf_token %}
+            <button
+              type="submit"
+              name="clear_mapping"
+              value="1"
+              class="btn btn-outline-danger d-inline-flex align-items-center"
+            >
+              Clear mapping upload
+            </button>
+          </form>
         {% endif %}
       </div>
 
@@ -160,18 +147,19 @@
     <div class="d-flex justify-content-center gap-3 mt-4">
 
       <!-- Back -->
-      <a href="/campaigns/simulator/upload/next/" class="btn btn-outline-secondary">
-      Back
+      <a href="/campaigns/simulator/upload/next/"
+         class="btn btn-outline-secondary d-inline-flex align-items-center">
+        Back
       </a>
 
       <!-- Continue -->
       {% if ok_genbank and ok_mapping %}
         <a class="btn btn-assembly" href="/campaigns/simulator/run/">
-        Continue
+          Continue
         </a>
       {% else %}
         <a class="btn btn-assembly disabled" aria-disabled="true">
-        Continue
+          Continue
         </a>
       {% endif %}
 
@@ -179,7 +167,6 @@
 
   </div>
 </main>
-
 
 <!-- FOOTER -->
 {% include 'frontend/footer.html' %}
