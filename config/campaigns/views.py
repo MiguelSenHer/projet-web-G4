@@ -30,10 +30,124 @@ def load_template(request):
             with open(dest, "wb") as w:
                 for chunk in f.chunks():
                     w.write(chunk)
+<<<<<<< HEAD
 
             uploaded_name = f.name
 
     return render(request, "campaigns/load.html", {"uploaded_name": uploaded_name, "error": error})
+=======
+            request.session["uploaded_template_path"] = str(dest)
+            request.session["uploaded_template_name"] = f.name
+
+            return redirect("/campaigns/simulator/upload/")
+
+    return render(request, "campaigns/upload.html", {"error": error})
+
+
+def upload_template_next(request):
+    path_str = request.session.get("uploaded_template_path")
+    filename = request.session.get("uploaded_template_name")
+
+    if not path_str:
+        return redirect("/campaigns/simulator/upload/")
+
+    try:
+        wb = openpyxl.load_workbook(path_str, data_only=True)
+        ws = wb.active
+
+        enzyme = _find_value_right(ws, "Restriction enzyme")
+        name = _find_value_right(ws, "Name")
+        sep = _find_value_right(ws, "Output separator")
+        parts = _find_part_names(ws)
+
+        
+        assembly = {
+            "name": (str(name).strip() if name is not None else (filename or "Unnamed")),
+            "separator": (str(sep).strip() if sep is not None else ""),
+            "restriction_enzyme": (str(enzyme).strip() if enzyme is not None else ""),
+            "input_parts": parts,
+        }
+
+        # Verification
+        missing = []
+        if not assembly["restriction_enzyme"]:
+            missing.append("Restriction enzyme")
+        if not assembly["name"]:
+            missing.append("Name")
+        if not assembly["separator"]:
+            missing.append("Output separator")
+        if not assembly["input_parts"]:
+            missing.append("Part name -> row")
+
+        error = None
+        if missing:
+            error = "Template incomplete: missing " + ", ".join(missing)
+        
+        is_valid = (len(missing) == 0)
+        request.session["template_is_valid"] = is_valid
+        request.session["assembly_preview"] = assembly
+
+        return render(request, "campaigns/upload_preview.html", {"assembly": assembly, "error": error})
+
+    except Exception as e:
+        return render(request, "campaigns/upload_preview.html", {"assembly": None, "error": str(e)})
+
+
+def simulator_inputs(request):
+    # template validé
+    if not request.session.get("template_is_valid", False):
+        return redirect("/campaigns/simulator/load/next/")
+
+    assembly = request.session.get("assembly_preview")
+
+    error = None
+    ok_genbank = request.session.get("ok_genbank")
+    ok_mapping = request.session.get("ok_mapping")
+
+
+    if request.method == "POST":
+        out_dir = Path(settings.MEDIA_ROOT) / "simulator" / "inputs"
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+        # --- Upload GenBank ZIP ---
+        if request.FILES.get("genbank_zip"):
+            f = request.FILES["genbank_zip"]
+            if not f.name.lower().endswith(".zip"):
+                error = "GenBank input must be a .zip archive."
+            else:
+                dest = out_dir / f.name
+                with open(dest, "wb") as w:
+                    for chunk in f.chunks():
+                        w.write(chunk)
+                request.session["ok_genbank"] = f"GenBank archive uploaded: {f.name}"
+                ok_genbank = request.session["ok_genbank"]
+
+
+        # --- Upload Mapping (csv/tsv/txt OR zip) ---
+        if request.FILES.get("mapping_file"):
+            f = request.FILES["mapping_file"]
+            allowed = (".csv", ".tsv", ".txt", ".zip")
+            if not f.name.lower().endswith(allowed):
+                error = "Mapping file must be .csv, .tsv, .txt, or .zip."
+            else:
+                dest = out_dir / f.name
+                with open(dest, "wb") as w:
+                    for chunk in f.chunks():
+                        w.write(chunk)
+                request.session["ok_mapping"] = f"Mapping uploaded: {f.name}"
+                ok_mapping = request.session["ok_mapping"]
+
+    return render(
+        request,
+        "campaigns/inputs.html",
+        {
+            "assembly": assembly,
+            "error": error,
+            "ok_genbank": ok_genbank,
+            "ok_mapping": ok_mapping,
+        },
+    )
+>>>>>>> 56972fd2 (updated upload)
 
 
 def browse_templates(request):

@@ -16,7 +16,28 @@
 <body>
 
 <!-- NAVBAR -->
+<<<<<<< HEAD:config/campaigns/templates/campaigns/load.html
 {% include 'frontend/navbar.html' %}
+=======
+<nav class="navbar navbar-expand-md navbar-light bg-light border-bottom border-3">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" href="/">InSillyClo</a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav ms-auto mb-2 mb-md-0">
+        <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="/campaigns/simulator/browse/">Assemblies</a></li>
+        <li class="nav-item"><a class="nav-link active" href="/campaigns/simulator/">Simulations</a></li>
+        <li class="nav-item"><a class="btn btn-simulator ms-md-3" href="/accounts/login/">Login</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+>>>>>>> 56972fd2 (updated upload):config/campaigns/templates/campaigns/upload.html
 
 <!-- HERO -->
 <section class="container text-center mt-5">
@@ -32,18 +53,28 @@
   </p>
 </section>
 
-<!-- UPLOAD CARD -->
-<section class="container mt-5">
-  <div class="row justify-content-center">
-    <div class="col-md-6">
+<!-- MAIN CONTENT -->
+<main class="flex-grow-1">
+  <div class="container py-4">
+    <div class="row justify-content-center">
+      <div class="col-md-7 col-lg-6">
 
-      <div class="assembly-card">
-        <h3 class="assembly-title mb-4">Upload campaign template</h3>
+        <!-- UPLOAD CARD -->
+        <div class="assembly-card mt-3">
 
-        <form method="post" enctype="multipart/form-data">
-          {% csrf_token %}
+          <h3 class="assembly-title mb-4 text-center">
+            Upload campaign template
+          </h3>
 
-          <div class="mb-3">
+          {% if error %}
+            <div class="alert alert-danger mb-4">
+              {{ error }}
+            </div>
+          {% endif %}
+
+          <!-- UPLOAD FORM -->
+          <form method="post" enctype="multipart/form-data" class="d-flex gap-3 align-items-center">
+            {% csrf_token %}
             <input
               class="form-control"
               type="file"
@@ -51,36 +82,52 @@
               accept=".xlsx"
               required
             >
-          </div>
+            <button type="submit" class="btn btn-assembly">
+              Upload
+            </button>
+          </form>
 
-          <button type="submit" class="btn btn-assembly w-100">
-            UPLOAD TEMPLATE
-          </button>
-        </form>
+          <!-- SUCCESS -->
+          {% if request.session.uploaded_template_name %}
+            <div class="alert alert-success mt-3 mb-0">
+              Template uploaded: <strong>{{ request.session.uploaded_template_name }}</strong>
+            </div>
+          {% endif %}
 
-        {% if error %}
-          <div class="alert alert-danger mt-3 mb-0">
-            {{ error }}
-          </div>
-        {% endif %}
+        </div>
 
+<<<<<<< HEAD:config/campaigns/templates/campaigns/load.html
         {% if uploaded_name %}
           <div class="alert alert-success mt-3 mb-0">
             Template <strong>{{ uploaded_name }}</strong> uploaded successfully.
           </div>
         {% endif %}
+=======
+        <div class="d-flex justify-content-center gap-3 mt-4 flex-wrap">
+
+          <!-- Back -->
+          <a href="/campaigns/simulator/" class="btn btn-outline-secondary">
+            Back
+          </a>
+
+          <!-- Continue -->
+          {% if request.session.uploaded_template_path %}
+            <a href="/campaigns/simulator/upload/next/" class="btn btn-assembly">
+              Continue
+            </a>
+          {% else %}
+            <a class="btn btn-assembly disabled" aria-disabled="true">
+              Continue
+            </a>
+          {% endif %}
+
+        </div>
+>>>>>>> 56972fd2 (updated upload):config/campaigns/templates/campaigns/upload.html
 
       </div>
-
-      <div class="text-center mt-4">
-        <a href="/campaigns/simulator/" class="text-muted" style="text-decoration: none;">
-          ← Back to simulator
-        </a>
-      </div>
-
     </div>
   </div>
-</section>
+</main>
 
 <!-- FOOTER -->
 {% include 'frontend/footer.html' %}
