@@ -1,16 +1,52 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.conf import settings
 from pathlib import Path
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404
 from .models import Assembly, InputParts, Type
+import openpyxl
 
 def simulator_home(request):
     options = [
-        {"label": "LOAD YOUR PLASMID ASSEMBLY TEMPLATE", "url": "/campaigns/simulator/load/"},
+        {"label": "LOAD YOUR PLASMID ASSEMBLY TEMPLATE", "url": "/campaigns/simulator/upload/"},
         {"label": "BROWSE PLASMID ASSEMBLY TEMPLATE", "url": "/campaigns/simulator/browse/"},
     ]
     return render(request, "campaigns/template.html", {"options": options})
+
+def _find_value_right(ws, key, max_rows=80, max_cols=12):
+    """
+    Cherche une cellule égale à key (case-insensitive, stripped)
+    et renvoie la valeur de la cellule à droite (même ligne, col+1).
+    """
+    key_norm = key.strip().lower()
+
+    for r in range(1, max_rows + 1):
+        for c in range(1, max_cols + 1):
+            v = ws.cell(r, c).value
+            if isinstance(v, str) and v.strip().lower() == key_norm:
+                return ws.cell(r, c + 1).value
+
+    return None
+
+
+def _find_part_names(ws, max_rows=120, max_cols=40):
+    """
+    Trouve la ligne qui commence par "Part name ->"
+    et retourne toutes les valeurs à droite (parts).
+    """
+    for r in range(1, max_rows + 1):
+        for c in range(1, max_cols + 1):
+            v = ws.cell(r, c).value
+            if isinstance(v, str) and v.strip().lower() == "part name ->":
+                parts = []
+                for cc in range(c + 1, max_cols + 1):
+                    pv = ws.cell(r, cc).value
+                    if pv is None or (isinstance(pv, str) and not pv.strip()):
+                        continue
+                    parts.append(str(pv).strip())
+                return parts
+
+    return []
 
 def load_template(request):
     uploaded_name = None
@@ -30,12 +66,6 @@ def load_template(request):
             with open(dest, "wb") as w:
                 for chunk in f.chunks():
                     w.write(chunk)
-<<<<<<< HEAD
-
-            uploaded_name = f.name
-
-    return render(request, "campaigns/load.html", {"uploaded_name": uploaded_name, "error": error})
-=======
             request.session["uploaded_template_path"] = str(dest)
             request.session["uploaded_template_name"] = f.name
 
@@ -96,7 +126,7 @@ def upload_template_next(request):
 def simulator_inputs(request):
     # template validé
     if not request.session.get("template_is_valid", False):
-        return redirect("/campaigns/simulator/load/next/")
+        return redirect("/campaigns/simulator/upload/next/")
 
     assembly = request.session.get("assembly_preview")
 
@@ -147,7 +177,6 @@ def simulator_inputs(request):
             "ok_mapping": ok_mapping,
         },
     )
->>>>>>> 56972fd2 (updated upload)
 
 
 def browse_templates(request):
