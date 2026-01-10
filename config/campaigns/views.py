@@ -3,6 +3,7 @@ from django.conf import settings
 from django.http import FileResponse, Http404
 from pathlib import Path
 import openpyxl
+import zipfile
 
 from .models import Assembly, InputParts, Type
 
@@ -106,6 +107,7 @@ def upload_template(request):
             return redirect("/campaigns/simulator/upload/")
 
     return render(request, "campaigns/upload.html", {"error": error})
+
 
 # ============================================================
 # Upload template preview / validation
@@ -261,6 +263,63 @@ def simulator_inputs(request):
         },
     )
 
+
+# ============================================================
+# Helper for simulation preview
+# ============================================================
+def _list_received_files(path_str):
+    """
+    Return list of received filenames.
+    - If path is a zip: return zip content filenames (filtered: no directories)
+    - Else: return [basename]
+    """
+    if not path_str:
+        return []
+
+    p = Path(path_str)
+    if not p.exists():
+        return []
+
+    # ZIP case
+    if p.suffix.lower() == ".zip" and zipfile.is_zipfile(p):
+        with zipfile.ZipFile(p, "r") as z:
+            names = []
+            for n in z.namelist():
+                # skip directories
+                if n.endswith("/"):
+                    continue
+                names.append(n.split("/")[-1])  # keep basename
+            # remove empty names and sort for nicer display
+            names = [x for x in names if x]
+            return sorted(names)
+
+    # non-zip
+    return [p.name]
+
+# ============================================================
+# Simulation preview
+# ============================================================
+def simulation_preview(request):
+    if not request.session.get("template_is_valid", False):
+        return redirect("/campaigns/simulator/upload/next/")
+
+    genbank_path = request.session.get("genbank_path")
+    mapping_path = request.session.get("mapping_path")  
+
+    genbank_files = _list_received_files(genbank_path)
+    mapping_files = _list_received_files(mapping_path)
+
+    return render(
+        request,
+        "campaigns/simulation_preview.html",
+        {
+            "assembly": request.session.get("assembly_preview"),
+            "genbank_files": genbank_files,
+            "mapping_files": mapping_files,
+            "genbank_count": len(genbank_files),
+            "mapping_count": len(mapping_files),
+        },
+    )
 
 # ============================================================
 # Browse templates
