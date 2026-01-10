@@ -52,11 +52,15 @@
         </a>
 
         <!-- CONTINUE -->
-        <a href="/campaigns/simulator/inputs/" class="btn btn-assembly">
-          Continue
-        </a>
-      </div>
-
+        {% if request.session.template_is_valid %}
+          <a href="/campaigns/simulator/inputs/" class="btn btn-assembly">
+            Continue
+          </a>
+        {% else %}
+          <a class="btn btn-assembly disabled" aria-disabled="true">
+            Continue
+          </a>
+        {% endif %}
   </div>
 </main>
 

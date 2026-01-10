@@ -20,16 +20,15 @@
 
 <!-- HERO -->
 <section class="container text-center mt-5">
-  <h1 class="hero-title">Load the input plasmid sequences</h1>
+  <h1 class="hero-title">Load simulation inputs</h1>
 
   <div class="hero-subtitle">
     Upload GenBank archive and name mappings
   </div>
 
   <p class="hero-text">
-    Upload a zipped archive containing your GenBank files.
-    Then upload one or more mapping files allowing translation
-    between plasmid names and identifiers.
+    Upload a zipped archive containing all your plasmid sequences (GenBank) files.
+    Then upload one or more table mapping the names of input plasmids with the correponding genbank files. If you directly used genbank filenames in the campaign file, you can omit this table.
   </p>
 </section>
 
@@ -153,7 +152,7 @@
       </a>
 
       <!-- Continue -->
-      {% if ok_genbank and ok_mapping %}
+      {% if ok_genbank%}
         <a class="btn btn-assembly" href="/campaigns/simulator/run/">
           Continue
         </a>
