@@ -282,15 +282,19 @@ def browse_templates(request):
 # ============================================================
 def assembly_download(request, pk):
     assembly = get_object_or_404(Assembly, pk=pk)
-    if not assembly.file:
+    if not assembly.file_name:
         raise Http404("No file associated with this assembly")
-
-    response = FileResponse(
-        assembly.file.open("rb"),
+    file_path = Path(settings.BASE_DIR) / "assemblies_files" / assembly.file_name
+    print(file_path)
+    print(file_path.exists())
+    if not file_path.exists():
+        raise Http404("File not found")
+    return FileResponse(
+        open(file_path, "rb"),
         as_attachment=True,
-        filename=assembly.file.name.split("/")[-1],
+        filename=assembly.file_name
     )
-    return response
+
 
 
 # ============================================================

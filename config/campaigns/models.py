@@ -8,11 +8,8 @@ class Assembly(models.Model):
     creation_date = models.DateTimeField("Created At")
     separator = models.CharField(max_length=20)
     restriction_enzyme = models.CharField(max_length=50)
-    file = models.FileField(
-        upload_to="assemblies/",
-        blank=True,
-        null=True
-    )
+    file_name = models.CharField(max_length=255, blank=True, null=True)
+
 
 
 class InputParts(models.Model):
