@@ -156,13 +156,25 @@
 
     </div>
 
-    <!-- CONTINUE -->
+    <!-- ACTION BUTTONS -->
     <div class="d-flex justify-content-center gap-3 mt-4">
+
+      <!-- Back -->
       <a href="/campaigns/simulator/upload/next/" class="btn btn-outline-secondary">
-        Back
+      Back
       </a>
 
-      <a class="btn btn-assembly" href="/campaigns/simulator/run/">Continue</a>
+      <!-- Continue -->
+      {% if ok_genbank and ok_mapping %}
+        <a class="btn btn-assembly" href="/campaigns/simulator/run/">
+        Continue
+        </a>
+      {% else %}
+        <a class="btn btn-assembly disabled" aria-disabled="true">
+        Continue
+        </a>
+      {% endif %}
+
     </div>
 
   </div>
