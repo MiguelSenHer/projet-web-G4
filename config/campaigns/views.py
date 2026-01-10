@@ -64,6 +64,105 @@ def _find_part_names(ws, max_rows=120, max_cols=40):
 
     return []
 
+import openpyxl
+
+
+def _find_cell(ws, label, max_rows=200, max_cols=80):
+    target = label.strip().lower()
+    for r in range(1, max_rows + 1):
+        for c in range(1, max_cols + 1):
+            v = ws.cell(r, c).value
+            if isinstance(v, str) and v.strip().lower() == target:
+                return r, c
+    return None, None
+
+
+def _read_row_right(ws, row, start_col, max_cols=200):
+    out = []
+    for c in range(start_col, max_cols + 1):
+        v = ws.cell(row, c).value
+        if v is None or (isinstance(v, str) and not v.strip()):
+            break
+        out.append(str(v).strip())
+    return out
+
+
+def _read_col_down(ws, start_row, col, max_rows=500):
+    out = []
+    for r in range(start_row, max_rows + 1):
+        v = ws.cell(r, col).value
+        if v is None or (isinstance(v, str) and not v.strip()):
+            break
+        out.append(str(v).strip())
+    return out
+
+
+def _cell_str(v):
+    if v is None:
+        return ""
+    return str(v).strip()
+
+
+def parse_output_plasmids(xlsx_path):
+    """
+    TEMPLATE Campaign_display_L1.xlsx
+
+    - pIDs: column under "Output plasmid id ↓"
+    - types: column under "OutputType (optional) ↓"
+    - parts: row right of "Part name ->"
+    - values: grid intersection (row pID × column part)
+
+    Returns:
+      parts: list[str]
+      rows: list[dict] with keys:
+        pid, ptype, part_values
+    """
+    wb = openpyxl.load_workbook(xlsx_path, data_only=True)
+    ws = wb.active
+
+    pid_r, pid_c = _find_cell(ws, "Output plasmid id ↓")
+    typ_r, typ_c = _find_cell(ws, "OutputType (optional) ↓")
+    part_r, part_c = _find_cell(ws, "Part name ->")
+
+    if not pid_r or not part_r:
+        raise ValueError("Missing required headers in template.")
+
+    # Parts headers (row)
+    parts = _read_row_right(ws, part_r, part_c + 1)
+    if not parts:
+        raise ValueError("No parts detected.")
+
+    # pIDs + types (columns)
+    pids = _read_col_down(ws, pid_r + 1, pid_c)
+    ptypes = (
+        _read_col_down(ws, typ_r + 1, typ_c)
+        if typ_r else []
+    )
+
+    if len(ptypes) < len(pids):
+        ptypes += [""] * (len(pids) - len(ptypes))
+
+    rows = []
+    for i, pid in enumerate(pids):
+        excel_row = pid_r + 1 + i
+
+        part_values = []
+        for j in range(len(parts)):
+            excel_col = part_c + 1 + j
+            part_values.append(
+                _cell_str(ws.cell(excel_row, excel_col).value)
+            )
+
+        rows.append({
+            "pid": pid,
+            "ptype": ptypes[i],
+            "part_values": part_values,
+        })
+
+    return parts, rows
+
+
+
 
 # ============================================================
 # Upload template (xlsx)
@@ -175,6 +274,74 @@ def upload_template_next(request):
             },
         )
 
+# ============================================================
+# Helpers
+# ============================================================
+def _list_received_files(path):
+    """
+    Helper d'affichage: retourne une liste "jolie" des fichiers reçus.
+    - si path est None => []
+    - si path est un fichier ZIP => liste le contenu (hors dossiers)
+    - sinon => [nom_fichier]
+    """
+    if not path:
+        return []
+
+    p = Path(path)
+    if not p.exists():
+        return []
+
+    if p.suffix.lower() == ".zip":
+        try:
+            with zipfile.ZipFile(p, "r") as zf:
+                return [n for n in zf.namelist() if n and not n.endswith("/")]
+        except zipfile.BadZipFile:
+            return ["(corrupted zip)"]
+
+    return [p.name]
+
+
+def _zip_only_contains_extensions(zip_path, allowed_exts, *, allow_empty=False):
+    """
+    Check that a ZIP contains ONLY files with extensions in allowed_exts.
+    - Ignores directories (entries ending with '/')
+    - allowed_exts: set/tuple like {".gb", ".gbk"}
+    - allow_empty: if False, empty zip is rejected
+    Returns: (ok: bool, error_msg: str|None)
+    """
+    allowed_exts = {e.lower() for e in allowed_exts}
+
+    try:
+        with zipfile.ZipFile(zip_path, "r") as zf:
+            names = zf.namelist()
+    except zipfile.BadZipFile:
+        return False, "Uploaded file is not a valid .zip archive (corrupted)."
+
+    file_names = [n for n in names if n and not n.endswith("/")]
+    if not file_names and not allow_empty:
+        return False, "The .zip archive is empty."
+
+    for n in file_names:
+        lower = n.lower()
+        if not any(lower.endswith(ext) for ext in allowed_exts):
+            return (
+                False,
+                f"Invalid file in archive: '{n}'. Only {', '.join(sorted(allowed_exts))} allowed.",
+            )
+
+    return True, None
+
+
+def _validate_genbank_zip(zip_path):
+    # Extensions GenBank courantes
+    allowed = {".gb", ".gbk", ".genbank"}
+    return _zip_only_contains_extensions(zip_path, allowed)
+
+
+def _validate_mapping_zip(zip_path):
+    allowed = {".csv", ".tsv", ".txt"}
+    return _zip_only_contains_extensions(zip_path, allowed)
+
 
 # ============================================================
 # Simulator inputs (GenBank + mapping)
@@ -219,6 +386,9 @@ def simulator_inputs(request):
         out_dir = Path(settings.MEDIA_ROOT) / "simulator" / "inputs"
         out_dir.mkdir(parents=True, exist_ok=True)
 
+        # ---------------------------
+        # GenBank ZIP (REQUIRED)
+        # ---------------------------
         if request.FILES.get("genbank_zip"):
             f = request.FILES["genbank_zip"]
 
@@ -230,10 +400,24 @@ def simulator_inputs(request):
                     for chunk in f.chunks():
                         w.write(chunk)
 
-                request.session["genbank_path"] = str(dest)
-                request.session["genbank_name"] = f.name
-                request.session["ok_genbank"] = True
+                ok, msg = _validate_genbank_zip(dest)
+                if not ok:
+                    if dest.exists():
+                        dest.unlink()
 
+                    request.session.pop("genbank_path", None)
+                    request.session.pop("genbank_name", None)
+                    request.session.pop("ok_genbank", None)
+
+                    error = msg
+                else:
+                    request.session["genbank_path"] = str(dest)
+                    request.session["genbank_name"] = f.name
+                    request.session["ok_genbank"] = True
+
+        # ---------------------------
+        # Mapping file (OPTIONAL)
+        # ---------------------------
         if request.FILES.get("mapping_file"):
             f = request.FILES["mapping_file"]
             allowed = (".csv", ".tsv", ".txt", ".zip")
@@ -246,9 +430,26 @@ def simulator_inputs(request):
                     for chunk in f.chunks():
                         w.write(chunk)
 
-                request.session["mapping_path"] = str(dest)
-                request.session["mapping_name"] = f.name
-                request.session["ok_mapping"] = True
+                if f.name.lower().endswith(".zip"):
+                    ok, msg = _validate_mapping_zip(dest)
+                    if not ok:
+                        if dest.exists():
+                            dest.unlink()
+
+                        request.session.pop("mapping_path", None)
+                        request.session.pop("mapping_name", None)
+                        request.session.pop("ok_mapping", None)
+
+                        error = msg
+                    else:
+                        request.session["mapping_path"] = str(dest)
+                        request.session["mapping_name"] = f.name
+                        request.session["ok_mapping"] = True
+                else:
+                    # .csv/.tsv/.txt -> accepté
+                    request.session["mapping_path"] = str(dest)
+                    request.session["mapping_name"] = f.name
+                    request.session["ok_mapping"] = True
 
     return render(
         request,
@@ -304,10 +505,22 @@ def simulation_preview(request):
         return redirect("/campaigns/simulator/upload/next/")
 
     genbank_path = request.session.get("genbank_path")
-    mapping_path = request.session.get("mapping_path")  
+    mapping_path = request.session.get("mapping_path")  # optional
 
     genbank_files = _list_received_files(genbank_path)
     mapping_files = _list_received_files(mapping_path)
+
+    # Output plasmids table
+    template_path = request.session.get("uploaded_template_path")
+    output_parts = []
+    output_rows = []
+    output_error = None
+
+    if template_path:
+        try:
+            output_parts, output_rows = parse_output_plasmids(template_path)
+        except Exception as e:
+            output_error = str(e)
 
     return render(
         request,
@@ -318,6 +531,9 @@ def simulation_preview(request):
             "mapping_files": mapping_files,
             "genbank_count": len(genbank_files),
             "mapping_count": len(mapping_files),
+            "output_parts": output_parts,   # header parts (col 3..N)
+            "output_rows": output_rows,     # rows with pid/ptype/included_parts
+            "output_error": output_error,
         },
     )
 
