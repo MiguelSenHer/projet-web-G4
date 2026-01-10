@@ -75,7 +75,19 @@
 
             <div class="d-block">
               <span class="fw-bolder">Output Separator :</span>
-              {{ assembly.separator|default:"—" }}
+
+              {% if assembly.separator == "~" %}
+                Tilde ~
+              {% elif assembly.separator == "." %}
+                Dot .
+              {% elif assembly.separator == "_" %}
+                Underscore _
+              {% elif assembly.separator == "-" %}
+                Hyphen -
+              {% else %}
+                {{ assembly.separator }}
+              {% endif %}
+
             </div>
 
             <div class="d-block">
