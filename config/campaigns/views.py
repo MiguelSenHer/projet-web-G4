@@ -1,18 +1,33 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
-from pathlib import Path
 from django.http import FileResponse, Http404
-from django.shortcuts import get_object_or_404
-from .models import Assembly, InputParts, Type
+from pathlib import Path
 import openpyxl
 
+from .models import Assembly, InputParts, Type
+
+
+# ============================================================
+# Simulator home
+# ============================================================
 def simulator_home(request):
     options = [
         {"label": "LOAD YOUR PLASMID ASSEMBLY TEMPLATE", "url": "/campaigns/simulator/upload/"},
         {"label": "BROWSE PLASMID ASSEMBLY TEMPLATE", "url": "/campaigns/simulator/browse/"},
     ]
-    return render(request, "campaigns/template.html", {"options": options})
+    return render(
+        request,
+        "campaigns/template.html",
+        {
+            "options": options,
+            "active_page": "simulator",
+        },
+    )
 
+
+# ============================================================
+# Helpers for XLSX parsing
+# ============================================================
 def _find_value_right(ws, key, max_rows=80, max_cols=12):
     """
     Cherche une cellule égale à key (case-insensitive, stripped)
@@ -48,32 +63,45 @@ def _find_part_names(ws, max_rows=120, max_cols=40):
 
     return []
 
+
+# ============================================================
+# Upload template (xlsx)
+# ============================================================
 def load_template(request):
-    uploaded_name = None
     error = None
 
     if request.method == "POST" and request.FILES.get("template_file"):
         f = request.FILES["template_file"]
 
-        # optionnel mais utile : on force le .xlsx
         if not f.name.lower().endswith(".xlsx"):
             error = "Only .xlsx files are allowed."
         else:
             out_dir = Path(settings.MEDIA_ROOT) / "templates"
             out_dir.mkdir(parents=True, exist_ok=True)
-            dest = out_dir / f.name
 
+            dest = out_dir / f.name
             with open(dest, "wb") as w:
                 for chunk in f.chunks():
                     w.write(chunk)
+
             request.session["uploaded_template_path"] = str(dest)
             request.session["uploaded_template_name"] = f.name
 
             return redirect("/campaigns/simulator/upload/")
 
-    return render(request, "campaigns/upload.html", {"error": error})
+    return render(
+        request,
+        "campaigns/upload.html",
+        {
+            "error": error,
+            "active_page": "simulator",
+        },
+    )
 
 
+# ============================================================
+# Upload template preview / validation
+# ============================================================
 def upload_template_next(request):
     path_str = request.session.get("uploaded_template_path")
     filename = request.session.get("uploaded_template_name")
@@ -90,7 +118,6 @@ def upload_template_next(request):
         sep = _find_value_right(ws, "Output separator")
         parts = _find_part_names(ws)
 
-        
         assembly = {
             "name": (str(name).strip() if name is not None else (filename or "Unnamed")),
             "separator": (str(sep).strip() if sep is not None else ""),
@@ -98,7 +125,7 @@ def upload_template_next(request):
             "input_parts": parts,
         }
 
-        # Verification
+        # Validation
         missing = []
         if not assembly["restriction_enzyme"]:
             missing.append("Restriction enzyme")
@@ -112,19 +139,38 @@ def upload_template_next(request):
         error = None
         if missing:
             error = "Template incomplete: missing " + ", ".join(missing)
-        
+
         is_valid = (len(missing) == 0)
         request.session["template_is_valid"] = is_valid
         request.session["assembly_preview"] = assembly
 
-        return render(request, "campaigns/upload_preview.html", {"assembly": assembly, "error": error})
+        return render(
+            request,
+            "campaigns/upload_preview.html",
+            {
+                "assembly": assembly,
+                "error": error,
+                "active_page": "simulator",
+            },
+        )
 
     except Exception as e:
-        return render(request, "campaigns/upload_preview.html", {"assembly": None, "error": str(e)})
+        return render(
+            request,
+            "campaigns/upload_preview.html",
+            {
+                "assembly": None,
+                "error": str(e),
+                "active_page": "simulator",
+            },
+        )
 
 
+# ============================================================
+# Simulator inputs (GenBank + mapping)
+# ============================================================
 def simulator_inputs(request):
-    # template validé
+    # Template must be validated
     if not request.session.get("template_is_valid", False):
         return redirect("/campaigns/simulator/upload/next/")
 
@@ -133,7 +179,6 @@ def simulator_inputs(request):
     error = None
     ok_genbank = request.session.get("ok_genbank")
     ok_mapping = request.session.get("ok_mapping")
-
 
     if request.method == "POST":
         out_dir = Path(settings.MEDIA_ROOT) / "simulator" / "inputs"
@@ -152,8 +197,7 @@ def simulator_inputs(request):
                 request.session["ok_genbank"] = f"GenBank archive uploaded: {f.name}"
                 ok_genbank = request.session["ok_genbank"]
 
-
-        # --- Upload Mapping (csv/tsv/txt OR zip) ---
+        # --- Upload Mapping ---
         if request.FILES.get("mapping_file"):
             f = request.FILES["mapping_file"]
             allowed = (".csv", ".tsv", ".txt", ".zip")
@@ -175,38 +219,55 @@ def simulator_inputs(request):
             "error": error,
             "ok_genbank": ok_genbank,
             "ok_mapping": ok_mapping,
+            "active_page": "simulator",
         },
     )
 
 
+# ============================================================
+# Browse templates
+# ============================================================
 def browse_templates(request):
-    assemblies = Assembly.objects.prefetch_related('inputparts_set')
+    assemblies = Assembly.objects.prefetch_related("inputparts_set")
     return render(
         request,
-        'campaigns/browse.html',
-        {'assemblies': assemblies}
+        "campaigns/browse.html",
+        {
+            "assemblies": assemblies,
+            "active_page": "browse",
+        },
     )
 
 
+# ============================================================
+# Assembly download
+# ============================================================
 def assembly_download(request, pk):
     assembly = get_object_or_404(Assembly, pk=pk)
     if not assembly.file:
         raise Http404("No file associated with this assembly")
+
     response = FileResponse(
-        assembly.file.open('rb'),
+        assembly.file.open("rb"),
         as_attachment=True,
-        filename=assembly.file.name.split('/')[-1]
+        filename=assembly.file.name.split("/")[-1],
     )
     return response
 
 
+# ============================================================
+# Assembly detail
+# ============================================================
 def assembly_detail(request, pk):
     assembly = get_object_or_404(Assembly, id=pk)
     input_parts = assembly.inputparts_set.prefetch_related("allowed_types")
-    context = {
-        "assembly": assembly,
-        "input_parts": input_parts,
-    }
-    return render(request, "campaigns/assembly_details.html", context)
 
-
+    return render(
+        request,
+        "campaigns/assembly_details.html",
+        {
+            "assembly": assembly,
+            "input_parts": input_parts,
+            "active_page": "browse",
+        },
+    )
