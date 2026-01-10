@@ -1,0 +1,83 @@
+LOCUS       pMYT003                 1852 bp ds-DNA     circular     17-AUG-2023
+DEFINITION  .
+COMMENT     Description: pLacE YTK Part Type: 2 Antibiotic Resistance:
+            Chloramphenicol Copy Number: High Copy Addgene ID: 180656 Plate
+            Position: A3
+FEATURES             Location/Qualifiers
+     misc_feature    28..53
+                     /label="UASe"
+                     /ApEinfo_revcolor="#f58a5e"
+                     /ApEinfo_fwdcolor="#f58a5e"
+     misc_feature    54..83
+                     /label="AT-Rich Spacer"
+                     /ApEinfo_revcolor="#85dae9"
+                     /ApEinfo_fwdcolor="#85dae9"
+     misc_feature    84..91
+                     /label="TATA box"
+                     /ApEinfo_revcolor="#84b0dc"
+                     /ApEinfo_fwdcolor="#84b0dc"
+     misc_feature    94..112
+                     /label="LacO"
+                     /ApEinfo_revcolor="#ff9ccd"
+                     /ApEinfo_fwdcolor="#ff9ccd"
+     misc_feature    115..144
+                     /label="Core1"
+                     /ApEinfo_revcolor="#ffef86"
+                     /ApEinfo_fwdcolor="#ffef86"
+     misc_feature    147..165
+                     /label="LacO"
+                     /ApEinfo_revcolor="#ff9ccd"
+                     /ApEinfo_fwdcolor="#ff9ccd"
+     misc_feature    168..189
+                     /label="TSS"
+                     /ApEinfo_revcolor="#85dae9"
+                     /ApEinfo_fwdcolor="#85dae9"
+     misc_feature      complement(215..323)
+                     /label="CamR Terminator"
+                     /ApEinfo_revcolor="#84b0dc"
+                     /ApEinfo_fwdcolor="#84b0dc"
+     misc_feature             complement(324..983)
+                     /label="CamR"
+                     /ApEinfo_revcolor="#0000ff"
+                     /ApEinfo_fwdcolor="#0000ff"
+     misc_feature        complement(984..1088)
+                     /label="CamR Promoter"
+                     /ApEinfo_revcolor="#84b0dc"
+                     /ApEinfo_fwdcolor="#84b0dc"
+     misc_feature      complement(1089..1852)
+                     /label="ColE1"
+                     /ApEinfo_revcolor="#7f7f7f"
+                     /ApEinfo_fwdcolor="#7f7f7f"
+ORIGIN
+        1 AGTCGGTCTC AAACGGTCGT GCATGTAGGC GCGCCACTGA AATTTTTAAT TAATCAATTA
+       61 ATACTTATTT GGTAAAACAT TAATATAAAA GGCAATTGTG AGCGGATAAC AACGAGCACT
+      121 GTTGGGCGTG AGAGGAGGCG CCGGAGAATT GTGAGCGGAT AACAATCTAA ACACACATAA
+      181 ACAAACAAAA GAAAAAAGAT CTATGTGAGA CCAGACCAAT AAAAAACGCC CGGCGGCAAC
+      241 CGAGCGTTCT GAACAAATCC AGATGGAGTT CTGAGGTCAT TACTGGATCT ATCAACAGGA
+      301 GTCCAAGCGA GCTCGATATC AAATTACGCC CCGCCCTGCC ACTCATCGCA GTACTGTTGT
+      361 AATTCATTAA GCATTCTGCC GACATGGAAG CCATCACAAA CGGCATGATG AACCTGAATC
+      421 GCCAGCGGCA TCAGCACCTT GTCGCCTTGC GTATAATATT TGCCCATGGT GAAAACGGGG
+      481 GCGAAGAAGT TGTCCATATT GGCCACGTTT AAATCAAAAC TGGTGAAACT CACCCAGGGA
+      541 TTGGCTGAAA CGAAAAACAT ATTCTCAATA AACCCTTTAG GGAAATAGGC CAGGTTTTCA
+      601 CCGTAACACG CCACATCTTG CGAATATATG TGTAGAAACT GCCGGAAATC GTCGTGGTAT
+      661 TCACTCCAGA GCGATGAAAA CGTTTCAGTT TGCTCATGGA AAACGGTGTA ACAAGGGTGA
+      721 ACACTATCCC ATATCACCAG CTCACCGTCT TTCATTGCCA TACGAAATTC CGGATGAGCA
+      781 TTCATCAGGC GGGCAAGAAT GTGAATAAAG GCCGGATAAA ACTTGTGCTT ATTTTTCTTT
+      841 ACGGTCTTTA AAAAGGCCGT AATATCCAGC TGAACGGTCT GGTTATAGGT ACATTGAGCA
+      901 ACTGACTGAA ATGCCTCAAA ATGTTCTTTA CGATGCCATT GGGATATATC AACGGTGGTA
+      961 TATCCAGTGA TTTTTTTCTC CATTTTAGCT TCCTTAGCTC CTGAAAATCT CGATAACTCA
+     1021 AAAAATACGC CCGGTAGTGA TCTTATTTCA TTATGGTGAA AGTTGGAACC TCTTACGTGC
+     1081 CCGATCAATC ATGACCAAAA TCCCTTAACG TGAGTTTTCG TTCCACTGAG CGTCAGACCC
+     1141 CGTAGAAAAG ATCAAAGGAT CTTCTTGAGA TCCTTTTTTT CTGCGCGTAA TCTGCTGCTT
+     1201 GCAAACAAAA AAACCACCGC TACCAGCGGT GGTTTGTTTG CCGGATCAAG AGCTACCAAC
+     1261 TCTTTTTCCG AAGGTAACTG GCTTCAGCAG AGCGCAGATA CCAAATACTG TTCTTCTAGT
+     1321 GTAGCCGTAG TTAGGCCACC ACTTCAAGAA CTCTGTAGCA CCGCCTACAT ACCTCGCTCT
+     1381 GCTAATCCTG TTACCAGTGG CTGCTGCCAG TGGCGATAAG TCGTGTCTTA CCGGGTTGGA
+     1441 CTCAAGACGA TAGTTACCGG ATAAGGCGCA GCGGTCGGGC TGAACGGGGG GTTCGTGCAC
+     1501 ACAGCCCAGC TTGGAGCGAA CGACCTACAC CGAACTGAGA TACCTACAGC GTGAGCTATG
+     1561 AGAAAGCGCC ACGCTTCCCG AAGGGAGAAA GGCGGACAGG TATCCGGTAA GCGGCAGGGT
+     1621 CGGAACAGGA GAGCGCACGA GGGAGCTTCC AGGGGGAAAC GCCTGGTATC TTTATAGTCC
+     1681 TGTCGGGTTT CGCCACCTCT GACTTGAGCG TCGATTTTTG TGATGCTCGT CAGGGGGGCG
+     1741 GAGCCTATGG AAAAACGCCA GCAACGCGGC CTTTTTACGG TTCCTGGCCT TTTGCTGGCC
+     1801 TTTTGCTCAC ATGTTCTTTC CTGCGTTATC CCCTGATTCT GTGGATAACC GT
+//
