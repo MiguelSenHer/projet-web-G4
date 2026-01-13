@@ -44,7 +44,15 @@
               
               <input type="hidden" name="next" value="{{ next }}">
               
-              <button type="submit" class="btn-login">LOGIN</button>
+               <button type="submit" class="btn-login">LOGIN</button>
+              <!--<a href="{% url 'password_reset' %}" class="btn-login d-block text-center" style="text-decoration:none;">
+                Reset Password -->
+
+              </a> 
+              <a href="/accounts/password-reset/" class="btn-login d-block text-center" style="text-decoration:none;">
+                Reset Password
+              </a>
+
             </form>
           </div>
           <div class="login-panel login-panel-right">

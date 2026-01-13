@@ -47,6 +47,10 @@ def signup_view(request):
         },
     )
 
+@login_required
+def teams(request):
+    return render(request, "accounts/teams.html")
+
 
 @login_required
 def profile_view(request):
@@ -125,3 +129,6 @@ def profile_view(request):
             'active_page': 'profile',
         },
     )
+
+
+
