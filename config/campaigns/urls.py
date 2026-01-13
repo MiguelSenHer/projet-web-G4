@@ -11,4 +11,7 @@ urlpatterns = [
     path(
     'simulator/browse/<int:pk>/download/', views.assembly_download, name='assembly_download'),
     path('simulator/browse/<int:pk>/', views.assembly_detail, name='assembly_detail'),
+    path("simulator/run/", views.simulation_run, name="simulation_run"),
+    path("simulator/run/<str:run_id>/download/", views.simulation_run_download, name="simulation_run_download"),
+    path("simulator/simulations/", views.simulations_list, name="simulations_list"),
 ]
