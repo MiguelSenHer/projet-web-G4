@@ -95,7 +95,7 @@
             </div>
 
             <!-- Activity History Card -->
-            <div class="col-12">
+            <div class="col-md-6">
               <div class="login-panel profile-card">
                 <h2 class="panel-title">ACTIVITY HISTORY</h2>
                 
@@ -120,6 +120,38 @@
                   </div>
                   {% endif %}
                 </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="login-panel profile-card h-100">
+                <h2 class="panel-title mb-1">TEAM MANAGEMENT</h2>
+
+                <p class="mb-3 text-muted">
+                  Create a team to collaborate with other members.
+                </p>
+
+                <form method="post" action="{% url 'profile' %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="form_type" value="create_team">
+
+                  <div class="form-group">
+                    <label for="team_name" class="form-label">
+                      TEAM NAME <span class="required">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="team_name"
+                      name="team_name"
+                      class="form-input"
+                      placeholder="Enter team name"
+                      required
+                    >
+                  </div>
+                  </br>
+                  <button type="submit" class="btn-login">
+                    CREATE TEAM
+                  </button>
+                </form>
               </div>
             </div>
           </div>
