@@ -696,7 +696,6 @@ form .btn-simulator:focus,
   opacity: 1;
 }
 
-/* Responsive adjustments for profile */
 @media (max-width: 768px) {
   .profile-container-grid .row {
     gap: 1.5rem;
