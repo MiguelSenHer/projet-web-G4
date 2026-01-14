@@ -132,7 +132,7 @@ footer a:hover {
 
 /* Login Page */
 .login-section {
-  background-color: #f5f5f5;
+  background-color: #ffffff;
   min-height: calc(100vh - 200px);
   padding: 4rem 0;
 }
@@ -147,8 +147,9 @@ footer a:hover {
 }
 
 .login-panel {
-  background-color: #fff;
-  border-radius: 15px;
+  background-color: #fffaf5;
+  border: 2px solid #0b2d5c;
+  border-radius: 20px;
   padding: 2.5rem;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   flex: 0 1 450px;
@@ -364,7 +365,7 @@ form .btn-simulator:focus,
 }
 /* Profile Page */
 .profile-section {
-  background-color: #f5f5f5;
+  background-color: #ffffff;
   min-height: calc(100vh - 200px);
   padding: 4rem 0;
 }
