@@ -17,3 +17,6 @@ media/
 # OS
 .DS_Store
 Thumbs.db
+
+# pre-compiled python source
+__pycache__/
