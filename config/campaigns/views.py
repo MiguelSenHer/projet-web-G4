@@ -15,6 +15,7 @@ import shutil
 # Simulator home
 # ============================================================
 def simulator_home(request):
+    simulator_reset(request)
 
     options = [
         {
@@ -866,3 +867,22 @@ def _clear_template(request):
     request.session.pop("uploaded_template_name", None)
     request.session.pop("template_is_valid", None)
     request.session.pop("assembly_preview", None)
+
+
+def simulator_reset(request):
+    for k in [
+        "uploaded_template_path",
+        "uploaded_template_name",
+        "template_is_valid",
+        "assembly_preview",
+        "genbank_path",
+        "genbank_name",
+        "ok_genbank",
+        "mapping_path",
+        "mapping_name",
+        "ok_mapping",
+        "last_run_id",
+    ]:
+        request.session.pop(k, None)
+    request.session.modified = True
+    return redirect("/campaigns/simulator/")
