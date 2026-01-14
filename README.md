@@ -15,7 +15,7 @@ Django-based web application for in silico plasmid assembly simulation.
 
 ```text
 projet-web-G4/
-├── config/
+├── src/
 │   ├── manage.py
 │   ├── config/
 │   │   ├── __init__.py
@@ -68,7 +68,7 @@ python -m pip install -r requirements.txt
 ## Run the development server
 
 ```
-python config/manage.py runserver
+python src/manage.py runserver
 ```
 
 Open your browser at:
