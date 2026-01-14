@@ -1,3 +1,101 @@
-# create teams based on members in the database
-# make sure of the limitations on team creation (e.g., max number of teams per user)
-# and the roles (admin, member) when creating a team
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Team Creation</title>
+
+  <!-- Optional: Bootstrap (remove if you don’t want it) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  
+</head>
+
+<body>
+{% include 'frontend/navbar.html' %}
+  <section class="team-box">
+    <div class="team-grid">
+      <!-- LEFT: TEAM CREATION -->
+      <div>
+        <div class="panel-title">TEAM CREATION</div>
+
+        <input class="pill-input" type="text" placeholder="Enter team name" aria-label="Team name">
+
+        <div class="hint-label">Look up members</div>
+        <form method="get" class="mb-3">
+          <input
+            type="text"
+            name="user_q"
+            class="form-control"
+            placeholder="Search members by name or email"
+            value="{{ request.GET.user_q }}"
+          >
+        </form>
+
+        {% if users %}
+          <ul class="list-group mt-2">
+            {% for user in users %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ user.get_full_name|default:user.email }}
+                <button class="btn btn-sm btn-outline-primary">
+                  Add
+                </button>
+              </li>
+            {% endfor %}
+          </ul>
+        {% elif request.GET.user_q %}
+          <p class="text-muted mt-2">No users found.</p>
+        {% endif %}
+
+        <div class="found-row">
+          <button type="button" class="member-pill">Found members</button>
+          <button type="button" class="btn-outline-blue">ADD</button>
+        </div>
+      </div>
+
+      <!-- VERTICAL DIVIDER -->
+      <div class="divider" aria-hidden="true"></div>
+
+      <!-- RIGHT: TEAM MEMBERS (scrollable list) -->
+      <div>
+        <div class="panel-title">TEAM MEMBERS</div>
+
+        <div class="scroll-area">
+          <div class="member-row">
+            <button type="button" class="member-pill">Found members</button>
+            <button type="button" class="btn-outline-blue">Remove</button>
+          </div>
+
+          <div class="member-row">
+            <button type="button" class="member-pill">Found members</button>
+            <button type="button" class="btn-outline-blue">Remove</button>
+          </div>
+
+          <div class="member-row">
+            <button type="button" class="member-pill">Found members</button>
+            <button type="button" class="btn-outline-blue">Remove</button>
+          </div>
+
+          <div class="member-row">
+            <button type="button" class="member-pill">Found members</button>
+            <button type="button" class="btn-outline-blue">Remove</button>
+          </div>
+
+          <!-- Add more rows to see the scrollbar -->
+          <div class="member-row">
+            <button type="button" class="member-pill">Found members</button>
+            <button type="button" class="btn-outline-blue">Remove</button>
+          </div>
+          <div class="member-row">
+            <button type="button" class="member-pill">Found members</button>
+            <button type="button" class="btn-outline-blue">Remove</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+{% include 'frontend/footer.html' %}
+</body>
+</html>
+
