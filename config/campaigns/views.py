@@ -7,11 +7,7 @@ import zipfile
 import uuid
 from datetime import datetime
 from .models import Assembly
-import insillyclo.data_source
-import insillyclo.observer
-import insillyclo.simulator
-import io
-from contextlib import redirect_stderr
+import subprocess
 
 
 # ============================================================
@@ -612,8 +608,8 @@ def _make_zip_from_dir(src_dir: Path, zip_path: Path):
 # ============================================================
 # SIMULATION RUN
 # ============================================================
-
 def simulation_run(request):
+    # Prérequis : template validé + genbank présent
     if not request.session.get("template_is_valid", False):
         return redirect("/campaigns/simulator/upload/next/")
 
@@ -625,24 +621,29 @@ def simulation_run(request):
     if not template_path:
         return redirect("/campaigns/simulator/upload/")
 
-    mapping_path = request.session.get("mapping_path")  # optional
+    mapping_path = request.session.get("mapping_path")
 
+    # Run id unique
     run_id = uuid.uuid4().hex[:10]
 
+    # Dossier run
     runs_root = Path(settings.MEDIA_ROOT) / "simulator" / "runs"
     run_dir = runs_root / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
 
+    # Dossiers run
     out_dir = run_dir / "output"
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    repo_dir = run_dir / "plasmid_repository" 
+    map_dir = run_dir / "mapping"
+
+    # Template
     tpl_path = Path(template_path)
 
+    # Enzyme depuis la session preview (REQUIRED)
     assembly = request.session.get("assembly_preview") or {}
-    enzyme = ""
-    if isinstance(assembly, dict):
-        enzyme = (assembly.get("restriction_enzyme") or "").strip()
-    enzyme_names = [enzyme] if enzyme else []
+    enzyme = assembly.get("restriction_enzyme")
 
     status = "ok"
     error = None
@@ -653,65 +654,61 @@ def simulation_run(request):
         # ----------------------
         # GenBank (ZIP required)
         # ----------------------
-        repo_dir = run_dir / "plasmid_repository"
         _extract_zip(Path(genbank_zip_path), repo_dir)
-
         gb_files = _collect_files(repo_dir)
         if not gb_files:
             raise ValueError("No GenBank files found after extraction.")
 
         # ----------------------
-        # Mapping (optional)
+        # Mapping (optional zip or single file)
         # ----------------------
         input_parts_files = []
         if mapping_path:
             mp = Path(mapping_path)
             if mp.suffix.lower() == ".zip":
-                map_dir = run_dir / "mapping"
                 _extract_zip(mp, map_dir)
                 input_parts_files = _collect_files(map_dir)
             else:
                 input_parts_files = [mp]
 
         # ----------------------
-        # Run InSillyClo
+        # Build CLI command
         # ----------------------
-        err_buf = io.StringIO()
-        observer = insillyclo.observer.InSillyCloCliObserver(
-            debug=False,
-            fail_on_error=True,
+        cmd = [
+            "insillyclo",
+            "simulate",
+            "--input-template-filled", str(tpl_path),
+            "--plasmid-repository", str(repo_dir),
+            "--recursive-plasmid-repository",
+            "--default-mass-concentration", "200",
+            "--restriction-enzyme-gel", enzyme,
+            "--output-dir", str(out_dir),
+        ]
+
+        # mapping files : repeat option
+        for f in input_parts_files:
+            cmd += ["--input-parts-file", str(f)]
+
+        # ----------------------
+        # Run subprocess
+        # ----------------------
+        proc = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
         )
 
-        try:
-            with redirect_stderr(err_buf):
-                insillyclo.simulator.compute_all(
-                    observer=observer,
-                    settings=None,
-                    input_template_filled=tpl_path,
-                    input_parts_files=input_parts_files,
-                    gb_plasmids=gb_files,
-                    output_dir=out_dir,
-                    data_source=insillyclo.data_source.DataSourceHardCodedImplementation(),
-                    primers_file=None,
-                    primer_id_pairs=[],
-                    enzyme_names=enzyme_names,
-                    default_mass_concentration=200,
-                    sbol_export=False,
-                )
-        except Exception as e:
-            status = "error"
-            error = str(e)
-            stderr_text = err_buf.getvalue().strip()
+        raw = proc.stderr or ""
+        stderr_text = raw.split("Traceback", 1)[0].strip()
 
-        # ----------------------
-        # Return outputs ONLY if success
-        # ----------------------
-        if status == "ok":
+        if proc.returncode != 0:
+            status = "error"
+            error = stderr_text
+        else:
             zip_path = run_dir / "outputs.zip"
             _make_zip_from_dir(out_dir, zip_path)
             outputs_zip_url = f"/campaigns/simulator/run/{run_id}/download/"
 
-            # Save successful run in session
             runs = request.session.get("successful_runs", []) or []
             if run_id not in runs:
                 runs.append(run_id)
@@ -729,7 +726,7 @@ def simulation_run(request):
             "assembly": request.session.get("assembly_preview"),
             "status": status,
             "error": error,
-            "stderr_text": stderr_text,   # ✅ toujours présent
+            "stderr_text": stderr_text,
             "run_id": run_id,
             "outputs_zip_url": outputs_zip_url,
         },
