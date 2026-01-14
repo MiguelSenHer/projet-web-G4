@@ -1,3 +1,5 @@
+@use "sass:color";
+
 /* Palette */
 $brand-blue: #0b2d5c;
 $brand-blue-hover: #6c89b2;
@@ -94,7 +96,7 @@ body {
 
   &:hover,
   &:focus {
-    background-color: $brand-orange-hover;
+    background-color: $brand-blue-hover;
     color: #fff;
   }
 }
@@ -135,9 +137,9 @@ footer a {
 }
 
 .designer-badge {
-  color: $brand-orange;
+  color: $brand-blue;
   background-color: transparent;
-  border: 2px solid $brand-orange;
+  border: 2px solid $brand-blue;
   border-radius: 20px;
   padding: 0.35em 0.75em;
   font-weight: 600;
@@ -147,7 +149,7 @@ footer a {
 
 /* Login Page */
 $login-blue: #0b2d5c;
-$login-blue-hover: #6c89b2;
+$login-blue-hover: #101f35;
 $login-bg: #f5f5f5;
 
 .login-section {
@@ -162,6 +164,7 @@ $login-bg: #f5f5f5;
   justify-content: center;
   flex-wrap: wrap;
   align-items: center;
+  width: 100%;
 }
 
 .login-panel {
@@ -169,9 +172,10 @@ $login-bg: #f5f5f5;
   border-radius: 15px;
   padding: 2.5rem;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  flex: 1;
-  min-width: 300px;
+  flex: 0 1 450px; 
+  width: 100%;
   max-width: 450px;
+  min-width: 300px;
   display: flex;
   flex-direction: column;
 }
@@ -204,7 +208,7 @@ $login-bg: #f5f5f5;
 
 .form-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); 
   gap: 1.5rem;
 
   @media (max-width: 576px) {
@@ -216,18 +220,7 @@ $login-bg: #f5f5f5;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-}
-
-.form-label {
-  font-weight: 700;
-  font-size: 0.85rem;
-  color: #111;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.required {
-  color: #dc3545;
+  min-width: 0; 
 }
 
 .form-input {
@@ -236,12 +229,15 @@ $login-bg: #f5f5f5;
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.3s;
+  width: 100%;            
+  box-sizing: border-box; 
 
   &:focus {
     outline: none;
     border-color: $login-blue;
   }
 }
+
 
 .btn-login {
   background-color: $login-blue;
@@ -345,7 +341,7 @@ $login-bg: #f5f5f5;
   line-height: inherit;
 
   &:hover {
-    background-color: darken($brand-blue, 10%);
+    background-color: color.adjust($brand-blue, $lightness: -10%);
     color: #fff;
     text-decoration: none;
   }
@@ -353,12 +349,12 @@ $login-bg: #f5f5f5;
   &:focus {
     text-decoration: none;
     color: #fff;
-    background-color: darken($brand-blue, 10%);
+    background-color: color.adjust($brand-blue, $lightness: -10%);
   }
 
   /* Ensure button in form has same styling */
   form &,
-  button& {
+  button {
     background-color: $brand-blue;
     border: none;
     color: #fff;
@@ -371,12 +367,12 @@ $login-bg: #f5f5f5;
     line-height: inherit;
 
     &:hover {
-      background-color: darken($brand-blue, 10%);
+      background-color: color.adjust($brand-blue, $lightness: -10%);
       color: #fff;
     }
 
     &:focus {
-      background-color: darken($brand-blue, 10%);
+      background-color: color.adjust($brand-blue, $lightness: -10%);
       color: #fff;
       outline: none;
     }
@@ -753,3 +749,4 @@ $login-bg: #f5f5f5;
     height: auto;
   }
 }
+
