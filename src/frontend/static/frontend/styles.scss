@@ -751,3 +751,60 @@ $login-bg: #ffffff;
   }
 }
 
+.profile-collapse {
+  border: 1px solid $login-blue;
+  border-radius: 10px;
+  background: $bg-soft;
+  overflow: hidden;
+}
+
+
+.profile-collapse summary {
+  list-style: none;
+  cursor: pointer;
+}
+.profile-collapse summary::-webkit-details-marker {
+  display: none;
+}
+
+
+.profile-collapse-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid $brand-blue;
+  background: $bg-soft;
+}
+
+.profile-collapse-title {
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: $login-blue-hover; 
+}
+
+.profile-collapse-toggle {
+  width: 38px;
+  height: 34px;
+  border-radius: 8px;
+  background: $brand-blue;
+  display: grid;
+  place-items: center;
+  color: $bg-soft;
+}
+
+.profile-collapse-toggle::before {
+  content: "▲";
+  font-size: 14px;
+  line-height: 1;
+}
+
+.profile-collapse:not([open]) .profile-collapse-toggle::before {
+  content: "▼";
+}
+
+.profile-collapse-body {
+  padding: 16px;
+}
+
+
