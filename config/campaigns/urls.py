@@ -14,4 +14,7 @@ urlpatterns = [
     path("simulator/run/", views.simulation_run, name="simulation_run"),
     path("simulator/run/<str:run_id>/download/", views.simulation_run_download, name="simulation_run_download"),
     path("simulator/simulations/", views.simulations_list, name="simulations_list"),
+    path("simulator/run/<str:run_id>/resume/", views.resume_run, name="resume_run"),
+    path("simulator/run/<str:run_id>/delete/", views.delete_run, name="delete_run"),
+
 ]

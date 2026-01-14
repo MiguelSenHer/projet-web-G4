@@ -5,15 +5,17 @@ from pathlib import Path
 import openpyxl
 import zipfile
 import uuid
-from datetime import datetime
-from .models import Assembly
+from .models import Assembly, SimulationRun
 import subprocess
+from django.contrib.auth.decorators import login_required
+import shutil
 
 
 # ============================================================
 # Simulator home
 # ============================================================
 def simulator_home(request):
+
     options = [
         {
             "label": "LOAD YOUR PLASMID ASSEMBLY TEMPLATE",
@@ -176,17 +178,7 @@ def upload_template(request):
 
     # CLEAR TEMPLATE
     if request.method == "POST" and request.POST.get("clear_template") == "1":
-        path = request.session.get("uploaded_template_path")
-        if path:
-            p = Path(path)
-            if p.exists():
-                p.unlink()
-
-        request.session.pop("uploaded_template_path", None)
-        request.session.pop("uploaded_template_name", None)
-        request.session.pop("template_is_valid", None)
-        request.session.pop("assembly_preview", None)
-
+        _clear_template(request)
         return redirect("/campaigns/simulator/upload/")
 
     # UPLOAD TEMPLATE
@@ -345,30 +337,12 @@ def simulator_inputs(request):
 
     # CLEAR GENBANK
     if request.method == "POST" and request.POST.get("clear_genbank") == "1":
-        path = request.session.get("genbank_path")
-        if path:
-            p = Path(path)
-            if p.exists():
-                p.unlink()
-
-        request.session.pop("genbank_path", None)
-        request.session.pop("genbank_name", None)
-        request.session.pop("ok_genbank", None)
-
+        _clear_genbank(request)
         return redirect("/campaigns/simulator/inputs/")
 
     # CLEAR MAPPING
     if request.method == "POST" and request.POST.get("clear_mapping") == "1":
-        path = request.session.get("mapping_path")
-        if path:
-            p = Path(path)
-            if p.exists():
-                p.unlink()
-
-        request.session.pop("mapping_path", None)
-        request.session.pop("mapping_name", None)
-        request.session.pop("ok_mapping", None)
-
+        _clear_mapping(request)
         return redirect("/campaigns/simulator/inputs/")
 
     # UPLOAD FILES
@@ -631,7 +605,8 @@ def simulation_run(request):
     run_dir = runs_root / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
 
-    # Dossiers run
+
+    # Dossiers output
     out_dir = run_dir / "output"
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -649,6 +624,18 @@ def simulation_run(request):
     error = None
     stderr_text = ""
     outputs_zip_url = None
+
+    # Stockage en BD du run si utilisateur connecté 
+    run = None
+    if request.user.is_authenticated:
+        run = SimulationRun.objects.create(
+            user=request.user,
+            run_id=run_id,
+            status="RUNNING",
+            template_path=template_path,
+            genbank_path=genbank_zip_path,
+            mapping_path=mapping_path or "",
+        )
 
     try:
         # ----------------------
@@ -698,26 +685,39 @@ def simulation_run(request):
             text=True,
         )
 
-        raw = proc.stderr or ""
-        stderr_text = raw.split("Traceback", 1)[0].strip()
-
         if proc.returncode != 0:
             status = "error"
+            raw = proc.stderr or ""
+            stderr_text = raw.split("Traceback", 1)[0].strip()
             error = stderr_text
+
+            if run is not None:
+                run.status = "FAILED"
+                run.error_message = error
+                run.save(
+                    update_fields=["status", "error_message", "updated_at"]
+                )
         else:
             zip_path = run_dir / "outputs.zip"
             _make_zip_from_dir(out_dir, zip_path)
             outputs_zip_url = f"/campaigns/simulator/run/{run_id}/download/"
 
-            runs = request.session.get("successful_runs", []) or []
-            if run_id not in runs:
-                runs.append(run_id)
-            request.session["successful_runs"] = runs
+            if run is not None:
+                run.status = "SUCCESS"
+                run.output_zip = str(zip_path.relative_to(settings.MEDIA_ROOT))
+                run.save(
+                    update_fields=["status", "output_zip", "updated_at"]
+                )
+            request.session["last_run_id"] = run_id
             request.session.modified = True
 
     except Exception as e:
         status = "error"
         error = str(e)
+        if run is not None:
+            run.status = "FAILED"
+            run.error_message = error
+            run.save(update_fields=["status", "error_message", "updated_at"])
 
     return render(
         request,
@@ -729,43 +729,30 @@ def simulation_run(request):
             "stderr_text": stderr_text,
             "run_id": run_id,
             "outputs_zip_url": outputs_zip_url,
+            "is_authenticated": request.user.is_authenticated,
         },
     )
 
-
-def simulation_run_download(request, run_id):
-    run_dir = Path(settings.MEDIA_ROOT) / "simulator" / "runs" / run_id
-    zip_path = run_dir / "outputs.zip"
-    if not zip_path.exists():
-        raise Http404("Outputs zip not found.")
-    return FileResponse(
-        open(zip_path, "rb"),
-        as_attachment=True,
-        filename=f"outputs_{run_id}.zip"
+# ============================================================
+# SIMULATIONS LIST (logged-in only)
+# ============================================================
+@login_required(login_url="/accounts/login/")
+def simulations_list(request):
+    runs = (
+        SimulationRun.objects
+        .filter(user=request.user)
+        .order_by("-updated_at")
     )
 
-
-def simulations_list(request):
-    run_ids = request.session.get("successful_runs", []) or []
-    runs_root = Path(settings.MEDIA_ROOT) / "simulator" / "runs"
-
     items = []
-    for run_id in run_ids:
-        zip_path = runs_root / run_id / "outputs.zip"
-
-        if not zip_path.exists():
-            continue
-
-        mtime = zip_path.stat().st_mtime
+    for r in runs:
         items.append({
-            "run_id": run_id,
-            "status": "SUCCESS",
-            "updated_at": datetime.fromtimestamp(mtime),
-            "download_url": f"/campaigns/simulator/run/{run_id}/download/",
-            "back_url": "/campaigns/simulator/preview/",
+            "run_id": r.run_id,
+            "status": r.status,
+            "updated_at": r.updated_at,
+            "download_url": f"/campaigns/simulator/run/{r.run_id}/download/" if r.status == "SUCCESS" else None,
+            "back_url": f"/campaigns/simulator/run/{r.run_id}/resume/",
         })
-
-    items.sort(key=lambda x: x["updated_at"], reverse=True)
 
     return render(
         request,
@@ -775,3 +762,107 @@ def simulations_list(request):
             "active_page": "simulations",
         },
     )
+
+# ============================================================
+# DOWNLOAD RUN OUTPUTS 
+# ============================================================
+def simulation_run_download(request, run_id):
+    # autorise seulement si ce run_id correspond à celui de la session
+    if request.session.get("last_run_id") != run_id:
+        raise Http404("Not allowed.")
+
+    zip_path = Path(settings.MEDIA_ROOT) / "simulator" / "runs" / run_id / "outputs.zip"
+    if not zip_path.exists():
+        raise Http404("File not found.")
+
+    return FileResponse(
+        open(zip_path, "rb"),
+        as_attachment=True,
+        filename=f"outputs_{run_id}.zip",
+    )
+
+# ============================================================
+# RESUME RUN (logged-in only)
+# ============================================================
+
+@login_required
+def resume_run(request, run_id):
+    run = get_object_or_404(SimulationRun, run_id=run_id, user=request.user)
+
+    # clear old session
+    _clear_genbank(request)
+    _clear_mapping(request)
+    _clear_template(request)
+
+    # restore paths in session from DB
+    request.session["uploaded_template_path"] = run.template_path
+    request.session["genbank_path"] = run.genbank_path
+
+    if run.mapping_path:
+        request.session["mapping_path"] = run.mapping_path
+    else:
+        request.session.pop("mapping_path", None)
+
+    # rebuild assembly_preview in session (for preview card)
+    wb = openpyxl.load_workbook(run.template_path, data_only=True)
+    ws = wb.active
+
+    enzyme = _find_value_right(ws, "Restriction enzyme")
+    name = _find_value_right(ws, "Name")
+    sep = _find_value_right(ws, "Output separator")
+    parts = _find_part_names(ws)
+
+    request.session["assembly_preview"] = {
+        "name": (str(name).strip() if name else "Unnamed"),
+        "separator": (str(sep).strip() if sep else ""),
+        "restriction_enzyme": (str(enzyme).strip() if enzyme else ""),
+        "input_parts": parts,
+    }
+
+    #  mark as valid (so /preview doesn't redirect)
+    request.session["template_is_valid"] = True
+    request.session.modified = True
+
+    return redirect("/campaigns/simulator/preview/")
+
+
+# Clear simulations
+
+
+
+@login_required
+def delete_run(request, run_id):
+    if request.method != "POST":
+        return redirect("/campaigns/simulator/simulations/")
+
+    run = get_object_or_404(SimulationRun, run_id=run_id, user=request.user)
+
+    # supprimer le dossier du run (outputs, extractions, etc.)
+    run_dir = Path(settings.MEDIA_ROOT) / "simulator" / "runs" / run_id
+    if run_dir.exists():
+        shutil.rmtree(run_dir, ignore_errors=True)
+
+    # supprimer l'entrée DB
+    run.delete()
+
+    return redirect("/campaigns/simulator/simulations/")
+
+
+# Helpers for clearing : 
+def _clear_genbank(request):
+    request.session.pop("genbank_path", None)
+    request.session.pop("genbank_name", None)
+    request.session.pop("ok_genbank", None)
+
+
+def _clear_mapping(request):
+    request.session.pop("mapping_path", None)
+    request.session.pop("mapping_name", None)
+    request.session.pop("ok_mapping", None)
+
+
+def _clear_template(request):
+    request.session.pop("uploaded_template_path", None)
+    request.session.pop("uploaded_template_name", None)
+    request.session.pop("template_is_valid", None)
+    request.session.pop("assembly_preview", None)

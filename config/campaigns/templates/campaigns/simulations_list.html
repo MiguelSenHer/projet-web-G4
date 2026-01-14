@@ -15,7 +15,7 @@
 
 <section class="container text-center mt-5">
   <h1 class="hero-title">Simulations</h1>
-  <div class="hero-subtitle">Your successful runs</div>
+  <div class="hero-subtitle">Your runs</div>
 </section>
 
 <main class="flex-grow-1">
@@ -47,7 +47,7 @@
                         SUCCESS
                       </span>
                     {% else %}
-                      <span class="badge text-bg-secondary">
+                      <span class="badge text-bg-danger">
                         {{ it.status }}
                       </span>
                     {% endif %}
@@ -61,15 +61,33 @@
 
                 <!-- RIGHT: actions -->
                 <div class="d-flex align-items-center gap-2">
-                  <a class="btn btn-assembly btn-sm" href="{{ it.download_url }}">
-                    <i class="bi bi-download me-1"></i>
-                    Download
-                  </a>
+                  {% if it.download_url %}
+                    <a class="btn btn-assembly btn-sm" href="{{ it.download_url }}">
+                      <i class="bi bi-download me-1"></i>
+                        Download
+                    </a>
+                  {% else %}
+                  <a class="btn btn-assembly btn-sm disabled" aria-disabled="true">
+                      <i class="bi bi-download me-1"></i>
+                        Download
+                      </a>
+                  {% endif %}
 
                   <a class="btn btn-outline-secondary btn-sm" href="{{ it.back_url }}">
                     <i class="bi bi-box-arrow-in-left me-1"></i>
                     Return to simulator
                   </a>
+                  <form method="post" action="{% url 'delete_run' it.run_id %}" class="m-0">
+                    {% csrf_token %}
+                    <button
+                      type="submit"
+                      class="btn btn-outline-danger btn-sm"
+                      onclick="return confirm('Delete run {{ it.run_id }}? This cannot be undone.');"
+                    >
+                      <i class="bi bi-trash me-1"></i>
+                      Delete
+                    </button>
+                  </form>
                 </div>
 
               </div>
