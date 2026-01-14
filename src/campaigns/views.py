@@ -1,420 +1,362 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.conf import settings
-from django.http import FileResponse, Http404
 from pathlib import Path
-import openpyxl
-import zipfile
-import uuid
-from .models import Assembly, SimulationRun
-import subprocess
-from django.contrib.auth.decorators import login_required
 import shutil
+import uuid
+import zipfile
+
+import pandas as pd
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.http import FileResponse, Http404
+from django.shortcuts import get_object_or_404, redirect, render
+
+from .models import Assembly, SimulationRun
+
+import insillyclo.data_source
+import insillyclo.observer
+import insillyclo.simulator
 
 
-# ============================================================
-# Simulator home
-# ============================================================
+# Session Keys
+SESSION_KEYS = [
+    "uploaded_template_path",
+    "uploaded_template_name",
+    "template_is_valid",
+    "assembly_preview",
+    "genbank_path",
+    "genbank_name",
+    "ok_genbank",
+    "mapping_path",
+    "mapping_name",
+    "ok_mapping",
+    "last_run_id",
+]
+
+
+# Helper to save an uploaded file to MEDIA_ROOT and return its path
+def save_upload(f, out_dir: Path) -> Path:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    safe_name = Path(f.name).name
+    dest = out_dir / safe_name
+    with open(dest, "wb") as w:
+        for chunk in f.chunks():
+            w.write(chunk)
+    return dest
+
+
+# Helper to parse a campaign template
+def parse_template(xlsx_path):
+
+    # Open template and catch bad file
+    try:
+        df = pd.read_excel(xlsx_path, header=None)
+    except Exception as e:
+        return {
+            "status": "error",
+            "errors": [str(e)],
+        }
+
+    row_count, col_count = df.shape
+    errors = []
+
+    # Locate sections
+    settings_r = df.index[df[0] == "Assembly settings"].tolist()
+    compo_r = df.index[df[0] == "Assembly composition"].tolist()
+    output_r = df.index[df[0] == "Output plasmid id ↓"].tolist()
+
+    # Verify sections exist
+    if not settings_r:
+        errors.append("Missing section: 'Assembly settings'")
+    if not compo_r:
+        errors.append("Missing section: 'Assembly composition'")
+    if not output_r:
+        errors.append("Missing section: 'Output plasmid id ↓'")
+
+    if errors:
+        return {"errors": errors, "status": "error"}
+
+    # First row of each section
+    s_r, c_r, o_r = settings_r[0], compo_r[0], output_r[0]
+
+    # Retrieve right input of section
+    name, sep, enzyme = "Unnamed", "", ""
+    for i in range(s_r + 1, c_r):
+        key = str(df.iloc[i, 0]).strip()
+        val = df.iloc[i, 1]
+        if key == "Name":
+            name = str(val).strip() if pd.notna(val) else name
+        elif key == "Output separator":
+            sep = str(val).strip() if pd.notna(val) else ""
+        elif key == "Restriction enzyme":
+            v_str = str(val).lower().strip()
+            enzyme = "" if v_str in ("na", "n.a.", "nan") or pd.isna(val) else str(val).strip()
+    
+    if not enzyme:
+        errors.append("Missing or empty: 'Restriction enzyme'")
+    if not sep:
+        errors.append("Missing or empty: 'Output separator'")
+    if not name or name == "Unnamed":
+        errors.append("Missing or empty: 'Name'")
+
+    # Find part names
+    part_name_row = None
+    for i in range(c_r, o_r):
+        if str(df.iloc[i, 1]).strip() == "Part name ->":
+            part_name_row = i
+            break
+
+    # Verify part name exists
+    if part_name_row is None:
+        errors.append("Missing Part name -> in Assembly composition.")
+        return {"errors": errors, "status": "error"}
+
+    # Extract parts
+    parts = []
+    for j in range(2, col_count):
+        v = df.iloc[part_name_row, j]
+        if pd.isna(v) or str(v).strip() == "":
+            break
+        parts.append(str(v).strip())
+    if not parts:
+        errors.append("No parts detected (row 'Part name ->' empty).")
+
+    # Extract outputs
+    outputs = []
+    for i in range(o_r + 1, row_count):
+        pid = df.iloc[i, 0]
+        if pd.isna(pid) or str(pid).strip() == "":
+            break
+        
+        part_vals = []
+        for j in range(2, 2 + len(parts)):
+            cell_v = df.iloc[i, j] if j < col_count else None
+            part_vals.append(str(cell_v).strip() if pd.notna(cell_v) else "")
+        
+        outputs.append({
+            "pid": str(pid).strip(),
+            "ptype": str(df.iloc[i, 1]).strip() if pd.notna(df.iloc[i, 1]) else "",
+            "part_values": part_vals
+        })
+
+    return {
+        "name": name,
+        "separator": sep,
+        "restriction_enzyme": enzyme,
+        "input_parts": parts,
+        "output_parts": parts,
+        "output_rows": outputs,
+        "errors": errors,
+        "status": "error" if errors else "ok"
+    }
+
+
+# Helper to validate extensions in a zip
+def zip_only_contains_extensions(
+        zip_path: Path,
+        allowed_exts: set[str],
+        *,
+        allow_empty=False):
+    
+    allowed_exts = {e.lower() for e in allowed_exts}
+
+    try:
+        with zipfile.ZipFile(zip_path, "r") as zf:
+            names = [n for n in zf.namelist() if n and not n.endswith("/")]
+    except zipfile.BadZipFile:
+        return False, "Uploaded file is not a valid .zip archive (corrupted)."
+
+    if not names and not allow_empty:
+        return False, "The .zip archive is empty."
+
+    for n in names:
+        lower = n.lower()
+        if not any(lower.endswith(ext) for ext in allowed_exts):
+            ext_list = ", ".join(sorted(allowed_exts))
+            return (
+                False, 
+                f"Invalid file in archive: '{n}'. Only {ext_list} allowed."
+            )
+
+    return True, None
+
+
+# View to start a new simulation
 def simulator_home(request):
-    simulator_reset(request)
+    # Reset session
+    for k in SESSION_KEYS:
+        request.session.pop(k, None)
+    request.session.modified = True
 
     options = [
         {
             "label": "LOAD YOUR PLASMID ASSEMBLY TEMPLATE",
-            "url": "/campaigns/simulator/upload/",
+            "url": "/campaigns/simulator/upload/"
         },
         {
             "label": "BROWSE PLASMID ASSEMBLY TEMPLATE",
-            "url": "/campaigns/simulator/browse/",
-        },
+            "url": "/campaigns/simulator/browse/"},
     ]
     return render(
         request,
         "campaigns/template.html",
-        {
-            "options": options,
-            "active_page": "simulator",
-        },
-    )
+        {"options": options, "active_page": "simulator"}
+        )
 
 
-# ============================================================
-# Helpers for XLSX parsing
-# ============================================================
-def _find_value_right(ws, key, max_rows=80, max_cols=12):
-    """
-    Cherche une cellule égale à key (case-insensitive, stripped)
-    et renvoie la valeur de la cellule à droite (même ligne, col+1).
-    """
-    key_norm = key.strip().lower()
-
-    for r in range(1, max_rows + 1):
-        for c in range(1, max_cols + 1):
-            v = ws.cell(r, c).value
-            if isinstance(v, str) and v.strip().lower() == key_norm:
-                return ws.cell(r, c + 1).value
-
-    return None
-
-
-def _find_part_names(ws, max_rows=120, max_cols=40):
-    """
-    Trouve la ligne qui commence par "Part name ->"
-    et retourne toutes les valeurs à droite (parts).
-    """
-    for r in range(1, max_rows + 1):
-        for c in range(1, max_cols + 1):
-            v = ws.cell(r, c).value
-            if isinstance(v, str) and v.strip().lower() == "part name ->":
-                parts = []
-                for cc in range(c + 1, max_cols + 1):
-                    pv = ws.cell(r, cc).value
-                    if pv is None or (isinstance(pv, str) and not pv.strip()):
-                        continue
-                    parts.append(str(pv).strip())
-                return parts
-
-    return []
-
-
-def _find_cell(ws, label, max_rows=200, max_cols=80):
-    target = label.strip().lower()
-    for r in range(1, max_rows + 1):
-        for c in range(1, max_cols + 1):
-            v = ws.cell(r, c).value
-            if isinstance(v, str) and v.strip().lower() == target:
-                return r, c
-    return None, None
-
-
-def _read_row_right(ws, row, start_col, max_cols=200):
-    out = []
-    for c in range(start_col, max_cols + 1):
-        v = ws.cell(row, c).value
-        if v is None or (isinstance(v, str) and not v.strip()):
-            break
-        out.append(str(v).strip())
-    return out
-
-
-def _read_col_down(ws, start_row, col, max_rows=500):
-    out = []
-    for r in range(start_row, max_rows + 1):
-        v = ws.cell(r, col).value
-        if v is None or (isinstance(v, str) and not v.strip()):
-            break
-        out.append(str(v).strip())
-    return out
-
-
-def _cell_str(v):
-    if v is None:
-        return ""
-    return str(v).strip()
-
-
-def parse_output_plasmids(xlsx_path):
-    """
-    TEMPLATE Campaign_display_L1.xlsx
-
-    - pIDs: column under "Output plasmid id ↓"
-    - types: column under "OutputType (optional) ↓"
-    - parts: row right of "Part name ->"
-    - values: grid intersection (row pID × column part)
-
-    Returns:
-      parts: list[str]
-      rows: list[dict] with keys:
-        pid, ptype, part_values
-    """
-    wb = openpyxl.load_workbook(xlsx_path, data_only=True)
-    ws = wb.active
-
-    pid_r, pid_c = _find_cell(ws, "Output plasmid id ↓")
-    typ_r, typ_c = _find_cell(ws, "OutputType (optional) ↓")
-    part_r, part_c = _find_cell(ws, "Part name ->")
-
-    if not pid_r or not part_r:
-        raise ValueError("Missing required headers in template.")
-
-    # Parts headers (row)
-    parts = _read_row_right(ws, part_r, part_c + 1)
-    if not parts:
-        raise ValueError("No parts detected.")
-
-    # pIDs + types (columns)
-    pids = _read_col_down(ws, pid_r + 1, pid_c)
-    ptypes = (
-        _read_col_down(ws, typ_r + 1, typ_c)
-        if typ_r else []
-    )
-
-    if len(ptypes) < len(pids):
-        ptypes += [""] * (len(pids) - len(ptypes))
-
-    rows = []
-    for i, pid in enumerate(pids):
-        excel_row = pid_r + 1 + i
-
-        part_values = []
-        for j in range(len(parts)):
-            excel_col = part_c + 1 + j
-            part_values.append(
-                _cell_str(ws.cell(excel_row, excel_col).value)
-            )
-
-        rows.append({
-            "pid": pid,
-            "ptype": ptypes[i],
-            "part_values": part_values,
-        })
-
-    return parts, rows
-
-
-# ============================================================
-# Upload template (xlsx)
-# ============================================================
 def upload_template(request):
     error = None
-
-    # CLEAR TEMPLATE
+    # Clear uploaded input
     if request.method == "POST" and request.POST.get("clear_template") == "1":
-        _clear_template(request)
+        for k in ["uploaded_template_path",
+                  "uploaded_template_name",
+                  "template_is_valid",
+                  "assembly_preview"]:
+            request.session.pop(k, None)
+        request.session.modified = True
         return redirect("/campaigns/simulator/upload/")
 
-    # UPLOAD TEMPLATE
+    # Request .xlsx
     if request.method == "POST" and request.FILES.get("template_file"):
         f = request.FILES["template_file"]
-
         if not f.name.lower().endswith(".xlsx"):
             error = "Only .xlsx files are allowed."
         else:
-            out_dir = Path(settings.MEDIA_ROOT) / "simulator" / "templates"
-            out_dir.mkdir(parents=True, exist_ok=True)
-
-            dest = out_dir / f.name
-            with open(dest, "wb") as w:
-                for chunk in f.chunks():
-                    w.write(chunk)
-
+            dest = save_upload(f, Path(settings.MEDIA_ROOT) / "simulator" / "templates")
             request.session["uploaded_template_path"] = str(dest)
-            request.session["uploaded_template_name"] = f.name
-
+            request.session["uploaded_template_name"] = Path(f.name).name
+            request.session.modified = True
             return redirect("/campaigns/simulator/upload/")
 
-    return render(request, "campaigns/upload.html", {"error": error})
-
-
-# ============================================================
-# Upload template preview / validation
-# ============================================================
-def upload_template_next(request):
-    path_str = request.session.get("uploaded_template_path")
-    filename = request.session.get("uploaded_template_name")
-
-    if not path_str:
-        return redirect("/campaigns/simulator/upload/")
-
-    try:
-        wb = openpyxl.load_workbook(path_str, data_only=True)
-        ws = wb.active
-
-        enzyme = _find_value_right(ws, "Restriction enzyme")
-        name = _find_value_right(ws, "Name")
-        sep = _find_value_right(ws, "Output separator")
-        parts = _find_part_names(ws)
-
-        assembly = {
-            "name": (
-                str(name).strip()
-                if name is not None
-                else (filename or "Unnamed")
-            ),
-            "separator": (
-                str(sep).strip() if sep is not None else ""
-            ),
-            "restriction_enzyme": (
-                str(enzyme).strip() if enzyme is not None else ""
-            ),
-            "input_parts": parts,
-        }
-
-        # Validation
-        missing = []
-        if not assembly["restriction_enzyme"]:
-            missing.append("Restriction enzyme")
-        if not assembly["name"]:
-            missing.append("Name")
-        if not assembly["separator"]:
-            missing.append("Output separator")
-        if not assembly["input_parts"]:
-            missing.append("Part name -> row")
-
-        error = None
-        if missing:
-            error = "Template incomplete: missing " + ", ".join(missing)
-
-        is_valid = (len(missing) == 0)
-        request.session["template_is_valid"] = is_valid
-        request.session["assembly_preview"] = assembly
-
-        return render(
-            request,
-            "campaigns/upload_preview.html",
-            {
-                "assembly": assembly,
-                "error": error,
-                "active_page": "simulator",
-            },
+    return render(
+        request,
+        "campaigns/upload.html", 
+        {"error": error}
         )
 
-    except Exception as e:
+
+# View to upload, validate template, and preview assembly
+def upload_template_next(request):
+    xlsx_path = request.session.get("uploaded_template_path")
+    filename = request.session.get("uploaded_template_name")
+
+    # Require an uploaded .xlsx
+    if not xlsx_path:
+        return redirect("/campaigns/simulator/upload/")
+
+    # Retrieve all data from the template
+    data = parse_template(xlsx_path)
+
+    # If parser has errors
+    if data["status"] != "ok":
+        request.session["template_is_valid"] = False
+        request.session["assembly_preview"] = None
+        request.session.modified = True
+
+    # Return parser errors
         return render(
             request,
             "campaigns/upload_preview.html",
             {
                 "assembly": None,
-                "error": str(e),
+                "error": "\n".join(data.get("errors", [])),
                 "active_page": "simulator",
             },
         )
 
+    # Else Create assembly
+    assembly = {
+        "name": data["name"] or (filename or "Unnamed"),
+        "separator": data["separator"],
+        "restriction_enzyme": data["restriction_enzyme"],
+        "input_parts": data["input_parts"],
+    }
 
-# ============================================================
-# Helpers
-# ============================================================
-def _zip_only_contains_extensions(
-    zip_path, allowed_exts, *, allow_empty=False
-):
-    """
-    Check that a ZIP contains ONLY files with extensions in allowed_exts.
-    - Ignores directories (entries ending with '/')
-    - allowed_exts: set/tuple like {".gb", ".gbk"}
-    - allow_empty: if False, empty zip is rejected
-    Returns: (ok: bool, error_msg: str|None)
-    """
-    allowed_exts = {e.lower() for e in allowed_exts}
+    # Valide assembly (no errors)
+    request.session["template_is_valid"] = True
+    request.session["assembly_preview"] = assembly
+    request.session.modified = True
 
-    try:
-        with zipfile.ZipFile(zip_path, "r") as zf:
-            names = zf.namelist()
-    except zipfile.BadZipFile:
-        return False, "Uploaded file is not a valid .zip archive (corrupted)."
-
-    file_names = [n for n in names if n and not n.endswith("/")]
-    if not file_names and not allow_empty:
-        return False, "The .zip archive is empty."
-
-    for n in file_names:
-        lower = n.lower()
-        if not any(lower.endswith(ext) for ext in allowed_exts):
-            ext_list = ', '.join(sorted(allowed_exts))
-            msg = f"Invalid file in archive: '{n}'. Only {ext_list} allowed."
-            return (False, msg)
-
-    return True, None
+    return render(
+        request,
+        "campaigns/upload_preview.html",
+        {"assembly": assembly, "error": None, "active_page": "simulator"},
+    )
 
 
-def _validate_genbank_zip(zip_path):
-    # Extensions GenBank courantes
-    allowed = {".gb", ".gbk", ".genbank"}
-    return _zip_only_contains_extensions(zip_path, allowed)
-
-
-def _validate_mapping_zip(zip_path):
-    allowed = {".csv", ".tsv", ".txt"}
-    return _zip_only_contains_extensions(zip_path, allowed)
-
-
-# ============================================================
-# Simulator inputs (GenBank + mapping)
-# ============================================================
+# View to upload inputs
 def simulator_inputs(request):
+    # Require validated template
     if not request.session.get("template_is_valid", False):
         return redirect("/campaigns/simulator/upload/next/")
 
+    # Get assembly preview
     assembly = request.session.get("assembly_preview")
     error = None
 
-    # CLEAR GENBANK
+    # Clear genbank
     if request.method == "POST" and request.POST.get("clear_genbank") == "1":
-        _clear_genbank(request)
+        for k in ["genbank_path", "genbank_name", "ok_genbank"]:
+            request.session.pop(k, None)
+        request.session.modified = True
         return redirect("/campaigns/simulator/inputs/")
-
-    # CLEAR MAPPING
+    
+    # Clear mapping
     if request.method == "POST" and request.POST.get("clear_mapping") == "1":
-        _clear_mapping(request)
+        for k in ["mapping_path", "mapping_name", "ok_mapping"]:
+            request.session.pop(k, None)
+        request.session.modified = True
         return redirect("/campaigns/simulator/inputs/")
 
-    # UPLOAD FILES
     if request.method == "POST":
         out_dir = Path(settings.MEDIA_ROOT) / "simulator" / "inputs"
-        out_dir.mkdir(parents=True, exist_ok=True)
 
-        # ---------------------------
-        # GenBank ZIP (REQUIRED)
-        # ---------------------------
+        # GenBank zip (required)
         if request.FILES.get("genbank_zip"):
             f = request.FILES["genbank_zip"]
-
             if not f.name.lower().endswith(".zip"):
                 error = "GenBank input must be a .zip archive."
             else:
-                dest = out_dir / f.name
-                with open(dest, "wb") as w:
-                    for chunk in f.chunks():
-                        w.write(chunk)
-
-                ok, msg = _validate_genbank_zip(dest)
+                # Verify extensions in zip
+                dest = save_upload(f, out_dir)
+                ok, msg = zip_only_contains_extensions(dest, {".gb", ".gbk", ".genbank"})
                 if not ok:
-                    if dest.exists():
-                        dest.unlink()
-
-                    request.session.pop("genbank_path", None)
-                    request.session.pop("genbank_name", None)
-                    request.session.pop("ok_genbank", None)
-
+                    dest.unlink(missing_ok=True)
+                    for k in ["genbank_path", "genbank_name", "ok_genbank"]:
+                        request.session.pop(k, None)
                     error = msg
                 else:
                     request.session["genbank_path"] = str(dest)
-                    request.session["genbank_name"] = f.name
+                    request.session["genbank_name"] = Path(f.name).name
                     request.session["ok_genbank"] = True
+                    request.session.modified = True
 
-        # ---------------------------
-        # Mapping file (OPTIONAL)
-        # ---------------------------
+        # Mapping (optional)
         if request.FILES.get("mapping_file"):
             f = request.FILES["mapping_file"]
-            allowed = (".csv", ".tsv", ".txt", ".zip")
+            name_lower = f.name.lower()
 
-            if not f.name.lower().endswith(allowed):
+            # Require zip or table
+            if not name_lower.endswith((".csv", ".tsv", ".txt", ".zip")):
                 error = "Mapping file must be .csv, .tsv, .txt, or .zip."
             else:
-                dest = out_dir / f.name
-                with open(dest, "wb") as w:
-                    for chunk in f.chunks():
-                        w.write(chunk)
-
-                if f.name.lower().endswith(".zip"):
-                    ok, msg = _validate_mapping_zip(dest)
+                dest = save_upload(f, out_dir)
+                # If zip, verify inside file extensions
+                if name_lower.endswith(".zip"):
+                    ok, msg = zip_only_contains_extensions(dest, {".csv", ".tsv", ".txt"})
                     if not ok:
-                        if dest.exists():
-                            dest.unlink()
-
-                        request.session.pop("mapping_path", None)
-                        request.session.pop("mapping_name", None)
-                        request.session.pop("ok_mapping", None)
-
+                        dest.unlink(missing_ok=True)
+                        for k in ["mapping_path", "mapping_name", "ok_mapping"]:
+                            request.session.pop(k, None)
                         error = msg
                     else:
                         request.session["mapping_path"] = str(dest)
-                        request.session["mapping_name"] = f.name
+                        request.session["mapping_name"] = Path(f.name).name
                         request.session["ok_mapping"] = True
+                        request.session.modified = True
                 else:
-                    # .csv/.tsv/.txt -> accepté
                     request.session["mapping_path"] = str(dest)
-                    request.session["mapping_name"] = f.name
+                    request.session["mapping_name"] = Path(f.name).name
                     request.session["ok_mapping"] = True
+                    request.session.modified = True
 
     return render(
         request,
@@ -430,69 +372,55 @@ def simulator_inputs(request):
     )
 
 
-# ============================================================
-# Helper for simulation preview
-# ============================================================
-def _list_received_files(path_str):
-    """
-    Return list of received filenames.
-    - If path is a zip: return zip content filenames (filtered: no directories)
-    - Else: return [basename]
-    """
-    if not path_str:
-        return []
-
-    p = Path(path_str)
-    if not p.exists():
-        return []
-
-    # ZIP case
-    if p.suffix.lower() == ".zip" and zipfile.is_zipfile(p):
-        with zipfile.ZipFile(p, "r") as z:
-            names = []
-            for n in z.namelist():
-                # skip directories
-                if n.endswith("/"):
-                    continue
-                names.append(n.split("/")[-1])  # keep basename
-            # remove empty names and sort for nicer display
-            names = [x for x in names if x]
-            return sorted(names)
-
-    # non-zip
-    return [p.name]
-
-
-# ============================================================
-# Simulation preview
-# ============================================================
+# View to print simulation preview
 def simulation_preview(request):
+    # Require valide template
     if not request.session.get("template_is_valid", False):
         return redirect("/campaigns/simulator/upload/next/")
+    
+    # View for received files
+    def list_received_files(path_str: str | None):
+        if not path_str:
+            return []
+        p = Path(path_str)
+        if not p.exists():
+            return []
+        if p.suffix.lower() == ".zip" and zipfile.is_zipfile(p):
+            with zipfile.ZipFile(p, "r") as z:
+                return sorted([Path(n).name for n in z.namelist() if n and not n.endswith("/") and Path(n).name])
+        return [p.name]
 
-    genbank_path = request.session.get("genbank_path")
-    mapping_path = request.session.get("mapping_path")  # optional
+    # Get received files
+    genbank_files = list_received_files(request.session.get("genbank_path"))
+    mapping_files = list_received_files(request.session.get("mapping_path"))
 
-    genbank_files = _list_received_files(genbank_path)
-    mapping_files = _list_received_files(mapping_path)
-
-    # Output plasmids table
+    # Get template
     template_path = request.session.get("uploaded_template_path")
-    output_parts = []
-    output_rows = []
-    output_error = None
+
+    # Get assembly preview
+    assembly = request.session.get("assembly_preview")
+    output_parts, output_rows, output_error = [], [], None
 
     if template_path:
-        try:
-            output_parts, output_rows = parse_output_plasmids(template_path)
-        except Exception as e:
-            output_error = str(e)
+        data = parse_template(template_path)
+
+        if data.get("status") == "ok":
+            assembly = {
+                "name": data.get("name", ""),
+                "separator": data.get("separator", ""),
+                "restriction_enzyme": data.get("restriction_enzyme", ""),
+                "input_parts": data.get("input_parts", []),
+            }
+            output_parts = data.get("output_parts", [])
+            output_rows = data.get("output_rows", [])
+        else:
+            output_error = "\n".join(data.get("errors", []))
 
     return render(
         request,
         "campaigns/simulation_preview.html",
         {
-            "assembly": request.session.get("assembly_preview"),
+            "assembly": assembly,
             "genbank_files": genbank_files,
             "mapping_files": mapping_files,
             "genbank_count": len(genbank_files),
@@ -504,130 +432,72 @@ def simulation_preview(request):
     )
 
 
-# ============================================================
-# Browse templates
-# ============================================================
+# View to browse templates
 def browse_templates(request):
     assemblies = Assembly.objects.prefetch_related("inputparts_set")
-    return render(
-        request,
-        "campaigns/browse.html",
-        {
-            "assemblies": assemblies,
-            "active_page": "browse",
-        },
-    )
+    return render(request, "campaigns/browse.html", {"assemblies": assemblies, "active_page": "browse"})
 
 
-# ============================================================
-# Assembly download
-# ============================================================
+# View to download the .xlsx associated with a template 
 def assembly_download(request, pk):
     assembly = get_object_or_404(Assembly, pk=pk)
     if not assembly.file_name:
         raise Http404("No file associated with this assembly")
-    file_path = (
-        Path(settings.BASE_DIR) / "assemblies_files" / assembly.file_name
-    )
-    print(file_path)
-    print(file_path.exists())
+
+    file_path = Path(settings.BASE_DIR) / "assemblies_files" / assembly.file_name
     if not file_path.exists():
         raise Http404("File not found")
-    return FileResponse(
-        open(file_path, "rb"),
-        as_attachment=True,
-        filename=assembly.file_name
-    )
+
+    return FileResponse(open(file_path, "rb"), as_attachment=True, filename=assembly.file_name)
 
 
-# ============================================================
-# Assembly detail
-# ============================================================
+# View to check details of an assembly
 def assembly_detail(request, pk):
     assembly = get_object_or_404(Assembly, id=pk)
     input_parts = assembly.inputparts_set.prefetch_related("allowed_types")
-
     return render(
         request,
         "campaigns/assembly_details.html",
         {
             "assembly": assembly,
             "input_parts": input_parts,
-            "active_page": "browse",
-        },
+            "active_page": "browse"
+        }
     )
 
 
-# ============================================================
-# Helpers to collect zips
-# ============================================================
-def _extract_zip(zip_path: Path, dest_dir: Path):
-    dest_dir.mkdir(parents=True, exist_ok=True)
-    with zipfile.ZipFile(zip_path, "r") as zf:
-        zf.extractall(dest_dir)
-
-
-def _collect_files(root: Path):
-    return [p for p in root.rglob("*") if p.is_file()]
-
-
-def _make_zip_from_dir(src_dir: Path, zip_path: Path):
-    with zipfile.ZipFile(
-        zip_path, "w", compression=zipfile.ZIP_DEFLATED
-    ) as zf:
-        for p in Path(src_dir).rglob("*"):
-            if p.is_file():
-                zf.write(p, p.relative_to(src_dir).as_posix())
-
-
-# ============================================================
-# SIMULATION RUN
-# ============================================================
+# View to run a simulation
 def simulation_run(request):
-    # Prérequis : template validé + genbank présent
-    if not request.session.get("template_is_valid", False):
+    # Require validated template
+    if not request.session.get("template_is_valid"):
         return redirect("/campaigns/simulator/upload/next/")
 
+    # Request input paths
+    template_path = request.session.get("uploaded_template_path")
     genbank_zip_path = request.session.get("genbank_path")
+    mapping_path = request.session.get("mapping_path")  # optional
+
+    if not template_path:
+        return redirect("/campaigns/simulator/upload/")
     if not genbank_zip_path:
         return redirect("/campaigns/simulator/inputs/")
 
-    template_path = request.session.get("uploaded_template_path")
-    if not template_path:
-        return redirect("/campaigns/simulator/upload/")
-
-    mapping_path = request.session.get("mapping_path")
-
-    # Run id unique
-    run_id = uuid.uuid4().hex[:10]
-
-    # Dossier run
-    runs_root = Path(settings.MEDIA_ROOT) / "simulator" / "runs"
-    run_dir = runs_root / run_id
-    run_dir.mkdir(parents=True, exist_ok=True)
-
-
-    # Dossiers output
-    out_dir = run_dir / "output"
-    out_dir.mkdir(parents=True, exist_ok=True)
-
-    repo_dir = run_dir / "plasmid_repository" 
-    map_dir = run_dir / "mapping"
-
-    # Template
-    tpl_path = Path(template_path)
-
-    # Enzyme depuis la session preview (REQUIRED)
+    # Request assembly details
     assembly = request.session.get("assembly_preview") or {}
-    enzyme = assembly.get("restriction_enzyme")
+    enzyme = assembly.get("restriction_enzyme") or ""
 
-    status = "ok"
-    error = None
-    stderr_text = ""
-    outputs_zip_url = None
+    # Create a run directory associated with simulation id
+    run_id = uuid.uuid4().hex[:10]
+    run_dir = Path(settings.MEDIA_ROOT) / "simulator" / "runs" / run_id
+    repo_dir = run_dir / "plasmid_repository"
+    map_dir = run_dir / "mapping"
+    out_dir = run_dir / "output"
+    for d in (repo_dir, map_dir, out_dir):
+        d.mkdir(parents=True, exist_ok=True)
 
-    # Stockage en BD du run si utilisateur connecté 
     run = None
+
+    # Create a run in database if user is connected
     if request.user.is_authenticated:
         run = SimulationRun.objects.create(
             user=request.user,
@@ -639,136 +509,97 @@ def simulation_run(request):
         )
 
     try:
-        # ----------------------
-        # GenBank (ZIP required)
-        # ----------------------
-        _extract_zip(Path(genbank_zip_path), repo_dir)
-        gb_files = _collect_files(repo_dir)
-        if not gb_files:
-            raise ValueError("No GenBank files found after extraction.")
+        # Extract GenBank zip
+        with zipfile.ZipFile(genbank_zip_path, "r") as zf:
+            zf.extractall(repo_dir)
 
-        # ----------------------
-        # Mapping (optional zip or single file)
-        # ----------------------
+        gb_plasmids = list(repo_dir.rglob("*.gb")) + list(repo_dir.rglob("*.gbk"))
+        if not gb_plasmids:
+            raise ValueError("No GenBank files found in the uploaded archive.")
+
+        # Get mapping files (optional)
         input_parts_files = []
         if mapping_path:
             mp = Path(mapping_path)
             if mp.suffix.lower() == ".zip":
-                _extract_zip(mp, map_dir)
-                input_parts_files = _collect_files(map_dir)
+                with zipfile.ZipFile(mp, "r") as zf:
+                    zf.extractall(map_dir)
+                input_parts_files = list(map_dir.rglob("*.csv")) + list(map_dir.rglob("*.tsv")) + list(map_dir.rglob("*.txt"))
             else:
                 input_parts_files = [mp]
 
-        # ----------------------
-        # Build CLI command
-        # ----------------------
-        cmd = [
-            "insillyclo",
-            "simulate",
-            "--input-template-filled", str(tpl_path),
-            "--plasmid-repository", str(repo_dir),
-            "--recursive-plasmid-repository",
-            "--default-mass-concentration", "200",
-            "--restriction-enzyme-gel", enzyme,
-            "--output-dir", str(out_dir),
-        ]
-
-        # mapping files : repeat option
-        for f in input_parts_files:
-            cmd += ["--input-parts-file", str(f)]
-
-        # ----------------------
-        # Run subprocess
-        # ----------------------
-        proc = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
+        # Run simulation via Python
+        # call inspired by commands.py
+        observer = insillyclo.observer.InSillyCloCliObserver(
+            debug=True,
+            fail_on_error=True,
         )
 
-        if proc.returncode != 0:
-            status = "error"
-            raw = proc.stderr or ""
-            stderr_text = raw.split("Traceback", 1)[0].strip()
-            error = stderr_text
+        insillyclo.simulator.compute_all(
+            observer=observer,
+            settings=None,
+            input_template_filled=Path(template_path),
+            input_parts_files=input_parts_files,
+            gb_plasmids=gb_plasmids,
+            output_dir=out_dir,
+            data_source=insillyclo.data_source.DataSourceHardCodedImplementation(),
+            enzyme_names=[enzyme] if enzyme else [],
+            default_mass_concentration=200,
+            sbol_export=False,
+        )
 
-            if run is not None:
-                run.status = "FAILED"
-                run.error_message = error
-                run.save(
-                    update_fields=["status", "error_message", "updated_at"]
-                )
-        else:
-            zip_path = run_dir / "outputs.zip"
-            _make_zip_from_dir(out_dir, zip_path)
-            outputs_zip_url = f"/campaigns/simulator/run/{run_id}/download/"
+        # Zip outputs
+        zip_path = run_dir / "outputs.zip"
+        with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+            for p in out_dir.rglob("*"):
+                if p.is_file():
+                    zf.write(p, p.relative_to(out_dir).as_posix())
 
-            if run is not None:
-                run.status = "SUCCESS"
-                run.output_zip = str(zip_path.relative_to(settings.MEDIA_ROOT))
-                run.save(
-                    update_fields=["status", "output_zip", "updated_at"]
-                )
-            request.session["last_run_id"] = run_id
-            request.session.modified = True
+        if run is not None:
+            run.status = "SUCCESS"
+            run.output_zip = str(zip_path.relative_to(settings.MEDIA_ROOT))
+            run.save(update_fields=["status", "output_zip", "updated_at"])
+
+        request.session["last_run_id"] = run_id
+        request.session.modified = True
+
+        return render(
+            request,
+            "campaigns/simulation_run.html",
+            {
+                "assembly": request.session.get("assembly_preview"),
+                "status": "ok",
+                "error": None,
+                "run_id": run_id,
+                "outputs_zip_url": f"/campaigns/simulator/run/{run_id}/download/",
+                "is_authenticated": request.user.is_authenticated,
+            },
+        )
 
     except Exception as e:
-        status = "error"
-        error = str(e)
+
+        # Get error message or error type
+        error_raised = str(e) if str(e) else e.__class__.__name__
         if run is not None:
             run.status = "FAILED"
-            run.error_message = error
+            run.error_message = error_raised
             run.save(update_fields=["status", "error_message", "updated_at"])
 
-    return render(
-        request,
-        "campaigns/simulation_run.html",
-        {
-            "assembly": request.session.get("assembly_preview"),
-            "status": status,
-            "error": error,
-            "stderr_text": stderr_text,
-            "run_id": run_id,
-            "outputs_zip_url": outputs_zip_url,
-            "is_authenticated": request.user.is_authenticated,
-        },
-    )
+        return render(
+            request,
+            "campaigns/simulation_run.html",
+            {
+                "assembly": request.session.get("assembly_preview"),
+                "status": "error",
+                "error": run.error_message,
+                "run_id": run_id,
+                "outputs_zip_url": None,
+                "is_authenticated": request.user.is_authenticated,
+            },
+        )
 
-# ============================================================
-# SIMULATIONS LIST (logged-in only)
-# ============================================================
-@login_required(login_url="/accounts/login/")
-def simulations_list(request):
-    runs = (
-        SimulationRun.objects
-        .filter(user=request.user)
-        .order_by("-updated_at")
-    )
 
-    items = []
-    for r in runs:
-        items.append({
-            "run_id": r.run_id,
-            "status": r.status,
-            "updated_at": r.updated_at,
-            "download_url": f"/campaigns/simulator/run/{r.run_id}/download/" if r.status == "SUCCESS" else None,
-            "back_url": f"/campaigns/simulator/run/{r.run_id}/resume/",
-        })
-
-    return render(
-        request,
-        "campaigns/simulations_list.html",
-        {
-            "items": items,
-            "active_page": "simulations",
-        },
-    )
-
-# ============================================================
-# DOWNLOAD RUN OUTPUTS 
-# ============================================================
 def simulation_run_download(request, run_id):
-    # autorise seulement si ce run_id correspond à celui de la session
     if request.session.get("last_run_id") != run_id:
         raise Http404("Not allowed.")
 
@@ -776,113 +607,69 @@ def simulation_run_download(request, run_id):
     if not zip_path.exists():
         raise Http404("File not found.")
 
-    return FileResponse(
-        open(zip_path, "rb"),
-        as_attachment=True,
-        filename=f"outputs_{run_id}.zip",
-    )
+    return FileResponse(open(zip_path, "rb"), as_attachment=True, filename=f"outputs_{run_id}.zip")
 
-# ============================================================
-# RESUME RUN (logged-in only)
-# ============================================================
 
+@login_required(login_url="/accounts/login/")
+def simulations_list(request):
+    runs = SimulationRun.objects.filter(user=request.user).order_by("-updated_at")
+    items = [
+        {
+            "run_id": r.run_id,
+            "status": r.status,
+            "updated_at": r.updated_at,
+            "download_url": f"/campaigns/simulator/run/{r.run_id}/download/" if r.status == "SUCCESS" else None,
+            "back_url": f"/campaigns/simulator/run/{r.run_id}/resume/",
+        }
+        for r in runs
+    ]
+    return render(request, "campaigns/simulations_list.html", {"items": items, "active_page": "simulations"})
+
+# View to go back to a run of a user
 @login_required
 def resume_run(request, run_id):
     run = get_object_or_404(SimulationRun, run_id=run_id, user=request.user)
 
-    # clear old session
-    _clear_genbank(request)
-    _clear_mapping(request)
-    _clear_template(request)
+    # Clear session
+    for k in SESSION_KEYS:
+        request.session.pop(k, None)
 
-    # restore paths in session from DB
     request.session["uploaded_template_path"] = run.template_path
     request.session["genbank_path"] = run.genbank_path
-
     if run.mapping_path:
         request.session["mapping_path"] = run.mapping_path
-    else:
-        request.session.pop("mapping_path", None)
 
-    # rebuild assembly_preview in session (for preview card)
-    wb = openpyxl.load_workbook(run.template_path, data_only=True)
-    ws = wb.active
+    data = parse_template(run.template_path)
 
-    enzyme = _find_value_right(ws, "Restriction enzyme")
-    name = _find_value_right(ws, "Name")
-    sep = _find_value_right(ws, "Output separator")
-    parts = _find_part_names(ws)
-
-    request.session["assembly_preview"] = {
-        "name": (str(name).strip() if name else "Unnamed"),
-        "separator": (str(sep).strip() if sep else ""),
-        "restriction_enzyme": (str(enzyme).strip() if enzyme else ""),
-        "input_parts": parts,
+    if data.get("status") != "ok":
+        request.session["template_is_valid"] = False
+        request.session["assembly_preview"] = None
+        request.session.modified = True
+        return redirect("/campaigns/simulator/upload/next/")
+    
+    assembly = {
+        "name": data.get("name", "Unnamed"),
+        "separator": data.get("separator", ""),
+        "restriction_enzyme": data.get("restriction_enzyme", ""),
+        "input_parts": data.get("input_parts", []),
     }
-
-    #  mark as valid (so /preview doesn't redirect)
+    
+    request.session["assembly_preview"] = assembly
     request.session["template_is_valid"] = True
     request.session.modified = True
 
     return redirect("/campaigns/simulator/preview/")
 
-
-# Clear simulations
-
-
-
+# View to delete the media associated to a run of a user that are in page Simulations
 @login_required
 def delete_run(request, run_id):
     if request.method != "POST":
         return redirect("/campaigns/simulator/simulations/")
 
     run = get_object_or_404(SimulationRun, run_id=run_id, user=request.user)
-
-    # supprimer le dossier du run (outputs, extractions, etc.)
     run_dir = Path(settings.MEDIA_ROOT) / "simulator" / "runs" / run_id
     if run_dir.exists():
         shutil.rmtree(run_dir, ignore_errors=True)
 
-    # supprimer l'entrée DB
     run.delete()
-
     return redirect("/campaigns/simulator/simulations/")
-
-
-# Helpers for clearing : 
-def _clear_genbank(request):
-    request.session.pop("genbank_path", None)
-    request.session.pop("genbank_name", None)
-    request.session.pop("ok_genbank", None)
-
-
-def _clear_mapping(request):
-    request.session.pop("mapping_path", None)
-    request.session.pop("mapping_name", None)
-    request.session.pop("ok_mapping", None)
-
-
-def _clear_template(request):
-    request.session.pop("uploaded_template_path", None)
-    request.session.pop("uploaded_template_name", None)
-    request.session.pop("template_is_valid", None)
-    request.session.pop("assembly_preview", None)
-
-
-def simulator_reset(request):
-    for k in [
-        "uploaded_template_path",
-        "uploaded_template_name",
-        "template_is_valid",
-        "assembly_preview",
-        "genbank_path",
-        "genbank_name",
-        "ok_genbank",
-        "mapping_path",
-        "mapping_name",
-        "ok_mapping",
-        "last_run_id",
-    ]:
-        request.session.pop(k, None)
-    request.session.modified = True
-    return redirect("/campaigns/simulator/")

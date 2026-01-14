@@ -16,6 +16,4 @@ urlpatterns = [
     path("simulator/simulations/", views.simulations_list, name="simulations_list"),
     path("simulator/run/<str:run_id>/resume/", views.resume_run, name="resume_run"),
     path("simulator/run/<str:run_id>/delete/", views.delete_run, name="delete_run"),
-    path("simulator/reset/", views.simulator_reset, name="simulator_reset"),
-
 ]
