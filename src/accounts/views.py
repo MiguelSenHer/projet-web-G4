@@ -52,6 +52,9 @@ def signup_view(request):
 def teams(request):
     return render(request, "accounts/teams.html")
 
+@login_required
+def teams_create(request):
+    return render(request, "accounts/teams_create.html")
 
 @login_required
 def profile_view(request):

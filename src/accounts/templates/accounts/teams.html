@@ -14,9 +14,27 @@
 
 {% include 'frontend/navbar.html' %}
 
+# need to load teams of the user from the database
+
 <section class="login-section">
+
+  <div class="container mb-5">
+    <h2 class="panel-title mb-2">CREATE TEAMS</h2>
+    <div class="row g-4">
+
+      <div class="col-lg-12">
+        <div class="login-panel profile-card h-100">
+
+          <a href="{% url 'teams_create' %}" class="btn-create" style="text-decoration: none; text-align: center;">
+            NEW TEAM
+          </a>
+
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="container">
-    <h2 class="panel-title mb-4">MY TEAMS</h2>
+    <h2 class="panel-title mb-2">MY TEAMS</h2>
 
     <div class="row g-4">
 
