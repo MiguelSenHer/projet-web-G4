@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "frontend",
     "plasmids",
     "campaigns",
+    "simulator",
     "accounts.apps.AccountsConfig",
     "django_extensions",
 ]

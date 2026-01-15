@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <title>Template preview</title>
+    <style>
+      table { border-collapse: collapse; width: 100%; }
+      th, td { border: 1px solid #ccc; padding: 6px; }
+      th { background: #f0f0f0; }
+    </style>
+  </head>
+  <body>
+
+    <h1>Template preview</h1>
+
+    <h2>Assembly settings</h2>
+    <ul>
+      <li><strong>Name:</strong> {{ imp.name }}</li>
+      <li><strong>Output separator:</strong> {{ imp.separator }}</li>
+      <li><strong>Restriction enzyme:</strong> {{ imp.restriction_enzyme }}</li>
+      <li><strong>Template file:</strong> {{ imp.filename }}</li>
+    </ul>
+
+    <h2>Output plasmids</h2>
+
+    {% if matrix %}
+      <table>
+        <thead>
+          <tr>
+            <th>Output plasmid ID</th>
+            <th>Type</th>
+            {% for p in parts %}
+              <th>{{ p }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in matrix %}
+            <tr>
+              <td>{{ row.pid }}</td>
+              <td>{{ row.ptype }}</td>
+              {% for v in row.values %}
+                <td>{{ v }}</td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No output plasmids.</p>
+    {% endif %}
+
+    <p>
+      <a href="{% url 'simulator:upload' %}">Upload another template</a>
+    </p>
+
+  </body>
+</html>
