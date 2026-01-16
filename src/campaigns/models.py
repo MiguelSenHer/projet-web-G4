@@ -1,5 +1,6 @@
 from contextlib import nullcontext
 from django.db import models
+from django.conf import settings
 
 
 class Assembly(models.Model):
@@ -22,11 +23,6 @@ class InputParts(models.Model):
 
 class Type(models.Model):
     type_name = models.CharField(max_length=50)
-
-
-from django.conf import settings
-from django.db import models
-
 
 class SimulationRun(models.Model):
     STATUS_CHOICES = [

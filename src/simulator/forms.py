@@ -1,10 +1,15 @@
 import pandas as pd
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import TemplateImport, TemplateRow
+import json
+import uuid
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+import zipfile
+from pathlib import Path
 
 
-# Upload and validation form with minimal parsing of assembly and plasmids for template
+# Upload and validate template with minimal parsing of assembly and plasmids
 class UploadTemplateForm(forms.Form):
     file = forms.FileField()
 
@@ -118,32 +123,107 @@ class UploadTemplateForm(forms.Form):
 
         return f
 
+    # Save templated and JSON preview and associate to job id
     def save(self):
         data = self.parsed
         f = self.cleaned_data["file"]
 
-        imp = TemplateImport.objects.create(
-            name=data["name"],
-            separator=data["separator"],
-            restriction_enzyme=data["enzyme"],
-            filename=f.name,
+        # create job id
+        job_id = uuid.uuid4().hex[:10]
+
+        # save .xlsx in MEDIA_ROOT relative to job_id
+        base = f"simulator/jobs/{job_id}"
+        default_storage.save(f"{base}/inputs/{f.name}", f)
+
+        # JSON preview
+        preview = {
+            "job_id": job_id,
+            "filename": f.name,
+            "name": data['name'],
+            "separator": data["separator"],
+            "enzyme": data["enzyme"],
+            "parts": data["parts"],
+            "plasmids": data["plasmids"]
+        }
+
+        # save .json in MEDIA_ROOT relative to job_id
+        default_storage.save(
+            f"{base}/preview/preview.json",
+            ContentFile(json.dumps(preview, indent=2)),
         )
 
-        rows = []
-        for out_i, plasmid in enumerate(data["plasmids"], start=1):
-            for part_i, (part_name, part_value) in enumerate(
-                zip(data["parts"], plasmid["part_values"]),
-                start=1,
-            ):
-                rows.append(
-                    TemplateRow(
-                        imp=imp,
-                        pid=plasmid["pid"],
-                        ptype=plasmid["ptype"] or None,
-                        part_name=part_name,
-                        part_value=part_value,
-                    )
+        return job_id
+
+
+# View to upload genbank and mapping
+class UploadInputsForm(forms.Form):
+    genbank_zip = forms.FileField(required=False)
+    mapping_zip = forms.FileField(required=False)
+
+    # For genbank only a zip containaing .gb .genbank .gbk files allowed
+    def clean_genbank_zip(self):
+        f = self.cleaned_data.get("genbank_zip")
+        if not f:
+            return None
+
+        try:
+            z = zipfile.ZipFile(f)
+        except Exception:
+            raise ValidationError("Invalid GenBank zip. Only .zip allowed.")
+
+        for name in z.namelist():
+            if name.endswith("/"):
+                continue
+            if Path(name).suffix.lower() not in (".gb", ".gbk", ".genbank"):
+                raise ValidationError(
+                    "GenBank zip may only contain .gb, .gbk or .genbank files."
                 )
 
-        TemplateRow.objects.bulk_create(rows)
-        return imp
+        return f
+
+    # For mapping only csv txt tsv or zip containing them allowed
+    def clean_mapping_zip(self):
+        f = self.cleaned_data.get("mapping_zip")
+        if not f:
+            return None
+
+        ext = Path(f.name).suffix.lower()
+
+        if ext in (".csv", ".tsv", ".txt"):
+            return f
+
+        try:
+            z = zipfile.ZipFile(f)
+        except Exception:
+            raise ValidationError(
+                "Invalid mapping zip. Only .csv, .tsv, .txt or a zip allowed."
+            )
+
+        for name in z.namelist():
+            if name.endswith("/"):
+                continue
+            if Path(name).suffix.lower() not in (".csv", ".tsv", ".txt"):
+                raise ValidationError(
+                    "Mapping zip may only contain .csv, .tsv or .txt files."
+                )
+
+        return f
+
+    # Save genbank and mapping in MEDIA_ROOT relative to job_id
+    def save(self, job_id):
+        base = f"simulator/jobs/{job_id}/inputs"
+
+        genbank = self.cleaned_data.get("genbank_zip")
+        if genbank:
+            path = f"{base}/genbank.zip"
+            if default_storage.exists(path):
+                default_storage.delete(path)
+            default_storage.save(path, genbank)
+
+        mapping = self.cleaned_data.get("mapping_zip")
+        if mapping:
+            ext = Path(mapping.name).suffix.lower()
+            path = f"{base}/mapping{ext}"
+            if default_storage.exists(path):
+                default_storage.delete(path)
+            default_storage.save(path, mapping)

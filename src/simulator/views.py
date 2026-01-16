@@ -1,9 +1,11 @@
-from django.views.generic import FormView, DetailView
+from django.views.generic import FormView
 from django.shortcuts import redirect
 from django.urls import reverse
+import json
+from django.http import Http404
+from django.core.files.storage import default_storage
 
-from .forms import UploadTemplateForm
-from .models import TemplateImport
+from .forms import UploadTemplateForm, UploadInputsForm
 
 
 class UploadTemplateView(FormView):
@@ -11,40 +13,51 @@ class UploadTemplateView(FormView):
     form_class = UploadTemplateForm
 
     def form_valid(self, form):
-        imp = form.save()
+        job_id = form.save()
+        self.request.session["current_job_id"] = job_id
+
         return redirect(
-            reverse("simulator:preview", kwargs={"pk": imp.id})
+            reverse("simulator:preview")
         )
 
 
-class TemplatePreviewView(DetailView):
-    model = TemplateImport
-    template_name = "simulator/preview_uploaded_template.html"
-    context_object_name = "imp"
+class TemplatePreviewView(FormView):
+    template_name = "simulator/preview.html"
+    form_class = UploadInputsForm
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.session.get("current_job_id"):
+            return redirect("simulator:upload_template")
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_success_url(self):
+        return reverse("simulator:preview")
 
     def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
-        rows = self.object.rows.all()  # TemplateRow
-        parts = sorted({r.part_name for r in rows})
-        plasmids = sorted({r.pid for r in rows})
+        job_id = self.request.session["current_job_id"]
+        json_path = f"simulator/jobs/{job_id}/preview/preview.json"
+        if not default_storage.exists(json_path):
+            raise Http404("File not found")
 
-        # (pid, part_name) -> (ptype, value)
-        cell = {}
-        ptype_map = {}
-        for r in rows:
-            cell[(r.pid, r.part_name)] = r.part_value
-            if r.pid not in ptype_map:
-                ptype_map[r.pid] = r.ptype or ""
+        with default_storage.open(json_path, "r") as fp:
+            data = json.load(fp)
 
-        matrix = []
-        for pid in plasmids:
-            matrix.append({
-                "pid": pid,
-                "ptype": ptype_map.get(pid, ""),
-                "values": [cell.get((pid, part), "") for part in parts],
-            })
+        context.update({
+            "filename": data.get("filename", ""),
+            "name": data.get("name", ""),
+            "enzyme": data.get("enzyme", ""),
+            "separator": data.get("separator", ""),
+            "parts": data.get("parts", []),
+            "plasmids": data.get("plasmids", []),
+        })
 
-        ctx["parts"] = parts
-        ctx["matrix"] = matrix
-        return ctx
+        # Open inputs accordion if there are errors
+        context["inputs_open"] = bool(context["form"].errors)
+        return context
+
+    def form_valid(self, form):
+        job_id = self.request.session["current_job_id"]
+        form.save(job_id)
+        return super().form_valid(form)

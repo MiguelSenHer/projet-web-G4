@@ -1,0 +1,234 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>InSillyClo – Simulation Preview</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'frontend/styles.css' %}">
+</head>
+
+<body>
+
+{% include 'frontend/navbar.html' %}
+
+<section class="container text-center mt-5">
+  <h1 class="hero-title">Simulation Preview</h1>
+</section>
+
+<main class="flex-grow-1">
+  <div class="container py-4">
+
+    <!-- ASSEMBLY PREVIEW CARD -->
+    <div class="card public-assembly mb-4">
+      <div class="card-body row">
+
+        <div class="col-12 col-xl-2 col-lg-3 col-md-3 me-md-4">
+          <div class="fw-bolder">{{ name }}</div>
+          <div class="text-muted small">{{ filename }}</div>
+        </div>
+
+        <div class="col border-10 border-start border-primary ps-md-4">
+
+          <div class="d-block">
+            <span class="fw-bolder">Output Separator :</span>
+            {% if separator == "~" %}
+              Tilde ~
+            {% elif separator == "." %}
+              Dot .
+            {% elif separator == "_" %}
+              Underscore _
+            {% elif separator == "-" %}
+              Hyphen -
+            {% else %}
+              {{ separator }}
+            {% endif %}
+          </div>
+
+          <div class="d-block">
+            <span class="fw-bolder">Restriction Enzyme :</span>
+            {{ enzyme }}
+          </div>
+
+          <div class="d-block mt-1">
+            {% for part in parts %}
+              <div class="d-inline-flex px-3 py-0 mb-1 border border-3 rounded-5 border-designer">
+                {{ part }}
+              </div>
+            {% empty %}
+              <span class="text-muted small">No input parts defined</span>
+            {% endfor %}
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- OUTPUT PLASMIDS CARD -->
+    <div class="card mt-2">
+      <div class="card-body">
+
+        <h5 class="fw-bold mb-2">Output plasmids</h5>
+
+        {% if plasmids %}
+          <div class="text-muted mb-2">
+            Outputs detected: <strong>{{ plasmids|length }}</strong>
+            |
+            Parts detected: <strong>{{ parts|length }}</strong>
+          </div>
+
+          <div class="border rounded-3 overflow-auto" style="height: 320px;">
+            <table class="table table-sm mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th style="min-width: 200px;">Output plasmid ID</th>
+                  <th style="min-width: 180px;">Output plasmid type</th>
+                  {% for part in parts %}
+                    <th style="min-width: 140px;">{{ part }}</th>
+                  {% endfor %}
+                </tr>
+              </thead>
+
+              <tbody>
+                {% for pl in plasmids %}
+                  <tr>
+                    <td class="fw-semibold">{{ pl.pid }}</td>
+                    <td>{{ pl.ptype|default:" " }}</td>
+                    {% for v in pl.part_values %}
+                      <td>{{ v|default:" " }}</td>
+                    {% endfor %}
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="text-muted">
+            No output plasmids could be extracted from the template.
+          </div>
+        {% endif %}
+
+      </div>
+    </div>
+
+    <!-- SIMULATION INPUTS -->
+    <div class="accordion mt-4" id="inputsAccordion">
+      <div class="card">
+        <div class="card-body p-0">
+
+          <h2 class="accordion-header">
+            <button
+              class="accordion-button fw-bold {% if not inputs_open %}collapsed{% endif %}"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#inputsCollapse"
+              aria-expanded="{% if inputs_open %}true{% else %}false{% endif %}"
+              aria-controls="inputsCollapse"
+            >
+              Simulation inputs
+            </button>
+          </h2>
+
+          <div
+            id="inputsCollapse"
+            class="accordion-collapse collapse {% if inputs_open %}show{% endif %}"
+          >
+            <div class="accordion-body">
+
+              {% if form.non_field_errors %}
+                <div class="alert alert-danger mb-3">
+                  <ul class="mb-0 ps-3">
+                    {% for err in form.non_field_errors %}
+                      <li>{{ err }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+
+              <!-- INPUTS FORM -->
+              <form method="post" enctype="multipart/form-data" class="d-flex flex-column gap-4">
+                {% csrf_token %}
+
+                <!-- GenBank -->
+                <div>
+                  <div class="fw-semibold mb-2">
+                    GenBank archive <span class="text-muted">(optional)</span>
+                  </div>
+
+                  <div class="flex-grow-1">
+                    <input
+                      type="file"
+                      name="{{ form.genbank_zip.name }}"
+                      id="{{ form.genbank_zip.id_for_label }}"
+                      class="form-control"
+                    >
+                  </div>
+
+                  {% if form.genbank_zip.errors %}
+                    <div class="alert alert-danger mt-3 mb-0">
+                      <ul class="mb-0 ps-3">
+                        {% for err in form.genbank_zip.errors %}
+                          <li>{{ err }}</li>
+                        {% endfor %}
+                      </ul>
+                    </div>
+                  {% endif %}
+                </div>
+
+                <!-- Mapping -->
+                <div>
+                  <div class="fw-semibold mb-2">
+                    Mapping archive <span class="text-muted">(optional)</span>
+                  </div>
+
+                  <div class="flex-grow-1">
+                    <input
+                      type="file"
+                      name="{{ form.mapping_zip.name }}"
+                      id="{{ form.mapping_zip.id_for_label }}"
+                      class="form-control"
+                    >
+                  </div>
+
+                  {% if form.mapping_zip.errors %}
+                    <div class="alert alert-danger mt-3 mb-0">
+                      <ul class="mb-0 ps-3">
+                        {% for err in form.mapping_zip.errors %}
+                          <li>{{ err }}</li>
+                        {% endfor %}
+                      </ul>
+                    </div>
+                  {% endif %}
+                </div>
+
+                <!-- ACTIONS -->
+                <div class="d-flex justify-content-center gap-3 mt-2">
+                  <a href="/simulator/upload/" class="btn btn-outline-secondary">
+                    Start over
+                  </a>
+
+                  <button type="submit" class="btn btn-assembly">
+                    Continue
+                  </button>
+                </div>
+
+              </form>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+{% include 'frontend/footer.html' %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
