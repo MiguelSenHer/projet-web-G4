@@ -8,8 +8,10 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
 from .models import Assembly, SimulationRun
+from .forms import AssemblyForm, InputPartsFormSet
 
 import insillyclo.data_source
 import insillyclo.observer
@@ -695,3 +697,34 @@ def design_home(request):
         "campaigns/designer_home.html",
         {"options": options, "active_page": "designer"}
         )
+
+
+def designer_properties(request):
+    if request.method == "POST":
+        form = AssemblyForm(request.POST)
+        if form.is_valid():
+            assembly = form.save(commit=False)
+            assembly.creation_date = timezone.now()
+            assembly.save()
+            return redirect("assembly_input_parts", pk=assembly.pk)
+    else:
+        form = AssemblyForm()
+
+    return render(request, "designer/properties.html", {"form": form})
+
+
+def designer_input_parts(request, pk):
+    assembly = get_object_or_404(Assembly, pk=pk)
+    if request.method == "POST":
+        formset = InputPartsFormSet(request.POST, instance=assembly)
+        if formset.is_valid():
+            formset.save()
+            return redirect("assembly_summary", pk=assembly.pk)
+    else:
+        formset = InputPartsFormSet(instance=assembly)
+    return render(
+        request,
+        "designer/input_parts.html",
+        {"assembly": assembly, "formset": formset}
+    )
+

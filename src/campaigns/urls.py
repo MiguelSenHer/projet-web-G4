@@ -17,4 +17,8 @@ urlpatterns = [
     path("simulator/run/<str:run_id>/resume/", views.resume_run, name="resume_run"),
     path("simulator/run/<str:run_id>/delete/", views.delete_run, name="delete_run"),
     path("designer/", views.design_home, name="design_home"),
+    path("designer/properties/", assembly_properties, name="designer_properties"),
+    path("designer/input-parts/<int:pk>/", assembly_input_parts, name="designer_input_parts"),
+    path("designer/summary/<int:pk>/", assembly_summary, name="designer_summary"),
+
 ]
