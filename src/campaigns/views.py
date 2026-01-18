@@ -673,3 +673,25 @@ def delete_run(request, run_id):
 
     run.delete()
     return redirect("/campaigns/simulator/simulations/")
+
+# View to start a new simulation
+def design_home(request):
+    # Reset session
+    for k in SESSION_KEYS:
+        request.session.pop(k, None)
+    request.session.modified = True
+
+    options = [
+        {
+            "label": "CREATE",
+            "url": "/campaigns/designer/properties/"
+        },
+        {
+            "label": "BROWSE EXISTING",
+            "url": ""},
+    ]
+    return render(
+        request,
+        "campaigns/designer_home.html",
+        {"options": options, "active_page": "designer"}
+        )
