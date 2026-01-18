@@ -132,8 +132,7 @@ class UploadTemplateForm(forms.Form):
         job_id = uuid.uuid4().hex[:10]
 
         # save .xlsx in MEDIA_ROOT relative to job_id
-        base = f"simulator/jobs/{job_id}"
-        default_storage.save(f"{base}/inputs/{f.name}", f)
+        default_storage.save(f"simulator/jobs/{job_id}/inputs/{f.name}", f)
 
         # JSON preview
         preview = {
@@ -148,21 +147,21 @@ class UploadTemplateForm(forms.Form):
 
         # save .json in MEDIA_ROOT relative to job_id
         default_storage.save(
-            f"{base}/preview/preview.json",
+            f"simulator/jobs/{job_id}/preview/preview.json",
             ContentFile(json.dumps(preview, indent=2)),
         )
 
         return job_id
 
 
-# View to upload genbank and mapping
+# View to upload genbank and mapping and save them
 class UploadInputsForm(forms.Form):
-    genbank_zip = forms.FileField(required=False)
-    mapping_zip = forms.FileField(required=False)
+    genbank = forms.FileField(required=False)
+    mapping = forms.FileField(required=False)
 
-    # For genbank only a zip containaing .gb .genbank .gbk files allowed
-    def clean_genbank_zip(self):
-        f = self.cleaned_data.get("genbank_zip")
+    # For genbank only a zip containaing .gb files allowed
+    def clean_genbank(self):
+        f = self.cleaned_data.get("genbank")
         if not f:
             return None
 
@@ -174,16 +173,16 @@ class UploadInputsForm(forms.Form):
         for name in z.namelist():
             if name.endswith("/"):
                 continue
-            if Path(name).suffix.lower() not in (".gb", ".gbk", ".genbank"):
+            if Path(name).suffix.lower() != ".gb":
                 raise ValidationError(
-                    "GenBank zip may only contain .gb, .gbk or .genbank files."
+                    "GenBank zip may only contain .gb files."
                 )
 
         return f
-
+    
     # For mapping only csv txt tsv or zip containing them allowed
-    def clean_mapping_zip(self):
-        f = self.cleaned_data.get("mapping_zip")
+    def clean_mapping(self):
+        f = self.cleaned_data.get("mapping")
         if not f:
             return None
 
@@ -209,21 +208,20 @@ class UploadInputsForm(forms.Form):
 
         return f
 
-    # Save genbank and mapping in MEDIA_ROOT relative to job_id
+    # Save genbank and mapping in MEDIA_ROOT relative to job_id with extraction and list
     def save(self, job_id):
-        base = f"simulator/jobs/{job_id}/inputs"
 
-        genbank = self.cleaned_data.get("genbank_zip")
+        # GenBank ZIP
+        genbank = self.cleaned_data.get("genbank")
         if genbank:
-            path = f"{base}/genbank.zip"
+            path = f"simulator/jobs/{job_id}/inputs/genbank/{genbank.name}"
             if default_storage.exists(path):
                 default_storage.delete(path)
             default_storage.save(path, genbank)
 
-        mapping = self.cleaned_data.get("mapping_zip")
+        mapping = self.cleaned_data.get("mapping")
         if mapping:
-            ext = Path(mapping.name).suffix.lower()
-            path = f"{base}/mapping{ext}"
+            path = f"simulator/jobs/{job_id}/inputs/mapping/{mapping.name}"
             if default_storage.exists(path):
                 default_storage.delete(path)
             default_storage.save(path, mapping)

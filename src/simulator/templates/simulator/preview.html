@@ -30,29 +30,23 @@
           <div class="text-muted small">{{ filename }}</div>
         </div>
 
-        <div class="col border-10 border-start border-primary ps-md-4">
+        <div class="col border-start border-primary ps-md-4">
 
-          <div class="d-block">
+          <div>
             <span class="fw-bolder">Output Separator :</span>
-            {% if separator == "~" %}
-              Tilde ~
-            {% elif separator == "." %}
-              Dot .
-            {% elif separator == "_" %}
-              Underscore _
-            {% elif separator == "-" %}
-              Hyphen -
-            {% else %}
-              {{ separator }}
-            {% endif %}
+            {% if separator == "~" %}Tilde ~
+            {% elif separator == "." %}Dot .
+            {% elif separator == "_" %}Underscore _
+            {% elif separator == "-" %}Hyphen -
+            {% else %}{{ separator }}{% endif %}
           </div>
 
-          <div class="d-block">
+          <div>
             <span class="fw-bolder">Restriction Enzyme :</span>
             {{ enzyme }}
           </div>
 
-          <div class="d-block mt-1">
+          <div class="mt-1">
             {% for part in parts %}
               <div class="d-inline-flex px-3 py-0 mb-1 border border-3 rounded-5 border-designer">
                 {{ part }}
@@ -66,7 +60,7 @@
       </div>
     </div>
 
-    <!-- OUTPUT PLASMIDS CARD -->
+    <!-- OUTPUT PLASMIDS -->
     <div class="card mt-2">
       <div class="card-body">
 
@@ -74,8 +68,7 @@
 
         {% if plasmids %}
           <div class="text-muted mb-2">
-            Outputs detected: <strong>{{ plasmids|length }}</strong>
-            |
+            Outputs detected: <strong>{{ plasmids|length }}</strong> |
             Parts detected: <strong>{{ parts|length }}</strong>
           </div>
 
@@ -90,7 +83,6 @@
                   {% endfor %}
                 </tr>
               </thead>
-
               <tbody>
                 {% for pl in plasmids %}
                   <tr>
@@ -113,114 +105,180 @@
       </div>
     </div>
 
-    <!-- SIMULATION INPUTS -->
-    <div class="accordion mt-4" id="inputsAccordion">
-      <div class="card">
-        <div class="card-body p-0">
+    <!-- INPUTS CARD (replaces accordion) -->
+    <div class="card mt-4" id="inputsCard" style="scroll-margin-top: 90px;">
+      <div class="card-body">
+        <h5 class="fw-bold mb-3">Simulation inputs</h5>
 
-          <h2 class="accordion-header">
-            <button
-              class="accordion-button fw-bold {% if not inputs_open %}collapsed{% endif %}"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#inputsCollapse"
-              aria-expanded="{% if inputs_open %}true{% else %}false{% endif %}"
-              aria-controls="inputsCollapse"
-            >
-              Simulation inputs
-            </button>
-          </h2>
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger mb-3">
+            <ul class="mb-0 ps-3">
+              {% for err in form.non_field_errors %}
+                <li>{{ err }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
 
-          <div
-            id="inputsCollapse"
-            class="accordion-collapse collapse {% if inputs_open %}show{% endif %}"
-          >
-            <div class="accordion-body">
+        <form method="post" enctype="multipart/form-data" class="d-flex flex-column gap-4">
+          {% csrf_token %}
 
-              {% if form.non_field_errors %}
-                <div class="alert alert-danger mb-3">
-                  <ul class="mb-0 ps-3">
-                    {% for err in form.non_field_errors %}
-                      <li>{{ err }}</li>
-                    {% endfor %}
-                  </ul>
-                </div>
-              {% endif %}
-
-              <!-- INPUTS FORM -->
-              <form method="post" enctype="multipart/form-data" class="d-flex flex-column gap-4">
-                {% csrf_token %}
-
-                <!-- GenBank -->
-                <div>
-                  <div class="fw-semibold mb-2">
-                    GenBank archive <span class="text-muted">(optional)</span>
-                  </div>
-
-                  <div class="flex-grow-1">
-                    <input
-                      type="file"
-                      name="{{ form.genbank_zip.name }}"
-                      id="{{ form.genbank_zip.id_for_label }}"
-                      class="form-control"
-                    >
-                  </div>
-
-                  {% if form.genbank_zip.errors %}
-                    <div class="alert alert-danger mt-3 mb-0">
-                      <ul class="mb-0 ps-3">
-                        {% for err in form.genbank_zip.errors %}
-                          <li>{{ err }}</li>
-                        {% endfor %}
-                      </ul>
-                    </div>
-                  {% endif %}
-                </div>
-
-                <!-- Mapping -->
-                <div>
-                  <div class="fw-semibold mb-2">
-                    Mapping archive <span class="text-muted">(optional)</span>
-                  </div>
-
-                  <div class="flex-grow-1">
-                    <input
-                      type="file"
-                      name="{{ form.mapping_zip.name }}"
-                      id="{{ form.mapping_zip.id_for_label }}"
-                      class="form-control"
-                    >
-                  </div>
-
-                  {% if form.mapping_zip.errors %}
-                    <div class="alert alert-danger mt-3 mb-0">
-                      <ul class="mb-0 ps-3">
-                        {% for err in form.mapping_zip.errors %}
-                          <li>{{ err }}</li>
-                        {% endfor %}
-                      </ul>
-                    </div>
-                  {% endif %}
-                </div>
-
-                <!-- ACTIONS -->
-                <div class="d-flex justify-content-center gap-3 mt-2">
-                  <a href="/simulator/upload/" class="btn btn-outline-secondary">
-                    Start over
-                  </a>
-
-                  <button type="submit" class="btn btn-assembly">
-                    Continue
-                  </button>
-                </div>
-
-              </form>
-
+          <!-- GenBank -->
+          <div>
+            <div class="fw-semibold mb-2">
+              GenBank archive <span class="text-muted">(optional)</span>
             </div>
+            <input
+              type="file"
+              name="{{ form.genbank.name }}"
+              class="form-control"
+              onchange="this.form.submit()"
+            >
+            {% if form.genbank.errors %}
+              <div class="alert alert-danger mt-3 mb-0">
+                <ul class="mb-0 ps-3">
+                  {% for err in form.genbank.errors %}
+                    <li>{{ err }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
           </div>
 
+          <!-- Mapping -->
+          <div>
+            <div class="fw-semibold mb-2">
+              Mapping archive <span class="text-muted">(optional)</span>
+            </div>
+            <input
+              type="file"
+              name="{{ form.mapping.name }}"
+              class="form-control"
+              onchange="this.form.submit()"
+            >
+            {% if form.mapping.errors %}
+              <div class="alert alert-danger mt-3 mb-0">
+                <ul class="mb-0 ps-3">
+                  {% for err in form.mapping.errors %}
+                    <li>{{ err }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+    <!-- RECEIVED FILES -->
+    <div class="row g-3 mt-4">
+
+      <!-- Mapping -->
+      <div class="col-12 col-lg-6">
+        <div class="card h-100">
+          <div class="card-body">
+
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="fw-bold mb-0">Mapping tables</h5>
+              <div class="d-flex gap-2">
+                <a href="#inputsCard" class="btn btn-sm btn-outline-primary">Upload</a>
+                <button class="btn btn-sm btn-outline-secondary" disabled>Add</button>
+              </div>
+            </div>
+
+            <div class="text-muted mb-2">
+              Received files: <strong>{{ mapping_files|length }}</strong>
+            </div>
+
+            <div class="border rounded-3 p-2 overflow-auto" style="height: 260px;">
+              {% if mapping_files %}
+                <ul class="list-unstyled mb-0">
+                  {% for f in mapping_files %}
+                    <li class="py-1 border-bottom">{{ f }}</li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <div class="text-muted">No mapping file provided.</div>
+              {% endif %}
+            </div>
+
+          </div>
         </div>
       </div>
+
+      <!-- GenBank -->
+      <div class="col-12 col-lg-6">
+        <div class="card h-100">
+          <div class="card-body">
+
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="fw-bold mb-0">Plasmid sequences</h5>
+              <div class="d-flex gap-2">
+                <a href="#inputsCard" class="btn btn-sm btn-outline-primary">Upload</a>
+                <button class="btn btn-sm btn-outline-secondary" disabled>Add</button>
+              </div>
+            </div>
+
+            <div class="text-muted mb-2">
+              Received files: <strong>{{ genbank_files|length }}</strong>
+            </div>
+
+            <div class="border rounded-3 p-2 overflow-auto" style="height: 260px;">
+              {% if genbank_files %}
+                <ul class="list-unstyled mb-0">
+                  {% for f in genbank_files %}
+                    <li class="py-1 border-bottom">{{ f }}</li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <div class="text-muted">No GenBank files detected.</div>
+              {% endif %}
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="d-flex justify-content-center gap-3 mt-4 flex-wrap">
+      <a href="/simulator/upload/" class="btn btn-outline-secondary d-inline-flex align-items-center">
+        Back
+      </a>
+
+      <form method="post" class="d-inline-flex">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="clear_inputs">
+        <button
+          type="submit"
+          class="btn btn-outline-secondary d-inline-flex align-items-center"
+          {% if not genbank_files and not mapping_files %}disabled{% endif %}
+        >
+          Clear inputs
+        </button>
+      </form>
+
+      <form method="post" action="{% url 'simulator:run' %}" class="d-inline-flex">
+      {% csrf_token %}
+
+      <input type="hidden" name="filename" value="{{ filename }}">
+      <input type="hidden" name="enzyme" value="{{ enzyme }}">
+      {% for p in genbank_paths %}
+        <input type="hidden" name="genbank_paths" value="{{ p }}">
+      {% endfor %}
+
+      {% for p in mapping_paths %}
+        <input type="hidden" name="mapping_paths" value="{{ p }}">
+      {% endfor %}
+
+
+      <button type="submit" class="btn btn-assembly">
+        Run simulation
+      </button>
+    </form>
+
     </div>
 
   </div>
@@ -232,3 +290,4 @@
 
 </body>
 </html>
+
