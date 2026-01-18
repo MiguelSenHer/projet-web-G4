@@ -16,7 +16,7 @@ class AssemblyForm(forms.ModelForm):
 InputPartsFormSet = inlineformset_factory(
     Assembly,
     InputParts,
-    fields=["part_name", "mandatory", "optional", "separator"],
+    fields=["part_name", "typed", "mandatory", "separator", "allowed_types"],
     extra=1,
     can_delete=True
 )

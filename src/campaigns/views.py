@@ -700,17 +700,17 @@ def design_home(request):
 
 
 def designer_properties(request):
+    assembly = None
     if request.method == "POST":
-        form = AssemblyForm(request.POST)
+        form = AssemblyForm(request.POST, instance=assembly)
         if form.is_valid():
             assembly = form.save(commit=False)
             assembly.creation_date = timezone.now()
             assembly.save()
-            return redirect("assembly_input_parts", pk=assembly.pk)
+            return redirect("designer_input_parts", pk=assembly.pk)
     else:
         form = AssemblyForm()
-
-    return render(request, "designer/properties.html", {"form": form})
+    return render(request, "campaigns/designer_properties.html", {"form": form, "assembly":assembly})
 
 
 def designer_input_parts(request, pk):
@@ -719,12 +719,25 @@ def designer_input_parts(request, pk):
         formset = InputPartsFormSet(request.POST, instance=assembly)
         if formset.is_valid():
             formset.save()
-            return redirect("assembly_summary", pk=assembly.pk)
+            return redirect("designer_summary", pk=assembly.pk)
     else:
         formset = InputPartsFormSet(instance=assembly)
     return render(
         request,
-        "designer/input_parts.html",
+        "campaigns/designer_input_parts.html",
         {"assembly": assembly, "formset": formset}
     )
+    
+def designer_summary(request, pk):
+    assembly = get_object_or_404(Assembly, pk=pk)
+    if request.method == "POST":
+        # ici tu peux ajouter un flag "is_published"
+        return redirect("assembly_detail", pk=assembly.pk)
+    return render(
+        request,
+        "campaigns/designer_summary.html",
+        {"assembly": assembly}
+    )
+
+
 
