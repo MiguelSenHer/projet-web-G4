@@ -1,17 +1,16 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" data-bs-theme="light">
 <head>
     <meta charset="utf-8">
-    <title>Assemblies</title>
+    <title>Assembly Designer – Properties</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
-    <!-- Google font -->
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     <!-- Custom CSS -->
@@ -23,56 +22,99 @@
     <!-- NAVBAR -->
     {% include 'frontend/navbar.html' %}
 
-<h1 class="col-12 text-center text-uppercase">
-    Assembly Designer
-</h1>
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-<div class="mb-3">
-    <label class="form-label requiredField">
-        Name of the assembly<span class="asteriskField">*</span>
-    </label>
-    {{ form.name }}
-</div>
-<div class="mb-3">
-    <label class="form-label">
-        Comment
-    </label>
-    {{ form.comment }}
-</div>
-<div class="mb-3">
-    <label class="form-label requiredField">
-        Naming convention for the output separator
-        <span class="asteriskField">*</span>
-    </label>
-    {{ form.separator }}
-    <div class="form-text">
-        
+    <!-- MAIN -->
+    <div class="container my-5">
+
+        <!-- Title -->
+        <div class="text-center mb-5">
+            <h1 class="text-uppercase fw-bold mb-2">
+                Assembly Designer
+            </h1>
+            <h2 class="text-uppercase text-muted fs-5">
+                Assembly properties
+            </h2>
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="card shadow-sm border-0 mx-auto" style="max-width: 720px;">
+
+                <h3 class="card-header bg-light text-primary fw-semibold">
+                    Assembly configuration
+                </h3>
+
+                <div class="card-body">
+
+                    <!-- Name -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold requiredField">
+                            Name of the assembly
+                            <span class="asteriskField">*</span>
+                        </label>
+                        {{ form.name }}
+                    </div>
+
+                    <!-- Comment -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            Comment
+                        </label>
+                        {{ form.comment }}
+                    </div>
+
+                    <!-- Separator -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold requiredField">
+                            Naming convention for the output separator
+                            <span class="asteriskField">*</span>
+                        </label>
+                        {{ form.separator }}
+                        <div class="form-text text-muted">
+                            This separator will be used to generate the output assembly name.
+                        </div>
+                    </div>
+
+                    <!-- Restriction enzyme -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold requiredField">
+                            Restriction enzyme
+                            <span class="asteriskField">*</span>
+                        </label>
+                        {{ form.restriction_enzyme }}
+                    </div>
+
+                </div>
+
+                <!-- Actions -->
+                <div class="card-footer bg-white border-0">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <a href="{% url 'designer_properties' %}?reset"
+                           class="text-decoration-none text-muted">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i>
+                            Clear form
+                        </a>
+
+                        <button class="btn btn-auto px-4" type="submit">
+                            Next
+                            <i class="bi bi-arrow-right ms-2"></i>
+                        </button>
+
+                    </div>
+                </div>
+
+            </div>
+        </form>
+
     </div>
-</div>
-<div class="mb-3">
-    <label class="form-label requiredField">
-        Restriction enzyme<span class="asteriskField">*</span>
-    </label>
-    {{ form.restriction_enzyme }}
-</div>
-<div class="text-center mt-3">
-    <a href="{% url 'designer_properties' %}?reset">
-        clear form
-    </a>
-</div>
-<div class="text-center mt-5">
-    <button class="btn btn-auto" type="submit">
-        Next
-    </button>
-</div>
-</form>
 
     <!-- FOOTER -->
     {% include 'frontend/footer.html' %}
 
-    <!-- Bootstrap JS Bundle with Popper -->
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
-
