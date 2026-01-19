@@ -718,7 +718,11 @@ def designer_input_parts(request, pk):
     if request.method == "POST":
         formset = InputPartsFormSet(request.POST, instance=assembly)
         if formset.is_valid():
-            formset.save()
+            instances = formset.save(commit=False)
+            for obj in instances:
+                obj.assembly = assembly
+                obj.save()
+            formset.save_m2m()  # ← THIS WAS MISSING
             return redirect("designer_summary", pk=assembly.pk)
     else:
         formset = InputPartsFormSet(instance=assembly)
@@ -727,17 +731,18 @@ def designer_input_parts(request, pk):
         "campaigns/designer_input_parts.html",
         {"assembly": assembly, "formset": formset}
     )
+
     
 def designer_summary(request, pk):
     assembly = get_object_or_404(Assembly, pk=pk)
     if request.method == "POST":
-        # ici tu peux ajouter un flag "is_published"
         return redirect("assembly_detail", pk=assembly.pk)
     return render(
         request,
         "campaigns/designer_summary.html",
         {"assembly": assembly}
     )
+
 
 
 

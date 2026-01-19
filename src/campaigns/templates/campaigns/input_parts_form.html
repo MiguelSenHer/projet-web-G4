@@ -1,0 +1,58 @@
+{% load static %}
+<div class="formset-row border rounded-3 p-4 mb-4 bg-white">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <strong>
+            {{ form.part_name.value|default:"New input part" }}
+        </strong>
+
+        <button type="button"
+                class="btn btn-sm btn-outline-danger delete-form">
+            <i class="bi bi-trash"></i>
+        </button>
+    </div>
+
+    <!-- BODY -->
+    <div class="row">
+        <div class="col-md-12">
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Name</label>
+                {{ form.part_name }}
+            </div>
+
+            <div class="form-check mb-3">
+                {{ form.mandatory }}
+                <label class="form-check-label">
+                    Mandatory part
+                </label>
+            </div>
+
+            <div class="form-check mb-3">
+                {{ form.typed }}
+                <label class="form-check-label">
+                    Typed part
+                </label>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Subpart separator</label>
+                {{ form.separator }}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Allowed types</label>
+                {{ form.allowed_types }}
+            </div>
+
+            <!-- REQUIRED hidden fields -->
+    {{ form.id }}
+<div class="d-none">
+    {{ form.DELETE }}
+</div>
+
+
+        </div>
+    </div>
+</div>

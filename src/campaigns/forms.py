@@ -17,6 +17,6 @@ InputPartsFormSet = inlineformset_factory(
     Assembly,
     InputParts,
     fields=["part_name", "typed", "mandatory", "separator", "allowed_types"],
-    extra=1,
+    extra=0,
     can_delete=True
 )
