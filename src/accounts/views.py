@@ -8,8 +8,7 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.urls import reverse
-
-from .forms import SignUpForm  # your signup form that renders in template
+from .forms import SignUpForm
 from .models import PasswordReset
 
 User = get_user_model()
