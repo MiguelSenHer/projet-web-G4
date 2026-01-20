@@ -6,7 +6,6 @@ import uuid
 from django.core.files.base import ContentFile
 import zipfile
 from pathlib import Path
-import shutil
 
 from .models import SimulationJob, InputFile
 

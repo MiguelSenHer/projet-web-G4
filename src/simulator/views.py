@@ -1,6 +1,6 @@
 from django.views.generic import FormView, TemplateView
 from django.views import View
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
 from django.urls import reverse
 import json
 from pathlib import Path
