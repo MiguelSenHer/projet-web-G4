@@ -33,7 +33,7 @@ def design_home(request):
     options = [
         {
             "label": "CREATE",
-            "url": "/campaigns/designer/properties/"
+            "url": "/designer/properties/"
         },
         {
             "label": "BROWSE EXISTING",

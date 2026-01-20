@@ -6,7 +6,7 @@ from .views import UploadTemplateView, TemplatePreviewView, RunSimulationView, D
 app_name = "simulator"
 
 urlpatterns = [
-    path("home/", SimulatorHomeView.as_view(), name="simulator_home"),
+    path("", SimulatorHomeView.as_view(), name="simulator_home"),
     path("upload/", UploadTemplateView.as_view(), name="upload"),
     path("preview/", TemplatePreviewView.as_view(), name="preview"),
     path("run/", RunSimulationView.as_view(), name="run"),

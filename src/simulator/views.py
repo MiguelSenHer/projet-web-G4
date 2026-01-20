@@ -29,11 +29,11 @@ class SimulatorHomeView(TemplateView):
         options = [
             {
                 "label": "LOAD YOUR PLASMID ASSEMBLY TEMPLATE",
-                "url": "/simulator/upload/",
+                "url": reverse("simulator:upload"),
             },
             {
                 "label": "BROWSE PLASMID ASSEMBLY TEMPLATE",
-                "url": "/browse/",
+                "url": reverse("browse:browse_templates"),
             },
         ]
 

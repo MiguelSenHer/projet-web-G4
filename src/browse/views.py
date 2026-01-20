@@ -15,7 +15,8 @@ def browse_templates(request):
 
 
 # View to download the .xlsx associated with a template 
-
+def  assembly_download(request):
+    pass
 
 
 # View to check details of an assembly
