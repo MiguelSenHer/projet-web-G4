@@ -189,12 +189,12 @@ class UploadInputsForm(forms.Form):
     def save(self, job):
         genbank = self.cleaned_data.get("genbank")
         if genbank:
-            InputFile(job=job, file_kind="genbank").delete()
-        InputFile.objects.create(job=job, file_kind="genbank")
+            InputFile.objects.filter(job=job, file_kind="genbank").delete()
+            InputFile.objects.create(job=job, file_kind="genbank", file=genbank)
 
         mapping = self.cleaned_data.get("mapping")
         if mapping:
-            InputFile(job=job, file_kind="mapping").delete()
-        InputFile.objects.create(job=job, file_kind="mapping")
+            InputFile.objects.filter(job=job, file_kind="mapping").delete()
+            InputFile.objects.create(job=job, file_kind="mapping", file=mapping)
 
         return job
