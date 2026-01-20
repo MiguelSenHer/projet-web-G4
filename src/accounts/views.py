@@ -233,11 +233,11 @@ def teams_create_view(request):
             .order_by("email")[:20]
         )
 
-    # --- "selected members" stored in session (simple, no DB model yet) ---
+    # no DB yet
     selected_ids = request.session.get("team_selected_ids", [])
     selected_users = User.objects.filter(id__in=selected_ids).order_by("email")
 
-    # --- POST: add/remove ---
+    # add remove membersss
     if request.method == "POST":
         action = request.POST.get("action")
         user_id = request.POST.get("user_id")
@@ -270,3 +270,4 @@ def teams_create_view(request):
             "selected_users": selected_users,
         },
     )
+
