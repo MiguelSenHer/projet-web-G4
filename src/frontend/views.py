@@ -4,7 +4,7 @@ from django.shortcuts import render
 def home(request):
     return render(
         request,
-        "frontend/template.html",
+        "frontend/home.html",
         {
             "active_page": "home",
         },

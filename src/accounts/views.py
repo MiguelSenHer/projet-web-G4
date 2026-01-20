@@ -8,8 +8,7 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.urls import reverse
-
-from .forms import SignUpForm  # your signup form that renders in template
+from .forms import SignUpForm
 from .models import PasswordReset
 
 User = get_user_model()
@@ -18,32 +17,29 @@ User = get_user_model()
 # -----------------------
 # SIGNUP
 # -----------------------
+
 def signup_view(request):
     if request.user.is_authenticated:
         return redirect("profile")
 
     if request.method == "POST":
         form = SignUpForm(request.POST)
+
         if form.is_valid():
+            user = form.save()
 
-            # (if username == email)
-            email = form.cleaned_data.get("email")
-            password = form.cleaned_data.get("password")
-            user_auth = authenticate(request, username=email,
-                                     password=password)
-            if user_auth is not None:
-                login(request, user_auth)
-                messages.success(request, "Account created successfully!")
-                return redirect("profile")
+            login(
+                request,
+                user,
+                backend=settings.AUTHENTICATION_BACKENDS[0],
+            )
 
-            messages.success(request, "Account created. Please login.")
-            return redirect("login")
+            messages.success(request, "Account created successfully!")
+            return redirect("profile")
 
         return render(request, "accounts/signup.html", {"form": form})
 
-    form = SignUpForm()
-    return render(request, "accounts/signup.html", {"form": form})
-
+    return render(request, "accounts/signup.html", {"form": SignUpForm()})
 
 # -----------------------
 # LOGIN
