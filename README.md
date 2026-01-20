@@ -25,8 +25,9 @@ projet-web-G4/
 │   │   └── wsgi.py
 │   │
 │   ├── accounts/
-│   ├── plasmids/
-│   ├── campaigns/
+│   ├── simulator/
+│   ├── designer/
+│   ├── browse/
 │   └── frontend/
 │
 ├── db.sqlite3
@@ -80,7 +81,8 @@ http://127.0.0.1:8000/
 ## Applications
 
 - **frontend**: landing page and navigation
-- **campaigns**: campaign simulation workflow (template upload, validation, inputs)
-- **plasmids**: plasmid-related features
+- **simulator**: campaign simulation workflow (template upload, validation, inputs)
+- **browse**: assembly browsing
+- **designer**: template designer
 - **accounts**: user authentication and permissions
 

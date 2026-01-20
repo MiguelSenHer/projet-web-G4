@@ -6,6 +6,7 @@ import uuid
 from django.core.files.base import ContentFile
 import zipfile
 from pathlib import Path
+import shutil
 
 from .models import SimulationJob, InputFile
 
@@ -185,16 +186,24 @@ class UploadInputsForm(forms.Form):
             if Path(name).suffix.lower() not in (".csv", ".tsv", ".txt"):
                 raise ValidationError("Mapping zip may only contain .csv, .tsv or .txt files.")
         return f
-
+    
+    # Save input files relative to job and extract if zip
     def save(self, job):
-        genbank = self.cleaned_data.get("genbank")
-        if genbank:
-            InputFile.objects.filter(job=job, file_kind="genbank").delete()
-            InputFile.objects.create(job=job, file_kind="genbank", file=genbank)
+        for kind in ("genbank", "mapping"):
+            f = self.cleaned_data.get(kind)
+            if not f:
+                continue
 
-        mapping = self.cleaned_data.get("mapping")
-        if mapping:
-            InputFile.objects.filter(job=job, file_kind="mapping").delete()
-            InputFile.objects.create(job=job, file_kind="mapping", file=mapping)
+            input = InputFile.objects.create(job=job, file_kind=kind, file=f)
+            dest_dir = Path(input.file.path).parent / kind
+            dest_dir.mkdir(exist_ok=True)
+
+            if f.name.lower().endswith(".zip"):
+                with zipfile.ZipFile(input.file.path) as z:
+                    z.extractall(dest_dir)
+            else:
+                with open(input.file.path, "rb") as src:
+                    with open(dest_dir / f.name, "wb") as dst:
+                        dst.write(src.read())
 
         return job

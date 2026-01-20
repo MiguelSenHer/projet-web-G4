@@ -14,10 +14,6 @@ InsillyClo - Run Simulation
 <main class="flex-grow-1">
   <div class="container py-4">
 
-    {% if assembly %}
-      {% include "campaigns/_assembly_preview_card.html" with assembly=assembly %}
-    {% endif %}
-
     {% if status == "SUCCESS" %}
       <!-- SUCCESS -->
       <div class="alert alert-success">
@@ -91,4 +87,4 @@ InsillyClo - Run Simulation
   </div>
 </main>
 
-{% endblock%}
+{% endblock %}

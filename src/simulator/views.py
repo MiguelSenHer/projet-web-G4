@@ -12,6 +12,8 @@ from .models import SimulationJob
 import insillyclo.simulator
 import insillyclo.observer
 import insillyclo.data_source
+from glob import glob
+
 
 # View to start a new simulation
 class SimulatorHomeView(TemplateView):
@@ -40,7 +42,8 @@ class SimulatorHomeView(TemplateView):
         context["options"] = options
         context["active_page"] = "simulator"
         return context
-    
+
+
 # View to upload the template
 class UploadTemplateView(FormView):
     template_name = "simulator/upload_template.html"
@@ -116,7 +119,7 @@ class TemplatePreviewView(FormView):
         return context
 
 
-# View to run simulation based on all inputs
+# View to run the simulation
 class RunSimulationView(TemplateView):
     template_name = "simulator/run.html"
 
@@ -125,36 +128,18 @@ class RunSimulationView(TemplateView):
             return redirect("simulator:upload")
         return super().dispatch(request, *args, **kwargs)
 
-    def get_job(self):
+    def post(self, request, *args, **kwargs):
         job_id = self.request.session["current_job_id"]
         job = SimulationJob.objects.filter(job_id=job_id).first()
-        if not job:
-            raise Http404("Run not found")
-        return job
+    
+        enzyme = request.POST.get("enzyme", "")
 
-    def post(self, request, *args, **kwargs):
-        job = self.get_job()
-        enzyme = request.POST.get("enzyme", "").strip()
+        base = Path(job.template.path).parent
 
-        if not job.template:
-            raise Http404("Run not found")
-        if not enzyme:
-            job.status = "FAIL"
-            job.error_message = "Missing enzyme."
-            job.save(update_fields=["status", "error_message", "updated_at"])
-            return redirect(reverse("simulator:run"))
+        gb_files = [Path(p) for p in glob(f"{base}/inputs/genbank/*")]
+        mapping_files = [Path(p) for p in glob(f"{base}/inputs/mapping/*")]
 
-        gb_files = [Path(x.file.path) for x in job.input_files.filter(file_kind="genbank").order_by("id")]
-        mapping_files = [Path(x.file.path) for x in job.input_files.filter(file_kind="genbank").order_by("id")]
-
-        if not gb_files:
-            job.status = "FAIL"
-            job.error_message = "Missing GenBank inputs."
-            job.save(update_fields=["status", "error_message", "updated_at"])
-            return redirect(reverse("simulator:run"))
-
-        output_dir = Path(job.template.path).parent / "output"
-        shutil.rmtree(output_dir, ignore_errors=True)
+        output_dir = base / "output"
         output_dir.mkdir(parents=True, exist_ok=True)
 
         job.status = "RUNNING"
@@ -162,7 +147,10 @@ class RunSimulationView(TemplateView):
         job.save(update_fields=["status", "error_message", "updated_at"])
 
         try:
-            observer = insillyclo.observer.InSillyCloCliObserver(debug=True, fail_on_error=True)
+            observer = insillyclo.observer.InSillyCloCliObserver(
+                debug=True,
+                fail_on_error=True
+            )
 
             insillyclo.simulator.compute_all(
                 observer=observer,
@@ -177,7 +165,7 @@ class RunSimulationView(TemplateView):
                 sbol_export=False,
             )
 
-            zip_base = output_dir.parent / f"outputs_{job.job_id}"
+            zip_base = output_dir.parent / "outputs"
             zip_path = zip_base.with_suffix(".zip")
             if zip_path.exists():
                 zip_path.unlink()
@@ -192,22 +180,13 @@ class RunSimulationView(TemplateView):
             job.save(update_fields=["status", "updated_at"])
 
         except Exception as e:
-            msg = str(e) if str(e) else repr(e)
             job.status = "FAIL"
-            job.error_message = msg
+            error =  str(e) if str(e) else repr(e)
+            job.error_message = error
+            print(f"Simulation failed: {error}")
             job.save(update_fields=["status", "error_message", "updated_at"])
 
         return redirect(reverse("simulator:run"))
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        job = self.get_job()
-        context["job_id"] = job.job_id
-        context["status"] = job.status
-        context["error"] = job.error_message
-        context["outputs_zip_url"] = reverse("simulator:download_outputs") if job.status == "SUCCESS" else None
-        return context
-
 
 
 # View to download outputs

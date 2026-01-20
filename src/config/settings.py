@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "frontend",
     "plasmids",
-    "campaigns",
     "simulator",
     "browse",
     "designer",
