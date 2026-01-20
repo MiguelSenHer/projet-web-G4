@@ -53,7 +53,7 @@ def designer_properties(request):
             assembly = form.save(commit=False)
             assembly.creation_date = timezone.now()
             assembly.save()
-            return redirect("designer_input_parts", pk=assembly.pk)
+            return redirect("designer:designer_input_parts", pk=assembly.pk)
     else:
         form = AssemblyForm()
     return render(request, "designer/designer_properties.html", {"form": form, "assembly":assembly})
@@ -69,7 +69,7 @@ def designer_input_parts(request, pk):
                 obj.assembly = assembly
                 obj.save()
             formset.save_m2m()  # ← THIS WAS MISSING
-            return redirect("designer_summary", pk=assembly.pk)
+            return redirect("designer:designer_summary", pk=assembly.pk)
     else:
         formset = InputPartsFormSet(instance=assembly)
     return render(
@@ -82,7 +82,7 @@ def designer_input_parts(request, pk):
 def designer_summary(request, pk):
     assembly = get_object_or_404(Assembly, pk=pk)
     if request.method == "POST":
-        return redirect("assembly_details", pk=assembly.pk)
+        return redirect("browse:assembly_details", pk=assembly.pk)
     return render(
         request,
         "designer/designer_summary.html",
