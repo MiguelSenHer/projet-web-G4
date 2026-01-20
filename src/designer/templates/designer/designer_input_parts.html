@@ -24,7 +24,7 @@
             <div class="card-body" id="formset-container">
 
                 {% for form in formset %}
-                    {% include "campaigns/input_parts_form.html" with form=form %}
+                    {% include "designer/input_parts_form.html" with form=form %}
                 {% endfor %}
 
             </div>
@@ -64,7 +64,7 @@
 
         <!-- EMPTY FORM (SAME STRUCTURE) -->
         <div id="empty-form" class="d-none">
-            {% include "campaigns/input_parts_form.html" with form=formset.empty_form %}
+            {% include "designer/input_parts_form.html" with form=formset.empty_form %}
         </div>
 
     </form>
@@ -107,5 +107,3 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
-</body>
-</html>

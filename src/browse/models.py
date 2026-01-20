@@ -31,8 +31,6 @@ class Assembly(models.Model):
     restriction_enzyme = models.CharField(max_length=50, choices=ENZYME_CHOICES)
     file = models.FileField(upload_to="assemblies/", blank=True, null=True)
 
-
-    
 class InputParts(models.Model):
     SEPARATOR_CHOICES = [
         (",", "Comma"),
