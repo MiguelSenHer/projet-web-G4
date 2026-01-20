@@ -6,8 +6,8 @@ import uuid
 from django.core.files.base import ContentFile
 import zipfile
 from pathlib import Path
-
-from .models import SimulationJob, InputFile
+from django.conf import settings
+from .models import SimulationJob
 
 
 # Upload and validate template with minimal parsing of assembly and plasmids
@@ -188,21 +188,22 @@ class UploadInputsForm(forms.Form):
     
     # Save input files relative to job and extract if zip
     def save(self, job):
+        base = Path(settings.MEDIA_ROOT) / "simulator" / "jobs" / job.job_id / "inputs"
+
         for kind in ("genbank", "mapping"):
             f = self.cleaned_data.get(kind)
             if not f:
                 continue
 
-            input = InputFile.objects.create(job=job, file_kind=kind, file=f)
-            dest_dir = Path(input.file.path).parent / kind
-            dest_dir.mkdir(exist_ok=True)
+            dest_dir = base / kind
+            dest_dir.mkdir(parents=True, exist_ok=True)
 
             if f.name.lower().endswith(".zip"):
-                with zipfile.ZipFile(input.file.path) as z:
+                with zipfile.ZipFile(f) as z:
                     z.extractall(dest_dir)
             else:
-                with open(input.file.path, "rb") as src:
-                    with open(dest_dir / f.name, "wb") as dst:
-                        dst.write(src.read())
-
+                out = dest_dir / f.name
+                with out.open("wb") as dst:
+                    for chunk in f.chunks():
+                        dst.write(chunk)
         return job

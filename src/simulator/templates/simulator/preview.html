@@ -256,13 +256,6 @@ InsillyClo - Run Preview
 
       <input type="hidden" name="filename" value="{{ filename }}">
       <input type="hidden" name="enzyme" value="{{ enzyme }}">
-      {% for p in genbank_paths %}
-        <input type="hidden" name="genbank_paths" value="{{ p }}">
-      {% endfor %}
-
-      {% for p in mapping_paths %}
-        <input type="hidden" name="mapping_paths" value="{{ p }}">
-      {% endfor %}
 
 
       <button type="submit" class="btn btn-assembly">
