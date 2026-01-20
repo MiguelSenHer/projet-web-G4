@@ -1,0 +1,55 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}
+InsillyClo - Upload Template
+{% endblock %}
+
+{% block content %}
+<section class="container text-center mt-5">
+  <h1 class="hero-title">Assembly Simulator</h1>
+
+  <div class="hero-subtitle">
+    Choose how you want to start your simulation
+  </div>
+
+  <p class="hero-text">
+    Upload your own campaign template (.xlsx) or browse available public templates.
+  </p>
+</section>
+
+<!-- MAIN ACTIONS -->
+<section class="container mt-5">
+  <div class="row align-items-stretch gy-4">
+
+    <!-- Option cards -->
+    {% for opt in options %}
+      <div class="col-md-6">
+        <div class="assembly-card h-100">
+          <h3 class="assembly-title mb-3">{{ opt.label }}</h3>
+
+          {% if "load" in opt.url %}
+            <p class="mb-4">
+              Upload your plasmid assembly campaign template (.xlsx) to start a new simulation.
+            </p>
+            <a href="{{ opt.url }}" class="btn btn-assembly">
+              LOAD TEMPLATE
+            </a>
+          {% else %}
+            <p class="mb-4">
+              Browse public templates and pick one to run your assembly simulation quickly.
+            </p>
+            <a href="{{ opt.url }}" class="btn btn-assembly">
+              BROWSE TEMPLATES
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+
+  </div>
+
+  <div class="text-center mt-4">
+    <a href="/" class="text-muted" style="text-decoration: none;">← Back to home</a>
+  </div>
+</section>
+{% endblock %}

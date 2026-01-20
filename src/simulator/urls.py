@@ -1,11 +1,12 @@
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from .views import UploadTemplateView, TemplatePreviewView, RunSimulationView, DownloadOutputsView
+from .views import UploadTemplateView, TemplatePreviewView, RunSimulationView, DownloadOutputsView, SimulatorHomeView
 
 app_name = "simulator"
 
 urlpatterns = [
+    path("home/", SimulatorHomeView.as_view(), name="simulator_home"),
     path("upload/", UploadTemplateView.as_view(), name="upload"),
     path("preview/", TemplatePreviewView.as_view(), name="preview"),
     path("run/", RunSimulationView.as_view(), name="run"),

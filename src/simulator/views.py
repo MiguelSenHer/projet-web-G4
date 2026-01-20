@@ -5,18 +5,42 @@ from django.urls import reverse
 import json
 from pathlib import Path
 import shutil
-import zipfile
 from django.http import Http404, FileResponse
 from django.core.files.storage import default_storage
 from .forms import UploadTemplateForm, UploadInputsForm
 from .models import SimulationJob
-
-
 import insillyclo.simulator
 import insillyclo.observer
 import insillyclo.data_source
 
+# View to start a new simulation
+class SimulatorHomeView(TemplateView):
+    template_name = "simulator/home.html"
 
+    def dispatch(self, request, *args, **kwargs):
+        # Reset session
+        request.session.pop("current_job_id", None)
+        request.session.modified = True
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        options = [
+            {
+                "label": "LOAD YOUR PLASMID ASSEMBLY TEMPLATE",
+                "url": "/campaigns/simulator/upload/",
+            },
+            {
+                "label": "BROWSE PLASMID ASSEMBLY TEMPLATE",
+                "url": "/campaigns/simulator/browse/",
+            },
+        ]
+
+        context["options"] = options
+        context["active_page"] = "simulator"
+        return context
+    
 # View to upload the template
 class UploadTemplateView(FormView):
     template_name = "simulator/upload_template.html"
