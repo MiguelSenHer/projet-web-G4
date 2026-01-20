@@ -1,92 +1,111 @@
 {% extends "frontend/base.html" %}
-
-{% block title %}
-Manage Teams - InSillyClo
-{% endblock %}
+{% block title %}Create Team - InSillyClo{% endblock %}
 
 {% block content %}
 
-  <section class="team-box">
-    <div class="team-grid">
-      <!-- LEFT: TEAM CREATION -->
-      <div>
-        <div class="panel-title">TEAM CREATION</div>
+{% if messages %}
+  <div class="container mt-3">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
 
-        <input class="pill-input" type="text" placeholder="Enter team name" aria-label="Team name">
+<div class="container py-4">
+  <div class="card">
+    <div class="card-body">
+      <h5 class="fw-bold mb-3">Team creation</h5>
 
-        <div class="hint-label">Look up members</div>
-        <form method="get" class="mb-3">
-          <input
-            type="text"
-            name="user_q"
-            class="form-control"
-            placeholder="Search members by name or email"
-            value="{{ request.GET.user_q }}"
-          >
-        </form>
+      <div class="row g-4">
+        <div class="col-12 col-lg-6">
+          <div class="fw-semibold mb-2">Search members</div>
 
-        {% if users %}
-          <ul class="list-group mt-2">
-            {% for user in users %}
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                {{ user.get_full_name|default:user.email }}
-                <button class="btn btn-sm btn-outline-primary">
-                  Add
-                </button>
-              </li>
-            {% endfor %}
-          </ul>
-        {% elif request.GET.user_q %}
-          <p class="text-muted mt-2">No users found.</p>
-        {% endif %}
+          <form method="get" class="d-flex gap-2 mb-3">
+            <input
+              type="text"
+              name="user_q"
+              class="form-control"
+              placeholder="Search by name or email"
+              value="{{ request.GET.user_q|default:'' }}"
+            >
+            <button class="btn-create" type="submit">Search</button>
+          </form>
 
-        <div class="found-row">
-          <button type="button" class="member-pill">Found members</button>
-          <button type="button" class="btn-outline-blue">ADD</button>
+          {% if users %}
+            <div class="border rounded-3 overflow-auto" style="max-height: 320px;">
+              <ul class="list-group list-group-flush">
+                {% for user in users %}
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                      <div class="fw-semibold">{{ user.get_full_name|default:user.email }}</div>
+                      <div class="text-muted small">{{ user.email }}</div>
+                    </div>
+
+                    <form method="post" class="m-0">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="add">
+                      <input type="hidden" name="user_id" value="{{ user.id }}">
+                      <button class="btn-create" type="submit">Add</button>
+                    </form>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% elif request.GET.user_q %}
+            <div class="text-muted">No users found.</div>
+          {% else %}
+            <div class="text-muted">Type an email or name to search.</div>
+          {% endif %}
+        </div>
+
+        <div class="col-12 col-lg-6">
+          <div class="fw-semibold mb-2">Selected members</div>
+
+          {% if selected_users %}
+            <div class="border rounded-3 overflow-auto" style="max-height: 320px;">
+              <ul class="list-group list-group-flush">
+                {% for user in selected_users %}
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                      <div class="fw-semibold">{{ user.get_full_name|default:user.email }}</div>
+                      <div class="text-muted small">{{ user.email }}</div>
+                    </div>
+
+                    <form method="post" class="m-0">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="remove">
+                      <input type="hidden" name="user_id" value="{{ user.id }}">
+                      <button class="btn-create" type="submit">Remove</button>
+                    </form>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% else %}
+            <div class="text-muted">No members selected yet.</div>
+          {% endif %}
         </div>
       </div>
 
-      <!-- VERTICAL DIVIDER -->
-      <div class="divider" aria-hidden="true"></div>
-
-      <!-- RIGHT: TEAM MEMBERS (scrollable list) -->
-      <div>
-        <div class="panel-title">TEAM MEMBERS</div>
-
-        <div class="scroll-area">
-          <div class="member-row">
-            <button type="button" class="member-pill">Found members</button>
-            <button type="button" class="btn-outline-blue">Remove</button>
-          </div>
-
-          <div class="member-row">
-            <button type="button" class="member-pill">Found members</button>
-            <button type="button" class="btn-outline-blue">Remove</button>
-          </div>
-
-          <div class="member-row">
-            <button type="button" class="member-pill">Found members</button>
-            <button type="button" class="btn-outline-blue">Remove</button>
-          </div>
-
-          <div class="member-row">
-            <button type="button" class="member-pill">Found members</button>
-            <button type="button" class="btn-outline-blue">Remove</button>
-          </div>
-
-          <!-- Add more rows to see the scrollbar -->
-          <div class="member-row">
-            <button type="button" class="member-pill">Found members</button>
-            <button type="button" class="btn-outline-blue">Remove</button>
-          </div>
-          <div class="member-row">
-            <button type="button" class="member-pill">Found members</button>
-            <button type="button" class="btn-outline-blue">Remove</button>
-          </div>
-        </div>
-      </div>
+      <div class="fw-semibold mt-4 mb-2">Assign Team Name</div>
+      <form method="post" class="d-flex gap-2 mb-4">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="create_team">
+        <input
+          type="text"
+          name="team_name"
+          class="form-control"
+          placeholder="Team name"
+          required
+        >
+        <button class="btn-create" type="submit">Create</button>
+      </form>
+      
     </div>
-  </section>
+  </div>
+</div>
 
 {% endblock %}
-

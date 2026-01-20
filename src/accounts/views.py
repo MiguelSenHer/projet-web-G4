@@ -10,9 +10,9 @@ from django.core.mail import EmailMessage
 from django.urls import reverse
 from .forms import SignUpForm
 from .models import PasswordReset
+from django.db.models import Q
 
 User = get_user_model()
-
 
 # -----------------------
 # SIGNUP
@@ -217,4 +217,56 @@ def teams_view(request):
 
 @login_required
 def teams_create_view(request):
-    return render(request, "accounts/teams_create.html")
+    q = request.GET.get("user_q", "").strip()
+    users = []
+
+    if q:
+        users = (
+            User.objects
+            .filter(
+                Q(email__icontains=q) |
+                Q(username__icontains=q) |
+                Q(first_name__icontains=q) |
+                Q(last_name__icontains=q)
+            )
+            .exclude(pk=request.user.pk)
+            .order_by("email")[:20]
+        )
+
+    # --- "selected members" stored in session (simple, no DB model yet) ---
+    selected_ids = request.session.get("team_selected_ids", [])
+    selected_users = User.objects.filter(id__in=selected_ids).order_by("email")
+
+    # --- POST: add/remove ---
+    if request.method == "POST":
+        action = request.POST.get("action")
+        user_id = request.POST.get("user_id")
+
+        if user_id and user_id.isdigit():
+            user_id = int(user_id)
+
+            if action == "add":
+                if user_id not in selected_ids:
+                    selected_ids.append(user_id)
+                    request.session["team_selected_ids"] = selected_ids
+                    messages.success(request, "Member added.")
+                return redirect(f"{request.path}?user_q={q}")
+
+            if action == "remove":
+                if user_id in selected_ids:
+                    selected_ids.remove(user_id)
+                    request.session["team_selected_ids"] = selected_ids
+                    messages.success(request, "Member removed.")
+                return redirect(f"{request.path}?user_q={q}")
+
+        messages.error(request, "Invalid action.")
+        return redirect(request.path)
+
+    return render(
+        request,
+        "accounts/teams_create.html",
+        {
+            "users": users,
+            "selected_users": selected_users,
+        },
+    )
