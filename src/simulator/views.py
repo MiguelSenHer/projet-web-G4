@@ -1,4 +1,4 @@
-from django.views.generic import FormView
+from django.views.generic import FormView, TemplateView
 from django.views import View
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -9,8 +9,8 @@ import zipfile
 from django.http import Http404, FileResponse
 from django.core.files.storage import default_storage
 from .forms import UploadTemplateForm, UploadInputsForm
+from .models import SimulationJob
 
-from .models import SimulationRun
 
 import insillyclo.simulator
 import insillyclo.observer
@@ -26,8 +26,9 @@ class UploadTemplateView(FormView):
         return reverse("simulator:preview")
 
     def form_valid(self, form):
-        job_id = form.save()
-        self.request.session["current_job_id"] = job_id
+        user = self.request.user if self.request.user.is_authenticated else None
+        job = form.save(user=user)
+        self.request.session["current_job_id"] = job.job_id
         return redirect(self.get_success_url())
 
 
@@ -44,39 +45,33 @@ class TemplatePreviewView(FormView):
     def get_success_url(self):
         return reverse("simulator:preview")
 
+    def get_job(self):
+        job_id = self.request.session["current_job_id"]
+        job = SimulationJob.objects.filter(job_id=job_id).first()
+        if not job:
+            raise Http404("Job not found")
+        return job
+
     def post(self, request, *args, **kwargs):
         if request.POST.get("action") == "clear_inputs":
-            self.clear_inputs()
+            job = self.get_job()
+            job.input_files.all().delete()
             return redirect(self.get_success_url())
         return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
-        job_id = self.request.session["current_job_id"]
-        form.save(job_id)
+        job = self.get_job()
+        form.save(job)
         return redirect(self.get_success_url())
-
-    def clear_inputs(self):
-        job_id = self.request.session["current_job_id"]
-        base = f"simulator/jobs/{job_id}/inputs"
-
-        for sub_dir in ("genbank", "mapping"):
-            sub_path = f"{base}/{sub_dir}"
-            if default_storage.exists(sub_path):
-                sub_fs_path = Path(default_storage.path(sub_path))
-                shutil.rmtree(sub_fs_path, ignore_errors=True)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        job_id = self.request.session["current_job_id"]
-        base = f"simulator/jobs/{job_id}/"
-
-        # Read JSON and add template info to context
-        json_path = f"{base}/preview/preview.json"
-        if not default_storage.exists(json_path):
+        job = self.get_job()
+        if not job.preview:
             raise Http404("File not found")
 
-        with default_storage.open(json_path, "r") as f:
+        with job.preview.open("r") as f:
             data = json.load(f)
 
         context["filename"] = data.get("filename", "")
@@ -86,157 +81,109 @@ class TemplatePreviewView(FormView):
         context["parts"] = data.get("parts", [])
         context["plasmids"] = data.get("plasmids", [])
 
-        # Read inputs and add (list, paths) of files received to context
-        def read_inputs(input_dir_path):
-            if not default_storage.exists(input_dir_path):
-                return [], []
+        genbank_qs = job.input_files.filter(file_kind="genbank").order_by("id")
+        mapping_qs = job.input_files.filter(file_kind="mapping").order_by("id")
 
-            _, files = default_storage.listdir(input_dir_path)
-            if not files:
-                return [], []
-
-            received_files = []
-            storage_paths = []
-
-            for file_name in files:
-                file_path = f"{input_dir_path}{file_name}"
-
-                if file_name.endswith(".zip"):
-                    with default_storage.open(file_path, "rb") as f:
-                        with zipfile.ZipFile(f) as z:
-                            received_files.extend(n for n in z.namelist() if not n.endswith("/"))
-                else:
-                    received_files.append(file_name)
-
-                storage_paths.append(file_path)
-
-            return received_files, storage_paths
-
-        context["genbank_files"], context["genbank_paths"] = read_inputs(f"{base}/inputs/genbank/")
-        context["mapping_files"], context["mapping_paths"] = read_inputs(f"{base}/inputs/mapping/")
+        context["genbank_files"] = [x.file.name.split("/")[-1] for x in genbank_qs]
+        context["mapping_files"] = [x.file.name.split("/")[-1] for x in mapping_qs]
+        context["genbank_paths"] = [x.file.name for x in genbank_qs]
+        context["mapping_paths"] = [x.file.name for x in mapping_qs]
 
         return context
 
 
 # View to run simulation based on all inputs
-class RunSimulationView(View):
+class RunSimulationView(TemplateView):
     template_name = "simulator/run.html"
 
     def dispatch(self, request, *args, **kwargs):
         if not request.session.get("current_job_id"):
             return redirect("simulator:upload")
         return super().dispatch(request, *args, **kwargs)
-    
-    def get(self, request, *args, **kwargs):
-        job_id = request.session["current_job_id"]
 
-        if request.user.is_authenticated:
-            run = SimulationRun.objects.filter(job_id=job_id, user=request.user).first()
-            status = run.status if run else None
-            error = run.error_message if run else None
-        else:
-            status = request.session.get("run_status")
-            error = request.session.get("run_error")
-
-        return render(request, self.template_name, {
-            "job_id": job_id,
-            "status": status,
-            "error": error,
-            "outputs_zip_url": (
-                reverse("simulator:download_outputs")
-                if run and run.status == "SUCCESS"
-                else None
-            ),
-        })
+    def get_job(self):
+        job_id = self.request.session["current_job_id"]
+        job = SimulationJob.objects.filter(job_id=job_id).first()
+        if not job:
+            raise Http404("Run not found")
+        return job
 
     def post(self, request, *args, **kwargs):
-        job_id = request.session["current_job_id"]
-        base = f"simulator/jobs/{job_id}"
+        job = self.get_job()
+        enzyme = request.POST.get("enzyme", "").strip()
 
-        # Inputs from post
-        filename = request.POST["filename"]
-        enzyme = request.POST["enzyme"]
-        genbank_paths = request.POST.getlist("genbank_paths") 
-        mapping_paths = request.POST.getlist("mapping_paths") 
+        if not job.template:
+            raise Http404("Run not found")
+        if not enzyme:
+            job.status = "FAIL"
+            job.error_message = "Missing enzyme."
+            job.save(update_fields=["status", "error_message", "updated_at"])
+            return redirect(reverse("simulator:run"))
 
-        template_path = Path(default_storage.path(f"{base}/inputs/{filename}"))
+        gb_files = [Path(x.file.path) for x in job.input_files.filter(file_kind="genbank").order_by("id")]
+        mapping_files = [Path(x.file.path) for x in job.input_files.filter(file_kind="genbank").order_by("id")]
 
-        # Expand uploaded inputs paths (zip extraction, file depending on extensions)
-        def expand_inputs_paths(paths, exts):
-            res = []
-            for p in paths:
-                fp = Path(default_storage.path(p))
+        if not gb_files:
+            job.status = "FAIL"
+            job.error_message = "Missing GenBank inputs."
+            job.save(update_fields=["status", "error_message", "updated_at"])
+            return redirect(reverse("simulator:run"))
 
-                if fp.suffix.lower() == ".zip":
-                    extract_dir = fp.parent / f"{fp.stem}"
-                    extract_dir.mkdir(parents=True, exist_ok=True)
+        output_dir = Path(job.template.path).parent / "output"
+        shutil.rmtree(output_dir, ignore_errors=True)
+        output_dir.mkdir(parents=True, exist_ok=True)
 
-                    with zipfile.ZipFile(fp) as z:
-                        z.extractall(extract_dir)
+        job.status = "RUNNING"
+        job.error_message = ""
+        job.save(update_fields=["status", "error_message", "updated_at"])
 
-                    for ext in exts:
-                        res.extend(extract_dir.rglob(f"*{ext}"))
-                else:
-                    if fp.suffix.lower() in exts:
-                        res.append(fp)
-            return res
-
-        # Note: use a tuple for extensions; (".gb") would be a string
-        gb_plasmids = expand_inputs_paths(genbank_paths, (".gb",))
-
-        input_parts_files = expand_inputs_paths(mapping_paths, (".csv", ".tsv", ".txt"))
-
-        # Directory to save outputs
-        output_dir_path = Path(default_storage.path(f"{base}/output"))
-        output_dir_path.mkdir(parents=True, exist_ok=True)
-
-        # Store run in DB if user authentificated, or in session if anonymous
-        if request.user.is_authenticated:
-            run, _ = SimulationRun.objects.get_or_create(job_id=job_id, user=request.user)
-            run.status = "RUNNING"
-            run.error_message = ""
-            run.save(update_fields=["status", "error_message", "updated_at"])
-        else:
-            request.session["run_status"] = "RUNNING"
-            request.session["run_error"] = ""
-
-        # Call InsillyClo simulator (python)
         try:
-            observer = insillyclo.observer.InSillyCloCliObserver(
-                debug=True,
-                fail_on_error=True,
-            )
+            observer = insillyclo.observer.InSillyCloCliObserver(debug=True, fail_on_error=True)
 
             insillyclo.simulator.compute_all(
                 observer=observer,
                 settings=None,
-                input_template_filled=template_path,
-                input_parts_files=input_parts_files,
-                gb_plasmids=gb_plasmids,
-                output_dir=output_dir_path,
+                input_template_filled=Path(job.template.path),
+                input_parts_files=mapping_files,
+                gb_plasmids=gb_files,
+                output_dir=output_dir,
                 data_source=insillyclo.data_source.DataSourceHardCodedImplementation(),
                 enzyme_names=[enzyme],
                 default_mass_concentration=200,
                 sbol_export=False,
             )
 
-            if request.user.is_authenticated:
-                run.status = "SUCCESS"
-                run.save(update_fields=["status", "updated_at"])
-            else:
-                request.session["run_status"] = "SUCCESS"
+            zip_base = output_dir.parent / f"outputs_{job.job_id}"
+            zip_path = zip_base.with_suffix(".zip")
+            if zip_path.exists():
+                zip_path.unlink()
+            shutil.make_archive(str(zip_base), "zip", root_dir=str(output_dir))
+
+            if job.outputs_zip:
+                job.outputs_zip.delete(save=False)
+            with open(zip_path, "rb") as f:
+                job.outputs_zip.save(zip_path.name, f, save=True)
+
+            job.status = "SUCCESS"
+            job.save(update_fields=["status", "updated_at"])
 
         except Exception as e:
-            error_message = str(e) if str(e) else repr(e)
-            if request.user.is_authenticated:
-                run.status = "FAIL"
-                run.error_message = error_message
-                run.save(update_fields=["status", "error_message", "updated_at"])
-            else:
-                request.session["run_status"] = "FAIL"
-                request.session["run_error"] = error_message
+            msg = str(e) if str(e) else repr(e)
+            job.status = "FAIL"
+            job.error_message = msg
+            job.save(update_fields=["status", "error_message", "updated_at"])
 
         return redirect(reverse("simulator:run"))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        job = self.get_job()
+        context["job_id"] = job.job_id
+        context["status"] = job.status
+        context["error"] = job.error_message
+        context["outputs_zip_url"] = reverse("simulator:download_outputs") if job.status == "SUCCESS" else None
+        return context
+
 
 
 # View to download outputs
