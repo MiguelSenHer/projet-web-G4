@@ -56,7 +56,7 @@
 
         <!-- RIGHT: Download -->
         <div class="col-auto">
-          <a href="{% url 'assembly_download' assembly.id %}"
+          <a href="{{ assembly.file.url }}" download
              class="btn btn-designer btn-md">
             <i class="bi bi-cloud-arrow-down fs-3"></i>
           </a>

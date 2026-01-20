@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import inlineformset_factory
-from .models import Assembly, InputParts
+from browse.models import Assembly, InputParts
 
 class AssemblyForm(forms.ModelForm):
     class Meta:
