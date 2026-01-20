@@ -1,0 +1,99 @@
+<!-- MAIN CONTENT -->
+<main class="flex-grow-1">
+  <div class="container py-4">
+<h3>Assembly properties</h3>
+
+<dl class="row">
+
+  <dt class="col-12 col-md-3">Name :</dt>
+  <dd class="col-12 col-md-9">
+    {{ assembly.name }}
+  </dd>
+
+  <dt class="col-12 col-md-3">Comment :</dt>
+  <dd class="col-12 col-md-9">
+    {{ assembly.comment|default:"—" }}
+  </dd>
+
+  <dt class="col-12 col-md-3 text-secondary">Created At :</dt>
+  <dd class="col-12 col-md-9 text-secondary">
+    {{ assembly.creation_date }}
+  </dd>
+
+  <dt class="col-12 col-md-3">Output Separator :</dt>
+  <dd class="col-12 col-md-9">
+    {{ assembly.separator|default:"—" }}
+  </dd>
+
+  <dt class="col-12 col-md-3">Restriction Enzyme :</dt>
+  <dd class="col-12 col-md-9">
+    {{ assembly.restriction_enzyme|default:"—" }}
+  </dd>
+
+</dl>
+
+<h3>Input parts</h3>
+
+{% if input_parts %}
+  {% for part in input_parts %}
+
+    <div class="card context-designer border-designer mb-3">
+      <div class="card-body row">
+
+        <!-- Left -->
+        <div class="col-12 col-xl-2 col-lg-3 col-md-3 me-md-4">
+          <div class="text-designer fw-bolder">
+            {{ part.part_name }}
+            {% if part.mandatory %}
+              <span class="text-danger">*</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Middle -->
+        <div class="col border-10 border-start border-auto ps-md-4">
+            <div class="d-block">
+                    {% if part.mandatory %}
+                        The input part is <b>mandatory</b>
+                    {% else %}
+                        The input part is <b>optional</b>
+                    {% endif %}
+                </div>
+
+                {% if part.typed %}
+                <div class="d-block">
+                    The input part is <b>typed</b>
+                </div>
+                {% endif %}
+
+                {% if part.separator %}
+                <div class="d-block">
+                    <span class="fw-bolder">Subpart Separator:</span>
+                    {{ part.separator }}
+                </div>
+                {% endif %}
+          
+          {% if part.allowed_types.exists %}
+            <div class="d-block mt-1">
+              <span class="fw-bolder">Allowed types:</span>
+
+              {% for t in part.allowed_types.all %}
+                <span class="border border-1 border-designer
+                             rounded-5 px-3 mx-1 bg-designer-light">
+                  {{ t.type_name }}
+                </span>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+        </div>
+
+      </div>
+    </div>
+
+  {% endfor %}
+{% else %}
+  <div class="placeholder-box">
+    No input parts defined for this assembly
+  </div>
+{% endif %}

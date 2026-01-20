@@ -80,13 +80,15 @@ def designer_input_parts(request, pk):
 
     
 def designer_summary(request, pk):
-    assembly = get_object_or_404(Assembly, pk=pk)
-    if request.method == "POST":
-        return redirect("browse:assembly_details", pk=assembly.pk)
+    assembly = get_object_or_404(Assembly, id=pk)
+    input_parts = assembly.inputparts_set.prefetch_related("allowed_types")
     return render(
         request,
         "designer/designer_summary.html",
-        {"assembly": assembly}
+        {
+            "assembly": assembly,
+            "input_parts": input_parts,
+        }
     )
 
 

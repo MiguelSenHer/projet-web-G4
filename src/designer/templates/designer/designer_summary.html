@@ -1,5 +1,7 @@
-<<<<<<< HEAD
-{% include 'browse/assembly_details.html' %}
-=======
-{% include 'designer/assembly_details.html' %}
->>>>>>> 13f0d44a (Updated project architecture)
+{% extends 'frontend/base.html' %}
+{% block title %}Designer Summary{% endblock %}
+{% block content %}
+<div class="container py-4">
+  {% include "browse/assembly_details_partial.html" %}
+</div>
+{% endblock %}
