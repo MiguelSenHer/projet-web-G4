@@ -56,13 +56,16 @@ InSillyClo – My simulations
               <div>
                 <div class="dropdown">
                   <button
-                    class="btn btn-assembly dropdown-toggle"
+                    class="btn btn-assembly"
                     type="button"
                     data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    title="Actions"
                   >
+                    <i class="bi bi-gear"></i>
                   </button>
 
-                  <ul class="dropdown-menu">
+                  <ul class="dropdown-menu dropdown-menu-end">
                     <li>
                       <form method="post" action="{% url 'simulator:resume_job' job.job_id %}">
                         {% csrf_token %}
@@ -103,19 +106,31 @@ InSillyClo – My simulations
 
             </div>
 
-            <!-- outputs list -->
+            <!-- outputs list (volatile on click) -->
             {% if gb_files %}
               <div class="mt-3">
-                  <section class="d-flex flex-column gap-3">
-                    <div class="text-muted small">Output plasmids</div>
-                  </section>
-                <div class="d-flex flex-wrap gap-2">
-                  {% for output_plasmid in gb_files %}
-                    <a class="border rounded-pill px-3 py-1 small text-decoration-none"
-                      href="{% url 'simulator:plasmid_view' job.job_id output_plasmid %}">
-                      {{ output_plasmid }}
-                    </a>
-                  {% endfor %}
+                <button
+                  class="btn btn-link p-0 text-muted small"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#outputs-{{ job.job_id }}"
+                  aria-expanded="false"
+                  aria-controls="outputs-{{ job.job_id }}"
+                >
+                  Output plasmids ({{ gb_files|length }})
+                </button>
+
+                <div class="collapse mt-2" id="outputs-{{ job.job_id }}">
+                  <div class="d-flex flex-wrap gap-2">
+                    {% for output_plasmid in gb_files %}
+                      <a
+                        class="border rounded-pill px-3 py-1 small text-decoration-none"
+                        href="{% url 'simulator:plasmid_view' job.job_id output_plasmid %}"
+                      >
+                        {{ output_plasmid }}
+                      </a>
+                    {% endfor %}
+                  </div>
                 </div>
               </div>
             {% endif %}

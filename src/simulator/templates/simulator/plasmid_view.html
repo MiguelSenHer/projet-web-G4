@@ -11,15 +11,30 @@
 
 <main class="flex-grow-1">
   <div class="container py-4">
-    <div class="assembly-card">
-        {{svg|safe}}
+
+    <div class="assembly-card" id="plasmid-svg">
+        {{ svg|safe }}
     </div>
 
     <div class="text-center mt-4">
-        <a href="{% url 'simulator:simulations_list' %}" class="btn btn-outline-secondary">Back to my simulations</a>
+        <a href="{% url 'simulator:simulations_list' %}" class="btn btn-outline-secondary">
+          Back to my simulations
+        </a>
     </div>
 
   </div>
 </main>
+{% endblock %}
 
+{% block extra_js %}
+ <script>
+        const links = {{ restriction_sites_sources|safe }};
+
+        document.querySelectorAll("#plasmid-svg text").forEach(t => {
+            if (links[t.textContent.trim()]) {
+            t.style.cursor = "pointer";
+            t.onclick = () => window.open(links[t.textContent.trim()], "_blank");
+            }
+        });
+    </script>
 {% endblock %}

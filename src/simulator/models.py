@@ -23,7 +23,7 @@ class SimulationJob(models.Model):
         related_name="simulator_jobs",
     )
 
-    status = models.CharField(max_length=10)
+    status = models.CharField(max_length=10, default="PENDING")
     error_message = models.TextField(blank=True, default="")
 
     created_at = models.DateTimeField(auto_now_add=True)

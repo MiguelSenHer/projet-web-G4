@@ -23,7 +23,6 @@ from reportlab.lib import colors
 from io import StringIO
 
 
-
 # View to start a new simulation
 class SimulatorHomeView(TemplateView):
     template_name = "simulator/home.html"
@@ -235,7 +234,7 @@ class SimulationsListView(LoginRequiredMixin, ListView):
             outputs_dir = Path(job.template.path).parent / "outputs"
             if outputs_dir.exists():
                 gb_files = [
-                    p.name for p in outputs_dir.rglob("*.gb")
+                    p.name.split(".gb")[0] for p in outputs_dir.rglob("*.gb")
                     if p.is_file()
                 ]
             jobs_with_outputs.append((job, gb_files))
@@ -297,53 +296,64 @@ class PlasmidView(TemplateView):
 
         filename = self.kwargs["filename"]
         base = Path(self.job.template.path).parent
-        gb_path = base / "outputs" / filename
+        gb_path = base / "outputs" / f"{filename}.gb"
 
         record = SeqIO.read(str(gb_path), "genbank")
 
         gd_diagram = GenomeDiagram.Diagram(record.id)
         gd_track_for_features = gd_diagram.new_track(1, name="Annotated Features")
         gd_feature_set = gd_track_for_features.new_set()
-        site_track = gd_diagram.new_track(2, name="Restriction sites", greytrack=False)
+        site_track = gd_diagram.new_track(2, name="Restriction sites")
         site_set = site_track.new_set()
 
+        # Features golden
+        features_golden_gate = {
+            "CDS":       colors.lightgreen,
+            "promoter":  colors.lightblue,
+            "terminator": colors.yellow,
+            "RBS":       colors.lightpink,
+        }
         for feature in record.features:
-            #if feature.type != "CDS":
-                #continue
-            if len(gd_feature_set) % 2 == 0:
-                color = colors.blue
-            else:
-                color = colors.lightblue
+            if feature.type not in features_golden_gate.keys():
+                continue
+
             gd_feature_set.add_feature(
                 feature,
                 sigil="ARROW",
-                color=color,
+                color=features_golden_gate[feature.type],
                 label=True,
                 label_size=15,
                 label_angle=0,
             )
 
         # Regonition sites
-        for site, name, color in [
-            ("GAATTC", "EcoRI", colors.green),
-            ("CCCGGG", "SmaI", colors.orange),
-            ("AAGCTT", "HindIII", colors.red),
-            ("GGATCC", "BamHI", colors.purple),
-        ]:
+        enzymes_golden_gate = {
+            "BsaI":  ("GGTCTC", colors.blue),
+            "Esp3I": ("CGTCTC", colors.purple),
+            "BbsI":  ("GAAGAC", colors.green),
+            "BtgZI": ("GCGATG", colors.red),
+            "AarI":  ("CACCTGC", colors.brown),
+            "BfuAI": ("ACCTGC", colors.green),
+            "BspQI": ("GCTCTTC", colors.orange),
+        }
+
+        for name, (site, color) in enzymes_golden_gate.items():
             index = 0
             while True:
                 index = record.seq.find(site, start=index)
                 if index == -1:
                     break
-                feature = SeqFeature(SimpleLocation(index, index + len(site))) 
+
+                feature = SeqFeature(SimpleLocation(index, index + len(site)))
                 site_set.add_feature(
                     feature=feature,
-                    color=color,
                     name=name,
+                    color=color,
                     label=True,
-                    label_size=12,
+                    label_size=20,
                     label_color=color,
                 )
+
                 index += len(site)
 
         gd_diagram.draw(
@@ -361,4 +371,16 @@ class PlasmidView(TemplateView):
         context["svg"] = svg
         context["plasmid_name"] = record.id
         context["job_id"] = self.job.job_id
+        context["restriction_sites_sources"] = {
+            "BsaI":  "https://enzymefinder.neb.com/#!/name/BsaI",
+            "Esp3I": "https://enzymefinder.neb.com/#!/name/Esp3I",
+            "BbsI":  "https://enzymefinder.neb.com/#!/name/BbsI",
+            "BtgZI": "https://enzymefinder.neb.com/#!/name/BtgZI",
+            "SapI":  "https://enzymefinder.neb.com/#!/name/SapI",
+            "AarI":  "https://enzymefinder.neb.com/#!/name/AarI",
+            "BfuAI": "https://enzymefinder.neb.com/#!/name/BfuAI",
+            "BspQI": "https://enzymefinder.neb.com/#!/name/BspQI",
+            "BsmAI": "https://enzymefinder.neb.com/#!/name/BsmAI",
+            }
+        
         return context
