@@ -1,12 +1,20 @@
 {% extends "frontend/base.html" %}
 
 {% block title %}
-InsillyClo - Run Preview
+InsillyClo - Simulation Preview
 {% endblock%}
 
 {% block content %}
 <section class="container text-center mt-5">
   <h1 class="hero-title">Simulation Preview</h1>
+
+  <div class="hero-subtitle">
+    Verify information before running
+  </div>
+
+  <p class="hero-text">
+    Check that the assembly settings and output plasmids extracted from your template are correct, provide inputs, then hit Run simulation.
+  </p>
 </section>
 
 <main class="flex-grow-1">
@@ -25,11 +33,7 @@ InsillyClo - Run Preview
 
           <div>
             <span class="fw-bolder">Output Separator :</span>
-            {% if separator == "~" %}Tilde ~
-            {% elif separator == "." %}Dot .
-            {% elif separator == "_" %}Underscore _
-            {% elif separator == "-" %}Hyphen -
-            {% else %}{{ separator }}{% endif %}
+            {{ separator }}
           </div>
 
           <div>
@@ -96,10 +100,10 @@ InsillyClo - Run Preview
       </div>
     </div>
 
-    <!-- INPUTS CARD (replaces accordion) -->
+    <!-- INPUTS CARD -->
     <div class="card mt-4" id="inputsCard" style="scroll-margin-top: 90px;">
       <div class="card-body">
-        <h5 class="fw-bold mb-3">Simulation inputs</h5>
+        <h5 class="fw-bold mb-2">Simulation inputs</h5>
 
         {% if form.non_field_errors %}
           <div class="alert alert-danger mb-3">
@@ -117,7 +121,7 @@ InsillyClo - Run Preview
           <!-- GenBank -->
           <div>
             <div class="fw-semibold mb-2">
-              GenBank archive <span class="text-muted">(optional)</span>
+              GenBank archive <span class="text-muted">(output plasmid sequences) should be a .zip of .gb files</span>
             </div>
             <input
               type="file"
@@ -139,7 +143,7 @@ InsillyClo - Run Preview
           <!-- Mapping -->
           <div>
             <div class="fw-semibold mb-2">
-              Mapping archive <span class="text-muted">(optional)</span>
+              Mapping tables <span class="text-muted">(optional input plasmid ID to Name conversion) can be a .csv, .tsv, .txt, or a .zip of those.</span>
             </div>
             <input
               type="file"
@@ -172,10 +176,6 @@ InsillyClo - Run Preview
 
             <div class="d-flex justify-content-between align-items-center mb-2">
               <h5 class="fw-bold mb-0">Mapping tables</h5>
-              <div class="d-flex gap-2">
-                <a href="#inputsCard" class="btn btn-sm btn-outline-primary">Upload</a>
-                <button class="btn btn-sm btn-outline-secondary" disabled>Add</button>
-              </div>
             </div>
 
             <div class="text-muted mb-2">
@@ -205,10 +205,6 @@ InsillyClo - Run Preview
 
             <div class="d-flex justify-content-between align-items-center mb-2">
               <h5 class="fw-bold mb-0">Plasmid sequences</h5>
-              <div class="d-flex gap-2">
-                <a href="#inputsCard" class="btn btn-sm btn-outline-primary">Upload</a>
-                <button class="btn btn-sm btn-outline-secondary" disabled>Add</button>
-              </div>
             </div>
 
             <div class="text-muted mb-2">
@@ -223,7 +219,7 @@ InsillyClo - Run Preview
                   {% endfor %}
                 </ul>
               {% else %}
-                <div class="text-muted">No GenBank files detected.</div>
+                <div class="text-muted">No GenBank file provided.</div>
               {% endif %}
             </div>
 
@@ -235,7 +231,7 @@ InsillyClo - Run Preview
 
     <!-- ACTIONS -->
     <div class="d-flex justify-content-center gap-3 mt-4 flex-wrap">
-      <a href="/simulator/upload/" class="btn btn-outline-secondary d-inline-flex align-items-center">
+      <a href="{% url 'simulator:upload' %}" class="btn btn-outline-secondary d-inline-flex align-items-center">
         Back
       </a>
 
@@ -252,21 +248,16 @@ InsillyClo - Run Preview
       </form>
 
       <form method="post" action="{% url 'simulator:run' %}" class="d-inline-flex">
-      {% csrf_token %}
-
-      <input type="hidden" name="filename" value="{{ filename }}">
-      <input type="hidden" name="enzyme" value="{{ enzyme }}">
-
-
-      <button type="submit" class="btn btn-assembly">
-        Run simulation
-      </button>
-    </form>
-
+        {% csrf_token %}
+        <input type="hidden" name="filename" value="{{ filename }}">
+        <input type="hidden" name="enzyme" value="{{ enzyme }}">
+        <button type="submit" class="btn btn-assembly">
+          Run simulation
+        </button>
+      </form>
     </div>
 
   </div>
 </main>
 
 {% endblock %}
-

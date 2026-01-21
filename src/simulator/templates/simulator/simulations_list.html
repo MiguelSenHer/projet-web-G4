@@ -1,0 +1,113 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}
+InSillyClo – My simulations
+{% endblock %}
+
+{% block content %}
+
+<section class="container text-center mt-5">
+  <h1 class="hero-title">My simulations</h1>
+</section>
+
+<main class="flex-grow-1">
+  <div class="container py-4">
+
+    {% if jobs %}
+      <div class="d-flex flex-column gap-3">
+
+        <!-- 6 column card for every job -->
+        {% for job in jobs %}
+          <div class="assembly-card">
+            <div class="d-flex flex-wrap align-items-center gap-3">
+
+              <!-- 1) Job ID -->
+              <div class="me-auto">
+                <div class="text-muted small">Job ID</div>
+                <div class="fw-semibold">{{ job.job_id }}</div>
+              </div>
+
+              <!-- Status -->
+              <div>
+                <div class="text-muted small">Status</div>
+                <div>
+                  {% if job.status == "SUCCESS" %}
+                    <span class="badge bg-success">SUCCESS</span>
+                  {% elif job.status == "FAIL" %}
+                    <span class="badge bg-danger">FAIL</span>
+                  {% else %}
+                    <span class="badge bg-secondary">{{ job.status }}</span>
+                  {% endif %}
+                </div>
+              </div>
+
+              <!-- Updated at -->
+              <div>
+                <div class="text-muted small">Updated on</div>
+                <div>{{ job.updated_at }}</div>
+              </div>
+
+              <!-- Created at -->
+              <div>
+                <div class="text-muted small">Created on</div>
+                <div>{{ job.created_at }}</div>
+              </div>
+
+              <!-- Resume simulation  -->
+                <div>
+                <div class="text-muted small">&nbsp;</div>
+                <form method="post" action="{% url 'simulator:resume_job' job.job_id %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-secondary">
+                    Resume
+                    </button>
+                </form>
+                </div>
+
+              <!-- Download -->
+              <div>
+                <div class="text-muted small">&nbsp;</div>
+                {% if job.status == "SUCCESS" and job.outputs_zip %}
+                  <a href="{% url 'simulator:download_by_job' job.job_id %}"
+                     class="btn btn-assembly d-inline-flex align-items-center">
+                    <i class="bi bi-download me-1"></i>
+                    Download
+                  </a>
+                {% else %}
+                  <button class="btn btn-outline-secondary" type="button" disabled>
+                    Download
+                  </button>
+                {% endif %}
+              </div>
+                <!-- Delete -->
+                <div>
+                <div class="text-muted small">&nbsp;</div>
+                <form method="post" action="{% url 'simulator:delete_job' job.job_id %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger"
+                            onclick="return confirm('Delete this simulation?');">
+                    Delete
+                    </button>
+                </form>
+                </div>
+
+            </div>
+
+
+          </div>
+        {% endfor %}
+
+      </div>
+    {% else %}
+      <div class="alert alert-info mt-3">
+        You don’t have any simulations yet.
+      </div>
+      <div class="text-center mt-4">
+        <a href="{% url 'simulator:home' %}" class="btn btn-assembly">Start a simulation</a>
+      </div>
+    {% endif %}
+
+  </div>
+</main>
+
+{% endblock %}

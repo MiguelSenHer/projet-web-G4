@@ -1,12 +1,13 @@
 {% extends "frontend/base.html" %}
 
 {% block title %}
-InsillyClo - Upload Template
+InSillyClo – Upload Template
 {% endblock %}
 
 {% block content %}
+
 <section class="container text-center mt-5">
-  <h1 class="hero-title">Load Assembly Template</h1>
+  <h1 class="hero-title">Upload Assembly Template</h1>
 
   <div class="hero-subtitle">
     Upload your plasmid assembly campaign file
@@ -18,13 +19,11 @@ InsillyClo - Upload Template
   </p>
 </section>
 
-<!-- MAIN CONTENT -->
 <main class="flex-grow-1">
   <div class="container py-4">
     <div class="row justify-content-center">
       <div class="col-md-7 col-lg-6">
 
-        <!-- UPLOAD CARD -->
         <div class="assembly-card mt-3">
 
           <h3 class="assembly-title mb-4 text-center">
@@ -62,9 +61,11 @@ InsillyClo - Upload Template
 
         </div>
 
-        <!-- Action buttons -->
         <div class="d-flex justify-content-center gap-3 mt-4 flex-wrap">
-          <a href="/simulator/" class="btn btn-outline-secondary d-inline-flex align-items-center">
+          <a
+            href="{% url 'simulator:home' %}"
+            class="btn btn-outline-secondary d-inline-flex align-items-center"
+          >
             Back
           </a>
         </div>
@@ -73,4 +74,5 @@ InsillyClo - Upload Template
     </div>
   </div>
 </main>
+
 {% endblock %}

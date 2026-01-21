@@ -1,4 +1,5 @@
-from django.views.generic import FormView, TemplateView
+from django.views.generic import FormView, TemplateView, ListView
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse
@@ -9,6 +10,7 @@ from django.http import Http404, FileResponse
 from .forms import UploadTemplateForm, UploadInputsForm
 from .models import SimulationJob
 import shutil
+from django.conf import settings
 
 import insillyclo.simulator
 import insillyclo.observer
@@ -25,19 +27,6 @@ class SimulatorHomeView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        options = [
-            {
-                "label": "LOAD YOUR PLASMID ASSEMBLY TEMPLATE",
-                "url": reverse("simulator:upload"),
-            },
-            {
-                "label": "BROWSE PLASMID ASSEMBLY TEMPLATE",
-                "url": reverse("browse:browse_templates"),
-            },
-        ]
-
-        context["options"] = options
         context["active_page"] = "simulator"
         return context
 
@@ -176,16 +165,12 @@ class RunSimulationView(TemplateView):
             self.job.outputs_zip.name = f"simulator/jobs/{self.job.job_id}/outputs.zip"
             self.job.status = "SUCCESS"
             self.job.error_message = ""
-            self.job.save(update_fields=["outputs_dir", "outputs_zip", "status", "error_message", "updated_at"])
+            self.job.save(update_fields=["outputs_zip", "status", "error_message", "updated_at"])
 
         except Exception as e:
             self.job.status = "FAIL"
             self.job.error_message = str(e) or repr(e)
             self.job.save(update_fields=["status", "error_message", "updated_at"])
-
-        print("template:", self.job.template.path)
-        print("zip abs:", (Path(self.job.template.path).parent / "outputs.zip"))
-        print("zip rel:", self.job.outputs_zip.name)
 
         return redirect("simulator:run")
    
@@ -202,7 +187,7 @@ class RunSimulationView(TemplateView):
         return context
 
 
-# View to download outputs
+# View to download outputs of a simulation
 class DownloadOutputsView(View):
     def dispatch(self, request, *args, **kwargs):
         job_id = request.session.get("current_job_id")
@@ -224,3 +209,52 @@ class DownloadOutputsView(View):
             raise Http404
         
         return FileResponse(job.outputs_zip.open("rb"), as_attachment=True, filename="outputs.zip")
+    
+
+# View to list user's simulation jobs
+class SimulationsListView(LoginRequiredMixin, ListView):
+    model = SimulationJob
+    template_name = "simulator/simulations_list.html"
+    context_object_name = "jobs"
+
+    def get_queryset(self):
+        return (SimulationJob.objects.filter(user=self.request.user).order_by("-updated_at"))
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["active_page"] = "simulations"
+        return context
+
+
+# View to download outputs of a specific job
+class DownloadOutputsByJobView(LoginRequiredMixin, View):
+    def get(self, request, job_id, *args, **kwargs):
+        job = get_object_or_404(SimulationJob, job_id=job_id, user=request.user)
+
+        if job.status != "SUCCESS" or not job.outputs_zip:
+            raise Http404
+
+        return FileResponse(job.outputs_zip.open("rb"), as_attachment=True, filename="outputs.zip")
+
+
+# View to resume a simulation from the simulations list
+class ResumeSimulationView(LoginRequiredMixin, View):
+    def post(self, request, job_id, *args, **kwargs):
+        job = get_object_or_404(SimulationJob, job_id=job_id)
+
+        if job.user_id != request.user.id:
+            raise Http404("Job not found")
+
+        request.session["current_job_id"] = job.job_id
+        return redirect("simulator:preview")
+    
+
+# View to delete a simulation job from the simulations list
+class DeleteSimulationView(LoginRequiredMixin, View):
+    def post(self, request, job_id, *args, **kwargs):
+        job = get_object_or_404(SimulationJob, job_id=job_id, user=request.user)
+
+        job_dir = Path(settings.MEDIA_ROOT) / "simulator" / "jobs" / job.job_id
+        shutil.rmtree(job_dir, ignore_errors=True)
+
+        job.delete()
+        return redirect("simulator:simulations_list")
