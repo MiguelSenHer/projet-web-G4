@@ -704,6 +704,23 @@ $login-bg: #ffffff;
   margin: 0;
 }
 
+.form-success {
+  background-color: rgb(237, 253, 233);
+  border: 1px solid rgb(62, 128, 60);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.field-success {
+  margin-top: 0.25rem;
+}
+
+.success-message {
+  color: #205e1e;
+  font-size: 0.875rem;
+  margin: 0;
+}
 /* Alert Messages */
 .alert {
   border-radius: 8px;
