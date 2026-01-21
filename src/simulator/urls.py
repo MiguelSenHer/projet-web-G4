@@ -10,7 +10,7 @@ from .views import (
     SimulationsListView,
     DownloadOutputsByJobView,
     ResumeSimulationView,
-    DeleteSimulationView,
+    DeleteSimulationView, PlasmidView,
 )
 
 app_name = "simulator"
@@ -21,8 +21,9 @@ urlpatterns = [
     path("preview/", TemplatePreviewView.as_view(), name="preview"),
     path("run/", RunSimulationView.as_view(), name="run"),
     path("outputs/download/", DownloadOutputsView.as_view(), name="download_outputs"),
-    path("my_simulations/", SimulationsListView.as_view(), name="simulations_list"),
+    path("simulations/", SimulationsListView.as_view(), name="simulations_list"),
     path("outputs/download/<str:job_id>/", DownloadOutputsByJobView.as_view(), name="download_by_job"),
     path("resume/<str:job_id>/", ResumeSimulationView.as_view(), name="resume_job"),
     path("delete/<str:job_id>/", DeleteSimulationView.as_view(), name="delete_job"),
+    path("view/<str:job_id>/plasmid/<str:filename>/", PlasmidView.as_view(), name="plasmid_view"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
