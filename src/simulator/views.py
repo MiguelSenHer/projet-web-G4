@@ -16,11 +16,15 @@ import insillyclo.simulator
 import insillyclo.observer
 import insillyclo.data_source
 
-from Bio import SeqIO
-from Bio.Graphics import GenomeDiagram
 from Bio.SeqFeature import SeqFeature, SimpleLocation
-from reportlab.lib import colors
+from pycirclize import Circos
+from pycirclize.utils import ColorCycler, fetch_genbank_by_accid
+from pycirclize.parser import Genbank
 from io import StringIO
+import matplotlib
+from matplotlib.patches import Patch
+from matplotlib.lines import Line2D
+matplotlib.use("Agg")
 
 
 # View to start a new simulation
@@ -291,86 +295,143 @@ class PlasmidView(TemplateView):
             raise Http404
         return super().dispatch(request, *args, **kwargs)
 
+    def post(self, request, *args, **kwargs):
+        return self.get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        # Get genbank file
         filename = self.kwargs["filename"]
         base = Path(self.job.template.path).parent
         gb_path = base / "outputs" / f"{filename}.gb"
+        gbk = Genbank(str(gb_path))
 
-        record = SeqIO.read(str(gb_path), "genbank")
+        # Initialize circos instance
+        seqid2size = gbk.get_seqid2size()
+        print(seqid2size)
+        space = 0 if len(seqid2size) == 1 else 2
+        circos = Circos(sectors=seqid2size, space=space)
+        circos.text(f"{filename}", size=12, r=25)
+        seqid2features = gbk.get_seqid2features(feature_type=None)
+        
+        # Get feature types present in the genbank file
+        all_types = set()
+        for features in seqid2features.values():
+            for feature in features:
+                all_types.add(feature.type)
 
-        gd_diagram = GenomeDiagram.Diagram(record.id)
-        gd_track_for_features = gd_diagram.new_track(1, name="Annotated Features")
-        gd_feature_set = gd_track_for_features.new_set()
-        site_track = gd_diagram.new_track(2, name="Restriction sites")
-        site_set = site_track.new_set()
+        # Get selected feature types from the form
+        if self.request.method == "POST":
+            action = self.request.POST.get("action")
+            if action == "clear":
+                selected_types = []
+            elif action == "all":
+                selected_types = sorted(all_types)
+            else:
+                selected_types = self.request.POST.getlist("feature_types")
+        else:
+            selected_types = sorted(all_types)
+       
+        # Assign colors to feature types
+        ColorCycler.set_cmap("tab10")
+        colors = ColorCycler.get_color_list(len(all_types))
+        features_type2color = {type: color for type, color in zip(sorted(all_types), colors)}
 
-        # Features golden
-        features_golden_gate = {
-            "CDS":       colors.lightgreen,
-            "promoter":  colors.lightblue,
-            "terminator": colors.yellow,
-            "RBS":       colors.lightpink,
-        }
-        for feature in record.features:
-            if feature.type not in features_golden_gate.keys():
-                continue
+        # Add features to circos
+        for sector in circos.sectors:
+            features_track = sector.add_track((90, 100))
+            features_track.axis(fc="#EEEEEE", ec="none")
+            features = seqid2features.get(sector.name)
+            features = [f for f in features if f.type in selected_types]
+            dupplicates = set()
 
-            gd_feature_set.add_feature(
-                feature,
-                sigil="ARROW",
-                color=features_golden_gate[feature.type],
-                label=True,
-                label_size=15,
-                label_angle=0,
+            for feature in features:
+                fc = features_type2color.get(feature.type)
+
+                if feature.location.strand == 1:
+                    features_track.genomic_features(feature, plotstyle="arrow", r_lim=(95, 100), fc=fc)
+                else:
+                    features_track.genomic_features(feature, plotstyle="arrow", r_lim=(90, 95), fc=fc)
+
+                start, end = int(feature.location.start), int(feature.location.end)
+                label_pos = (start + end) / 2
+                label = feature.qualifiers.get("label", [""])[0]
+                if label == "":
+                    continue
+                key = (start, end, label)
+                if key in dupplicates:
+                    continue
+                dupplicates.add(key)
+                features_track.annotate(label_pos, label, label_size=10, shorten=None,)
+            
+            # Add ticks to sector
+            features_track.xticks_by_interval(
+                interval=sector.size // 15,
+                outer=False,
+                label_formatter=lambda v: f"{v / 1000:.1f} Kb",
+                label_orientation="vertical",
+                line_kws=dict(ec="grey"),
+                show_endlabel=False,
             )
 
-        # Regonition sites
+        # Potential restriction sites track
         enzymes_golden_gate = {
-            "BsaI":  ("GGTCTC", colors.blue),
-            "Esp3I": ("CGTCTC", colors.purple),
-            "BbsI":  ("GAAGAC", colors.green),
-            "BtgZI": ("GCGATG", colors.red),
-            "AarI":  ("CACCTGC", colors.brown),
-            "BfuAI": ("ACCTGC", colors.green),
-            "BspQI": ("GCTCTTC", colors.orange),
+            "BsaI":  "GGTCTC",
+            "Esp3I": "CGTCTC",
+            "BsmBI-v2": "CGTCTC",
+            "BbsI":  "GAAGAC",
+            "BtgZI": "GCGATG",
+            "AarI":  "CACCTGC",
+            "SapI":  "GCTCTTC",
+            "BspQI": "GCTCTTC",
+            "BfuAI": "ACCTGC",
         }
 
-        for name, (site, color) in enzymes_golden_gate.items():
-            index = 0
+        # Add track to circos
+        seqid2seq = gbk.get_seqid2seq()
+        site_track = sector.add_track((89, 105))
+        site_track.axis(fc="none", ec="none")
+        seq = str(seqid2seq.get(sector.name, ""))
+
+        # Add restriction sites locations
+        for enz_name, motif in enzymes_golden_gate.items():
+            i = 0
             while True:
-                index = record.seq.find(site, start=index)
-                if index == -1:
+                pos = seq.find(motif, i)
+                if pos == -1:
                     break
 
-                feature = SeqFeature(SimpleLocation(index, index + len(site)))
-                site_set.add_feature(
-                    feature=feature,
-                    name=name,
-                    color=color,
-                    label=True,
-                    label_size=20,
-                    label_color=color,
-                )
+                start = pos
+                end = pos + len(motif)
+                mid = (start + end) / 2
+                site_track.genomic_features(SeqFeature(location=SimpleLocation(start, end)), fc="red")
+                site_track.annotate(mid, enz_name, label_size=12, text_kws=dict(color="red"))
+                i = pos + 1
 
-                index += len(site)
+        fig = circos.plotfig()
 
-        gd_diagram.draw(
-            format="circular",
-            circular=True,
-            start=0,
-            end=len(record),
-            circle_core=0.5,
-        )
+        # Add legend
+        handles = [Patch(color=features_type2color[t], label=t) for t in selected_types]
+        handles.append(Line2D([], [], color="red", label="Potential restriction site", marker = "_", ms=6, ls="None"))
+        _ = circos.ax.legend(handles=handles, loc="center", bbox_to_anchor=(0.5, 0.475), fontsize=8)
 
+        # Save figure to SVG
         bio = StringIO()
-        gd_diagram.write(bio, "SVG")
-        svg = bio.getvalue()
+        fig.savefig(bio, format="svg", bbox_inches="tight")
 
-        context["svg"] = svg
-        context["plasmid_name"] = record.id
+        # Return context
+        context["svg"] = bio.getvalue()
         context["job_id"] = self.job.job_id
+        context["feature_types"] = [
+            {
+                "type": t,
+                "selected": t in selected_types,
+                "color": features_type2color[t],
+            }
+            for t in sorted(all_types)
+        ]
+
         context["restriction_sites_sources"] = {
             "BsaI":  "https://enzymefinder.neb.com/#!/name/BsaI",
             "Esp3I": "https://enzymefinder.neb.com/#!/name/Esp3I",
@@ -380,7 +441,7 @@ class PlasmidView(TemplateView):
             "AarI":  "https://enzymefinder.neb.com/#!/name/AarI",
             "BfuAI": "https://enzymefinder.neb.com/#!/name/BfuAI",
             "BspQI": "https://enzymefinder.neb.com/#!/name/BspQI",
-            "BsmAI": "https://enzymefinder.neb.com/#!/name/BsmAI",
-            }
-        
+            "BsmBI-v2": "https://enzymefinder.neb.com/#!/name/BsmBI-v2",
+        }
+
         return context
