@@ -307,9 +307,9 @@ class PlasmidView(TemplateView):
         gb_path = base / "outputs" / f"{filename}.gb"
         gbk = Genbank(str(gb_path))
 
+        # PlASMID VIEWER WITH pyCIRCLIZE, implementation based on : https://moshi4.github.io/pyCirclize/ multiplte examples
         # Initialize circos instance
         seqid2size = gbk.get_seqid2size()
-        print(seqid2size)
         space = 0 if len(seqid2size) == 1 else 2
         circos = Circos(sectors=seqid2size, space=space)
         circos.text(f"{filename}", size=12, r=25)
@@ -319,6 +319,8 @@ class PlasmidView(TemplateView):
         all_types = set()
         for features in seqid2features.values():
             for feature in features:
+                if feature.type in ("source", "gene"):
+                    continue
                 all_types.add(feature.type)
 
         # Get selected feature types from the form
@@ -375,39 +377,50 @@ class PlasmidView(TemplateView):
                 show_endlabel=False,
             )
 
-        # Potential restriction sites track
+        # Potential restriction sites track 
         enzymes_golden_gate = {
-            "BsaI":  "GGTCTC",
-            "Esp3I": "CGTCTC",
-            "BsmBI-v2": "CGTCTC",
-            "BbsI":  "GAAGAC",
-            "BtgZI": "GCGATG",
-            "AarI":  "CACCTGC",
-            "SapI":  "GCTCTTC",
-            "BspQI": "GCTCTTC",
-            "BfuAI": "ACCTGC",
+            # BbsI family
+            "BbsI":      ("GAAGAC",  "GTCTTC"),
+            "BsaI":      ("GGTCTC",  "GAGACC"),
+            "Esp3I":     ("CGTCTC",  "GAGACG"),
+            "SapI":      ("GCTCTTC", "GAAGAGC"),
+            "BtgZI":     ("GCGATG",  "CATCGC"),
+            "PaqCI":     ("CACCTGC", "GCAGGTG"),
         }
 
         # Add track to circos
         seqid2seq = gbk.get_seqid2seq()
         site_track = sector.add_track((89, 105))
         site_track.axis(fc="none", ec="none")
-        seq = str(seqid2seq.get(sector.name, ""))
+        seq = str(seqid2seq.get(sector.name, "")).upper()
 
-        # Add restriction sites locations
-        for enz_name, motif in enzymes_golden_gate.items():
-            i = 0
-            while True:
-                pos = seq.find(motif, i)
-                if pos == -1:
-                    break
+        for enz_name, (motif_fwd, motif_rev) in enzymes_golden_gate.items():
 
-                start = pos
-                end = pos + len(motif)
-                mid = (start + end) / 2
-                site_track.genomic_features(SeqFeature(location=SimpleLocation(start, end)), fc="red")
-                site_track.annotate(mid, enz_name, label_size=12, text_kws=dict(color="red"))
-                i = pos + 1
+            for motif in (motif_fwd, motif_rev):
+                motif = motif.upper()
+                i = 0
+                while True:
+                    pos = seq.find(motif, i)
+                    if pos == -1:
+                        break
+
+                    start = pos
+                    end = pos + len(motif)
+                    mid = (start + end) / 2
+
+                    site_track.genomic_features(
+                        SeqFeature(location=SimpleLocation(start, end)),
+                        fc="red",
+                    )
+
+                    site_track.annotate(
+                        mid,
+                        enz_name,
+                        label_size=12,
+                        text_kws=dict(color="red"),
+                    )
+
+                    i = pos + 1
 
         fig = circos.plotfig()
 
@@ -433,15 +446,8 @@ class PlasmidView(TemplateView):
         ]
 
         context["restriction_sites_sources"] = {
-            "BsaI":  "https://enzymefinder.neb.com/#!/name/BsaI",
-            "Esp3I": "https://enzymefinder.neb.com/#!/name/Esp3I",
-            "BbsI":  "https://enzymefinder.neb.com/#!/name/BbsI",
-            "BtgZI": "https://enzymefinder.neb.com/#!/name/BtgZI",
-            "SapI":  "https://enzymefinder.neb.com/#!/name/SapI",
-            "AarI":  "https://enzymefinder.neb.com/#!/name/AarI",
-            "BfuAI": "https://enzymefinder.neb.com/#!/name/BfuAI",
-            "BspQI": "https://enzymefinder.neb.com/#!/name/BspQI",
-            "BsmBI-v2": "https://enzymefinder.neb.com/#!/name/BsmBI-v2",
+            enz: f"https://www.neb.com/{enz}"
+            for enz in enzymes_golden_gate
         }
 
         return context
