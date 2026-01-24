@@ -9,6 +9,11 @@ from django.utils import timezone
 from browse.models import Assembly
 from .forms import AssemblyForm, InputPartsFormSet
 
+from designer.utils.xlsx_generator import generate_assembly_xlsx
+
+import logging
+logger = logging.getLogger(__name__)
+
 # Session Keys
 SESSION_KEYS = [
     "uploaded_template_path",
@@ -68,7 +73,14 @@ def designer_input_parts(request, pk):
             for obj in instances:
                 obj.assembly = assembly
                 obj.save()
-            formset.save_m2m()  # ← THIS WAS MISSING
+            formset.save_m2m()
+            if not assembly.file:
+                xlsx_content = generate_assembly_xlsx(assembly)
+                assembly.file.save(
+                    f"assembly_{assembly.pk}.xlsx",
+                    xlsx_content,
+                    save=True
+                )   
             return redirect("designer:designer_summary", pk=assembly.pk)
     else:
         formset = InputPartsFormSet(instance=assembly)
@@ -90,7 +102,3 @@ def designer_summary(request, pk):
             "input_parts": input_parts,
         }
     )
-
-
-
-

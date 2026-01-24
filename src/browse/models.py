@@ -51,6 +51,7 @@ class InputParts(models.Model):
     typed = models.BooleanField(default=False)
     mandatory = models.BooleanField(default=True)
     separator = models.CharField(max_length=20, blank=True, null=True, choices=SEPARATOR_CHOICES)
+    include_in_output_name = models.BooleanField(default=False)
     allowed_types = models.ManyToManyField('Type', blank=True)
 
 class Type(models.Model):
