@@ -2,6 +2,9 @@ from openpyxl import Workbook
 from openpyxl.styles import Font
 from django.core.files.base import ContentFile
 from io import BytesIO
+import re
+from collections import OrderedDict
+
 
 def generate_assembly_xlsx(assembly):
     wb = Workbook()
@@ -42,16 +45,12 @@ def generate_assembly_xlsx(assembly):
     buffer.seek(0)
     return ContentFile(buffer.read())
 
-
 def format_types(types_qs):
-    """
-    [1] or [2, 2a, 2b] → "2,[2a, 2b]"
-    """
-    types = [t.type_name for t in types_qs]
-    if not types:
-        return ""
-    main = types[0]
-    subs = types[1:]
-    if subs:
-        return f"{main},[{', '.join(subs)}]"
-    return main
+    temp = []
+    for t in types_qs:
+        name = t.type_name
+        if len(name) == 1:
+            temp.append(name)
+        else:
+            temp.append(f"[{name}]")       
+    return ", ".join(temp)

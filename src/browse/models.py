@@ -30,6 +30,8 @@ class Assembly(models.Model):
     separator = models.CharField(max_length=20, choices=SEPARATOR_CHOICES)
     restriction_enzyme = models.CharField(max_length=50, choices=ENZYME_CHOICES)
     file = models.FileField(upload_to="assemblies/", blank=True, null=True)
+    def __str__(self):
+        return self.name
 
 class InputParts(models.Model):
     SEPARATOR_CHOICES = [
@@ -56,3 +58,5 @@ class InputParts(models.Model):
 
 class Type(models.Model):
     type_name = models.CharField(max_length=50)
+    def __str__(self):
+        return self.type_name
