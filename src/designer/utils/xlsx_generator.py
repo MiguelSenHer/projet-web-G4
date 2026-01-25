@@ -2,8 +2,6 @@ from openpyxl import Workbook
 from openpyxl.styles import Font
 from django.core.files.base import ContentFile
 from io import BytesIO
-import re
-from collections import OrderedDict
 
 
 def generate_assembly_xlsx(assembly):
