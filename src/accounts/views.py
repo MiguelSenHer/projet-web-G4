@@ -9,8 +9,11 @@ from django.conf import settings
 from django.core.mail import EmailMessage
 from django.urls import reverse
 from .forms import SignUpForm
-from .models import PasswordReset
+from .models import PasswordReset, Team, TeamMembership
 from django.db.models import Q
+from django.db import transaction
+from django.db import IntegrityError
+from django.db.models import Case, When, IntegerField
 
 User = get_user_model()
 
@@ -210,16 +213,61 @@ def profile_view(request):
 # -----------------------
 # TEAMS PAGES
 # -----------------------
+
 @login_required
 def teams_view(request):
-    return render(request, "accounts/teams.html")
+    # All memberships of the current user
+    memberships = (
+        TeamMembership.objects
+        .select_related("team")
+        .filter(user=request.user)
+    )
 
+    teams_data = []
+
+    for membership in memberships:
+        team = membership.team
+
+        # All members of the team, leader first
+        members = (
+            team.memberships
+            .select_related("user")
+            .annotate(
+                role_order=Case(
+                    When(role=TeamMembership.Role.LEADER, then=0),
+                    default=1,
+                    output_field=IntegerField(),
+                )
+            )
+            .order_by("role_order", "joined_at")
+        )
+
+        teams_data.append({
+            "team": team,
+            "my_role": membership.role,
+            "members_preview": members[:3],
+            "members_count": members.count(),
+            "is_leader": membership.role == TeamMembership.Role.LEADER,
+        })
+
+    return render(
+        request,
+        "accounts/teams.html",
+        {"teams_data": teams_data},
+    )
 
 @login_required
 def teams_create_view(request):
     q = request.GET.get("user_q", "").strip()
-    users = []
 
+    # Selected users stored in session
+    selected_ids = request.session.get("team_selected_ids", [])
+    selected_ids = [int(x) for x in selected_ids if str(x).isdigit()]
+    request.session["team_selected_ids"] = selected_ids
+
+    selected_users = User.objects.filter(id__in=selected_ids).order_by("email")
+
+    users = []
     if q:
         users = (
             User.objects
@@ -229,35 +277,72 @@ def teams_create_view(request):
                 Q(first_name__icontains=q) |
                 Q(last_name__icontains=q)
             )
-            .exclude(pk=request.user.pk)
+            .exclude(pk=request.user.pk)        
+            .exclude(id__in=selected_ids)         # hide already selected users
             .order_by("email")[:20]
         )
 
-    # no DB yet
-    selected_ids = request.session.get("team_selected_ids", [])
-    selected_users = User.objects.filter(id__in=selected_ids).order_by("email")
-
-    # add remove membersss
     if request.method == "POST":
-        action = request.POST.get("action")
-        user_id = request.POST.get("user_id")
+        action = request.POST.get("action", "").strip()
 
-        if user_id and user_id.isdigit():
-            user_id = int(user_id)
+        # 1) Add/remove members
+        if action in {"add", "remove"}:
+            user_id = request.POST.get("user_id")
 
-            if action == "add":
-                if user_id not in selected_ids:
-                    selected_ids.append(user_id)
-                    request.session["team_selected_ids"] = selected_ids
-                    messages.success(request, "Member added.")
-                return redirect(f"{request.path}?user_q={q}")
+            if user_id and user_id.isdigit():
+                user_id = int(user_id)
 
-            if action == "remove":
-                if user_id in selected_ids:
-                    selected_ids.remove(user_id)
-                    request.session["team_selected_ids"] = selected_ids
-                    messages.success(request, "Member removed.")
-                return redirect(f"{request.path}?user_q={q}")
+                if action == "add":
+                    if user_id not in selected_ids:
+                        selected_ids.append(user_id)
+                        request.session["team_selected_ids"] = selected_ids
+                        messages.success(request, "Member added.")
+                    return redirect(f"{request.path}?user_q={q}")
+
+                if action == "remove":
+                    if user_id in selected_ids:
+                        selected_ids.remove(user_id)
+                        request.session["team_selected_ids"] = selected_ids
+                        messages.success(request, "Member removed.")
+                    return redirect(f"{request.path}?user_q={q}")
+
+            messages.error(request, "Invalid member action.")
+            return redirect(request.path)
+
+        # 2) Create the team in DB
+        if action == "create_team":
+            team_name = request.POST.get("team_name", "").strip()
+
+            if not team_name:
+                messages.error(request, "Please provide a team name.")
+                return redirect(request.path)
+            try:
+                with transaction.atomic():
+                    team = Team.objects.create(name=team_name, teamleader=request.user)
+
+                    # Owner becomes leader (and also a member)
+                    TeamMembership.objects.create(
+                        team=team,
+                        user=request.user,
+                        role=TeamMembership.Role.LEADER,
+                    )
+
+                    # Add selected users as members
+                    for u in selected_users:
+                        TeamMembership.objects.get_or_create(
+                            team=team,
+                            user=u,
+                            defaults={"role": TeamMembership.Role.MEMBER},
+                        )
+
+                # Clear session selection after successful creation
+                request.session["team_selected_ids"] = []
+                messages.success(request, "Team created successfully.")
+                return redirect("teams")
+
+            except IntegrityError as e:
+                messages.error(request, str(e))
+                return redirect(request.path)
 
         messages.error(request, "Invalid action.")
         return redirect(request.path)
@@ -268,6 +353,6 @@ def teams_create_view(request):
         {
             "users": users,
             "selected_users": selected_users,
+            "user_q": q,
         },
     )
-

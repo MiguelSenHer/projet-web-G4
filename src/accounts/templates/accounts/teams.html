@@ -6,81 +6,97 @@ Manage Teams - InSillyClo
 
 {% block content %}
 
-<!-- need to load teams of the user from the database -->
-
 <section class="login-section">
 
+  <!-- CREATE TEAM -->
   <div class="container mb-5">
     <h2 class="panel-title mb-2">CREATE TEAMS</h2>
-    <div class="row g-4">
-
-      <div class="col-lg-12">
-        <div class="login-panel profile-card h-100">
-
-          <a href="{% url 'teams_create' %}" class="btn-create" style="text-decoration: none; text-align: center;">
-            NEW TEAM
-          </a>
-
-        </div>
+    <div class="card team-card">
+      <div class="card-body">
+        <a href="{% url 'teams_create' %}" class="btn-create text-center">
+          NEW TEAM
+        </a>
       </div>
     </div>
   </div>
+
+  <!-- MY TEAMS -->
   <div class="container">
     <h2 class="panel-title mb-2">MY TEAMS</h2>
 
     <div class="row g-4">
+      {% for item in teams_data %}
+        <div class="col-lg-12">
+          <div class="card team-card">
+            <div class="card-body">
 
-      <!-- Team Card -->
-      <div class="col-lg-12">
-        <div class="login-panel profile-card h-100">
+              <!-- HEADER -->
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                  <h3 class="mb-1">{{ item.team.name }}</h3>
+                  <p class="mb-0">
+                    Role:
+                    <strong>
+                      {% if item.is_leader %}Leader{% else %}Member{% endif %}
+                    </strong>
+                  </p>
+                </div>
 
-          <h3 class="mb-1">Synthetic Biology Team</h3>
-          <p class="text-muted mb-2">
-            Role: <strong>Admin</strong>
-          </p>
+                {% if item.is_leader %}
+                  <a href="#" class="team-action-btn">
+                    <span>Manage team</span>
+                    <span class="icon">⚙</span>
+                  </a>
+                {% else %}
+                  <span class="team-action-btn">
+                    <span>Check team</span>
+                    <span class="icon">👁</span>
+                  </span>
+                {% endif %}
+              </div>
 
-          <hr>
+              <hr>
 
-          <h6>Members</h6>
-          <ul class="mb-3">
-            <li>Julie Fares — Admin</li>
-            <li>Kevin Martin — Member</li>
-            <li>Ugo Bernard — Member</li>
-          </ul>
+              <!-- MEMBERS -->
+              <h6>Members</h6>
+              <ul class="mb-3">
+                {% for membership in item.members_preview %}
+                  <li>
+                    {{ membership.user.get_full_name|default:membership.user.email }}
+                    —
+                    {% if membership.role == "LEADER" %}
+                      Leader
+                    {% else %}
+                      Member
+                    {% endif %}
+                  </li>
+                {% endfor %}
+              </ul>
 
-          <a href="#" class="btn-login-sm">
-            ADD MEMBER
-          </a>
+              {% if item.members_count > 3 %}
+                <button
+                  class="btn btn-link p-0 small"
+                  data-team-id="{{ item.team.id }}"
+                  data-bs-toggle="modal"
+                  data-bs-target="#teamModal">
+                  See more
+                </button>
+              {% endif %}
 
+            </div>
+          </div>
         </div>
-      </div>
-
-      <!-- Another Team -->
-      <div class="col-lg-12">
-        <div class="login-panel profile-card h-100">
-
-          <h3 class="mb-1">MoClo Project</h3>
-          <p class="text-muted mb-2">
-            Role: <strong>Member</strong>
-          </p>
-
-          <hr>
-
-          <h6>Members</h6>
-          <ul class="mb-3">
-            <li>Julie Fares — Member</li>
-            <li>Sarah Something — Chef</li>
-          </ul>
-
-          <a href="#" class="btn-login-sm disabled">
-            ADD MEMBER
-          </a>
-
-        </div>
-      </div>
-
+      {% empty %}
+        <p>You are not a member of any team yet.</p>
+      {% endfor %}
     </div>
   </div>
+
+
+    <div class="text-center mt-4">
+    <a href="{% url 'profile' %}" class="text-muted" style="text-decoration: none;">← Back to profile</a>
+    </div>
+
 </section>
 
 {% endblock %}
