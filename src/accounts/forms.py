@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
-
+from .models import Team
 
 # Internal validation using django before views processing
 # cleaning the data and raising ValidationError if needed
@@ -200,3 +200,11 @@ class ProfilePasswordForm(forms.Form):
         if cleaned_data.get("new_password1") != cleaned_data.get("new_password2"):
             raise forms.ValidationError("New passwords do not match.")
         return cleaned_data
+
+# =========================
+# TEAM CREATION FORM
+# =========================
+class TeamCreateForm(forms.ModelForm):
+    class Meta:
+        model = Team
+        fields = ["name"]

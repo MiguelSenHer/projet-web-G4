@@ -725,7 +725,7 @@ form .btn-simulator:focus,
 .profile-collapse {
   border: 1px solid #0b2d5c;
   border-radius: 10px;
-  background: #fffaf5;
+  background: #fff;
   overflow: hidden;
 }
 
@@ -744,7 +744,7 @@ form .btn-simulator:focus,
   justify-content: space-between;
   padding: 14px 16px;
   border-bottom: 1px solid #0b2d5c;
-  background: #fffaf5;
+  background: #fff;
 }
 
 .profile-collapse-title {
@@ -775,4 +775,32 @@ form .btn-simulator:focus,
 
 .profile-collapse-body {
   padding: 16px;
+}
+
+/* Team action button (text + icon inside) */
+.team-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background-color: #0b2d5c;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 4px 10px rgba(11, 45, 92, 0.2);
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+
+.team-action-btn .icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.team-action-btn:hover {
+  background-color: #101f35;
+  color: #fff;
+  transform: translateY(-1px);
 }/*# sourceMappingURL=styles.css.map */
