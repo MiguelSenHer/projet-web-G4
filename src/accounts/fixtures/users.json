@@ -21,8 +21,8 @@
   "model": "auth.user",
   "pk": 2,
   "fields": {
-    "password": "pbkdf2_sha256$870000$uiLGz4z58EdVTXTNhZAZVi$lJ4pGIEKojg6bHAGfmjBtXg1CkJhy39hxBPkddHTjns=",
-    "last_login": "2026-01-13T23:40:08.385Z",
+    "password": "pbkdf2_sha256$870000$1bGnmc90OY9vLj6c76bdjs$N9fM/3S2BX4UBYngleFYsqB7jKukB2kz7G9Gxi4b/wc=",
+    "last_login": "2026-01-27T20:43:45.388Z",
     "is_superuser": false,
     "username": "julie.fares23@gmail.com",
     "first_name": "Julie",
@@ -67,6 +67,24 @@
     "is_staff": true,
     "is_active": true,
     "date_joined": "2026-01-27T12:42:01.157Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 6,
+  "fields": {
+    "password": "pbkdf2_sha256$870000$lA9VM2FnaA48scLdYeHJmZ$yURumoIrKcTkQu2SNyT70Ep+DJoOXEvJy1SJavRkSJA=",
+    "last_login": "2026-01-27T20:46:14.622Z",
+    "is_superuser": false,
+    "username": "marie.dupont26@gmail.com",
+    "first_name": "Marie",
+    "last_name": "Dupont",
+    "email": "marie.dupont26@gmail.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-01-27T20:46:12.617Z",
     "groups": [],
     "user_permissions": []
   }
