@@ -3,264 +3,12 @@
     "model": "browse.assembly",
     "pk": 1,
     "fields": {
-        "name": "mimimumu",
-        "comment": "",
-        "creation_date": "2026-01-24T16:41:32.158Z",
-        "separator": ".",
-        "restriction_enzyme": "SapI",
-        "file": ""
-    }
-},
-{
-    "model": "browse.assembly",
-    "pk": 2,
-    "fields": {
-        "name": "333333",
-        "comment": "",
-        "creation_date": "2026-01-24T16:52:27.860Z",
-        "separator": ",",
-        "restriction_enzyme": "BsmBI",
-        "file": ""
-    }
-},
-{
-    "model": "browse.assembly",
-    "pk": 3,
-    "fields": {
-        "name": "777",
-        "comment": "",
-        "creation_date": "2026-01-24T16:58:33.045Z",
-        "separator": "-",
-        "restriction_enzyme": "BsmBI",
-        "file": "assemblies/assembly_3.xlsx"
-    }
-},
-{
-    "model": "browse.assembly",
-    "pk": 4,
-    "fields": {
-        "name": "pussi",
-        "comment": "",
-        "creation_date": "2026-01-24T17:12:54.992Z",
-        "separator": "\\",
-        "restriction_enzyme": "BbsI",
-        "file": ""
-    }
-},
-{
-    "model": "browse.assembly",
-    "pk": 5,
-    "fields": {
-        "name": "jaja",
-        "comment": "",
-        "creation_date": "2026-01-24T17:16:20.125Z",
-        "separator": "~",
-        "restriction_enzyme": "BsmBI",
-        "file": ""
-    }
-},
-{
-    "model": "browse.assembly",
-    "pk": 6,
-    "fields": {
-        "name": "jaja",
-        "comment": "lord",
-        "creation_date": "2026-01-24T17:19:29.676Z",
-        "separator": "~",
-        "restriction_enzyme": "BsmBI",
-        "file": ""
-    }
-},
-{
-    "model": "browse.assembly",
-    "pk": 7,
-    "fields": {
-        "name": "AAAAA",
-        "comment": "",
-        "creation_date": "2026-01-24T17:21:00.222Z",
-        "separator": "_",
-        "restriction_enzyme": "BbsI",
-        "file": "assemblies/assembly_7.xlsx"
-    }
-},
-{
-    "model": "browse.assembly",
-    "pk": 8,
-    "fields": {
-        "name": "bbbbbb",
-        "comment": "",
-        "creation_date": "2026-01-24T17:25:52.341Z",
-        "separator": "/",
-        "restriction_enzyme": "BsaI",
-        "file": "assemblies/assembly_8.xlsx"
-    }
-},
-{
-    "model": "browse.assembly",
-    "pk": 9,
-    "fields": {
-        "name": "minino",
-        "comment": "LOVE",
-        "creation_date": "2026-01-25T13:11:43.427Z",
-        "separator": "_",
-        "restriction_enzyme": "BbsI",
-        "file": ""
-    }
-},
-{
-    "model": "browse.assembly",
-    "pk": 10,
-    "fields": {
-        "name": "vvvv",
-        "comment": "",
-        "creation_date": "2026-01-25T13:13:46.103Z",
-        "separator": ";",
-        "restriction_enzyme": "BsmBI",
-        "file": "assemblies/assembly_10.xlsx"
-    }
-},
-{
-    "model": "browse.assembly",
-    "pk": 11,
-    "fields": {
-        "name": "juju",
-        "comment": "",
-        "creation_date": "2026-01-25T13:17:19.125Z",
-        "separator": ";",
-        "restriction_enzyme": "BbsI",
-        "file": ""
-    }
-},
-{
-    "model": "browse.assembly",
-    "pk": 12,
-    "fields": {
-        "name": "mmmm",
-        "comment": "",
-        "creation_date": "2026-01-25T13:29:36.018Z",
-        "separator": ".",
-        "restriction_enzyme": "SapI",
-        "file": ""
-    }
-},
-{
-    "model": "browse.assembly",
-    "pk": 13,
-    "fields": {
-        "name": "tyty",
-        "comment": "",
-        "creation_date": "2026-01-25T13:35:38.600Z",
-        "separator": "~",
-        "restriction_enzyme": "BsmBI",
-        "file": "assemblies/assembly_13.xlsx"
-    }
-},
-{
-    "model": "browse.assembly",
-    "pk": 14,
-    "fields": {
-        "name": "iiii",
-        "comment": "",
-        "creation_date": "2026-01-25T13:39:12.509Z",
-        "separator": "_",
-        "restriction_enzyme": "BbsI",
-        "file": "assemblies/assembly_14.xlsx"
-    }
-},
-{
-    "model": "browse.assembly",
-    "pk": 15,
-    "fields": {
-        "name": "mmm",
-        "comment": "",
-        "creation_date": "2026-01-25T13:40:58.299Z",
-        "separator": "~",
-        "restriction_enzyme": "BsmBI",
-        "file": ""
-    }
-},
-{
-    "model": "browse.assembly",
-    "pk": 16,
-    "fields": {
-        "name": "mfnf",
-        "comment": "",
-        "creation_date": "2026-01-25T13:46:30.746Z",
-        "separator": "_",
-        "restriction_enzyme": "BbsI",
-        "file": ""
-    }
-},
-{
-    "model": "browse.assembly",
-    "pk": 17,
-    "fields": {
-        "name": "nn",
-        "comment": "",
-        "creation_date": "2026-01-25T13:48:10.575Z",
-        "separator": ".",
-        "restriction_enzyme": "BbsI",
-        "file": ""
-    }
-},
-{
-    "model": "browse.assembly",
-    "pk": 18,
-    "fields": {
-        "name": "cc",
-        "comment": "",
-        "creation_date": "2026-01-25T13:50:45.372Z",
-        "separator": ".",
-        "restriction_enzyme": "BsmBI",
-        "file": ""
-    }
-},
-{
-    "model": "browse.assembly",
-    "pk": 19,
-    "fields": {
-        "name": "final",
-        "comment": "",
-        "creation_date": "2026-01-25T13:53:14.222Z",
-        "separator": ".",
-        "restriction_enzyme": "BbsI",
-        "file": "assemblies/assembly_19.xlsx"
-    }
-},
-{
-    "model": "browse.assembly",
-    "pk": 20,
-    "fields": {
-        "name": "snsns",
-        "comment": "",
-        "creation_date": "2026-01-25T13:55:31.210Z",
+        "name": "YTK_L1",
+        "comment": "https://www.addgene.org/kits/moclo-ytk/",
+        "creation_date": "2026-01-27T22:02:00Z",
         "separator": "-",
         "restriction_enzyme": "BsaI",
-        "file": "assemblies/assembly_20.xlsx"
-    }
-},
-{
-    "model": "browse.assembly",
-    "pk": 21,
-    "fields": {
-        "name": "mmmm",
-        "comment": "",
-        "creation_date": "2026-01-25T14:00:58.152Z",
-        "separator": "~",
-        "restriction_enzyme": "BsmBI",
-        "file": "assemblies/assembly_21.xlsx"
-    }
-},
-{
-    "model": "browse.assembly",
-    "pk": 22,
-    "fields": {
-        "name": "sus",
-        "comment": "",
-        "creation_date": "2026-01-25T16:24:01.808Z",
-        "separator": "-",
-        "restriction_enzyme": "BbsI",
-        "file": "assemblies/assembly_22.xlsx"
+        "file": "browse/public_data/assemblies/Campaign_display_L1.xlsx"
     }
 },
 {
@@ -268,10 +16,10 @@
     "pk": 1,
     "fields": {
         "assembly": 1,
-        "part_name": "input part1",
-        "typed": false,
-        "mandatory": true,
-        "separator": "=",
+        "part_name": "ConI",
+        "typed": true,
+        "mandatory": false,
+        "separator": null,
         "include_in_output_name": false,
         "allowed_types": []
     }
@@ -281,192 +29,10 @@
     "pk": 2,
     "fields": {
         "assembly": 1,
-        "part_name": "input part2",
-        "typed": true,
-        "mandatory": false,
-        "separator": "_",
-        "include_in_output_name": false,
-        "allowed_types": []
-    }
-},
-{
-    "model": "browse.inputparts",
-    "pk": 3,
-    "fields": {
-        "assembly": 2,
-        "part_name": "only1111",
+        "part_name": "Promoter",
         "typed": false,
-        "mandatory": true,
-        "separator": "+",
-        "include_in_output_name": false,
-        "allowed_types": []
-    }
-},
-{
-    "model": "browse.inputparts",
-    "pk": 4,
-    "fields": {
-        "assembly": 3,
-        "part_name": "lolol",
-        "typed": true,
-        "mandatory": true,
-        "separator": "-",
-        "include_in_output_name": false,
-        "allowed_types": []
-    }
-},
-{
-    "model": "browse.inputparts",
-    "pk": 5,
-    "fields": {
-        "assembly": 3,
-        "part_name": "uuu",
-        "typed": false,
-        "mandatory": true,
-        "separator": "~",
-        "include_in_output_name": false,
-        "allowed_types": []
-    }
-},
-{
-    "model": "browse.inputparts",
-    "pk": 6,
-    "fields": {
-        "assembly": 3,
-        "part_name": "lolol",
-        "typed": true,
-        "mandatory": true,
-        "separator": "-",
-        "include_in_output_name": false,
-        "allowed_types": []
-    }
-},
-{
-    "model": "browse.inputparts",
-    "pk": 7,
-    "fields": {
-        "assembly": 3,
-        "part_name": "uuu999999",
-        "typed": false,
-        "mandatory": true,
-        "separator": "~",
-        "include_in_output_name": false,
-        "allowed_types": []
-    }
-},
-{
-    "model": "browse.inputparts",
-    "pk": 8,
-    "fields": {
-        "assembly": 3,
-        "part_name": "lolol",
-        "typed": true,
-        "mandatory": true,
-        "separator": "-",
-        "include_in_output_name": false,
-        "allowed_types": []
-    }
-},
-{
-    "model": "browse.inputparts",
-    "pk": 9,
-    "fields": {
-        "assembly": 3,
-        "part_name": "00000",
-        "typed": false,
-        "mandatory": true,
-        "separator": "~",
-        "include_in_output_name": false,
-        "allowed_types": []
-    }
-},
-{
-    "model": "browse.inputparts",
-    "pk": 10,
-    "fields": {
-        "assembly": 4,
-        "part_name": "uuu",
-        "typed": false,
-        "mandatory": true,
-        "separator": ":",
-        "include_in_output_name": false,
-        "allowed_types": []
-    }
-},
-{
-    "model": "browse.inputparts",
-    "pk": 11,
-    "fields": {
-        "assembly": 4,
-        "part_name": "oiop",
-        "typed": true,
-        "mandatory": true,
-        "separator": ";",
-        "include_in_output_name": false,
-        "allowed_types": []
-    }
-},
-{
-    "model": "browse.inputparts",
-    "pk": 12,
-    "fields": {
-        "assembly": 7,
-        "part_name": "0000",
-        "typed": false,
-        "mandatory": true,
-        "separator": "\\",
-        "include_in_output_name": true,
-        "allowed_types": []
-    }
-},
-{
-    "model": "browse.inputparts",
-    "pk": 13,
-    "fields": {
-        "assembly": 7,
-        "part_name": "909099999",
-        "typed": true,
         "mandatory": true,
         "separator": ".",
-        "include_in_output_name": false,
-        "allowed_types": []
-    }
-},
-{
-    "model": "browse.inputparts",
-    "pk": 14,
-    "fields": {
-        "assembly": 8,
-        "part_name": "iiiii",
-        "typed": true,
-        "mandatory": false,
-        "separator": "~",
-        "include_in_output_name": true,
-        "allowed_types": []
-    }
-},
-{
-    "model": "browse.inputparts",
-    "pk": 15,
-    "fields": {
-        "assembly": 8,
-        "part_name": "6666888888",
-        "typed": false,
-        "mandatory": true,
-        "separator": "\\",
-        "include_in_output_name": false,
-        "allowed_types": []
-    }
-},
-{
-    "model": "browse.inputparts",
-    "pk": 16,
-    "fields": {
-        "assembly": 10,
-        "part_name": "jjjj",
-        "typed": false,
-        "mandatory": true,
-        "separator": null,
         "include_in_output_name": false,
         "allowed_types": [
             1,
@@ -476,10 +42,42 @@
 },
 {
     "model": "browse.inputparts",
-    "pk": 17,
+    "pk": 3,
     "fields": {
-        "assembly": 13,
-        "part_name": "mmmmm",
+        "assembly": 1,
+        "part_name": "Gene",
+        "typed": false,
+        "mandatory": true,
+        "separator": ".",
+        "include_in_output_name": false,
+        "allowed_types": [
+            3,
+            4
+        ]
+    }
+},
+{
+    "model": "browse.inputparts",
+    "pk": 4,
+    "fields": {
+        "assembly": 1,
+        "part_name": "Terminator",
+        "typed": false,
+        "mandatory": true,
+        "separator": ".",
+        "include_in_output_name": false,
+        "allowed_types": [
+            5,
+            6
+        ]
+    }
+},
+{
+    "model": "browse.inputparts",
+    "pk": 5,
+    "fields": {
+        "assembly": 1,
+        "part_name": "Conr",
         "typed": true,
         "mandatory": false,
         "separator": null,
@@ -489,114 +87,17 @@
 },
 {
     "model": "browse.inputparts",
-    "pk": 18,
+    "pk": 6,
     "fields": {
-        "assembly": 14,
-        "part_name": "nnnn",
-        "typed": false,
-        "mandatory": true,
-        "separator": "~",
-        "include_in_output_name": false,
-        "allowed_types": []
-    }
-},
-{
-    "model": "browse.inputparts",
-    "pk": 19,
-    "fields": {
-        "assembly": 14,
-        "part_name": "mmm",
-        "typed": true,
-        "mandatory": true,
-        "separator": ".",
-        "include_in_output_name": true,
-        "allowed_types": []
-    }
-},
-{
-    "model": "browse.inputparts",
-    "pk": 20,
-    "fields": {
-        "assembly": 19,
-        "part_name": "cc",
-        "typed": true,
-        "mandatory": true,
-        "separator": ":",
-        "include_in_output_name": false,
-        "allowed_types": [
-            1,
-            2,
-            3
-        ]
-    }
-},
-{
-    "model": "browse.inputparts",
-    "pk": 21,
-    "fields": {
-        "assembly": 20,
-        "part_name": "ddd",
-        "typed": true,
-        "mandatory": true,
-        "separator": ".",
-        "include_in_output_name": false,
-        "allowed_types": [
-            1,
-            2,
-            3,
-            4
-        ]
-    }
-},
-{
-    "model": "browse.inputparts",
-    "pk": 22,
-    "fields": {
-        "assembly": 21,
-        "part_name": "nn",
+        "assembly": 1,
+        "part_name": "Backbone",
         "typed": false,
         "mandatory": true,
         "separator": ".",
         "include_in_output_name": false,
         "allowed_types": [
-            1,
-            2,
-            3,
-            4
-        ]
-    }
-},
-{
-    "model": "browse.inputparts",
-    "pk": 23,
-    "fields": {
-        "assembly": 22,
-        "part_name": "eee",
-        "typed": true,
-        "mandatory": true,
-        "separator": "/",
-        "include_in_output_name": false,
-        "allowed_types": [
-            1,
-            2,
-            3,
-            4
-        ]
-    }
-},
-{
-    "model": "browse.inputparts",
-    "pk": 24,
-    "fields": {
-        "assembly": 22,
-        "part_name": "eres",
-        "typed": true,
-        "mandatory": true,
-        "separator": "=",
-        "include_in_output_name": false,
-        "allowed_types": [
-            2,
-            3
+            7,
+            8
         ]
     }
 },
@@ -604,28 +105,56 @@
     "model": "browse.type",
     "pk": 1,
     "fields": {
-        "type_name": "1"
+        "type_name": "2"
     }
 },
 {
     "model": "browse.type",
     "pk": 2,
     "fields": {
-        "type_name": "1a, 1b"
+        "type_name": "2a, 2b"
     }
 },
 {
     "model": "browse.type",
     "pk": 3,
     "fields": {
-        "type_name": "4a, 4b, 4c"
+        "type_name": "3"
     }
 },
 {
     "model": "browse.type",
     "pk": 4,
     "fields": {
+        "type_name": "3a, 3b"
+    }
+},
+{
+    "model": "browse.type",
+    "pk": 5,
+    "fields": {
+        "type_name": "4"
+    }
+},
+{
+    "model": "browse.type",
+    "pk": 6,
+    "fields": {
+        "type_name": "4a, 4b"
+    }
+},
+{
+    "model": "browse.type",
+    "pk": 7,
+    "fields": {
         "type_name": "6"
+    }
+},
+{
+    "model": "browse.type",
+    "pk": 8,
+    "fields": {
+        "type_name": "6a, 6b, 6c"
     }
 }
 ]
