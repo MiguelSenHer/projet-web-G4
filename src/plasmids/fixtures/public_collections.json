@@ -1,0 +1,2152 @@
+[
+{
+  "model": "plasmids.collection",
+  "pk": 3,
+  "fields": {
+    "owner": 5,
+    "name": "pMISC",
+    "is_public": true,
+    "created_at": "2026-01-27T13:01:10.956Z"
+  }
+},
+{
+  "model": "plasmids.collection",
+  "pk": 4,
+  "fields": {
+    "owner": 5,
+    "name": "pMYTK",
+    "is_public": true,
+    "created_at": "2026-01-27T13:01:20.345Z"
+  }
+},
+{
+  "model": "plasmids.collection",
+  "pk": 5,
+  "fields": {
+    "owner": 5,
+    "name": "pYS",
+    "is_public": true,
+    "created_at": "2026-01-27T13:01:29.967Z"
+  }
+},
+{
+  "model": "plasmids.collection",
+  "pk": 6,
+  "fields": {
+    "owner": 5,
+    "name": "pYTK",
+    "is_public": true,
+    "created_at": "2026-01-27T13:01:43.932Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 80,
+  "fields": {
+    "collection": 3,
+    "name": "pUPR066",
+    "gb_path": "public_data/collections/pMISC/pUPR066.gb",
+    "created_at": "2026-01-27T13:05:44.137Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 81,
+  "fields": {
+    "collection": 3,
+    "name": "pCDE067",
+    "gb_path": "public_data/collections/pMISC/pCDE067.gb",
+    "created_at": "2026-01-27T13:05:44.142Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 82,
+  "fields": {
+    "collection": 3,
+    "name": "pCDE068",
+    "gb_path": "public_data/collections/pMISC/pCDE068.gb",
+    "created_at": "2026-01-27T13:05:44.145Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 83,
+  "fields": {
+    "collection": 3,
+    "name": "pCDE069",
+    "gb_path": "public_data/collections/pMISC/pCDE069.gb",
+    "created_at": "2026-01-27T13:05:44.149Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 84,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT016",
+    "gb_path": "public_data/collections/pMYTK/pMYT016.gb",
+    "created_at": "2026-01-27T13:05:44.153Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 85,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT047",
+    "gb_path": "public_data/collections/pMYTK/pMYT047.gb",
+    "created_at": "2026-01-27T13:05:44.156Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 86,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT080",
+    "gb_path": "public_data/collections/pMYTK/pMYT080.gb",
+    "created_at": "2026-01-27T13:05:44.159Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 87,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT073",
+    "gb_path": "public_data/collections/pMYTK/pMYT073.gb",
+    "created_at": "2026-01-27T13:05:44.161Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 88,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT022",
+    "gb_path": "public_data/collections/pMYTK/pMYT022.gb",
+    "created_at": "2026-01-27T13:05:44.165Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 89,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT063",
+    "gb_path": "public_data/collections/pMYTK/pMYT063.gb",
+    "created_at": "2026-01-27T13:05:44.166Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 90,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT090",
+    "gb_path": "public_data/collections/pMYTK/pMYT090.gb",
+    "created_at": "2026-01-27T13:05:44.168Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 91,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT057",
+    "gb_path": "public_data/collections/pMYTK/pMYT057.gb",
+    "created_at": "2026-01-27T13:05:44.170Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 92,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT006",
+    "gb_path": "public_data/collections/pMYTK/pMYT006.gb",
+    "created_at": "2026-01-27T13:05:44.174Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 93,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT084",
+    "gb_path": "public_data/collections/pMYTK/pMYT084.gb",
+    "created_at": "2026-01-27T13:05:44.177Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 94,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT077",
+    "gb_path": "public_data/collections/pMYTK/pMYT077.gb",
+    "created_at": "2026-01-27T13:05:44.179Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 95,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT043",
+    "gb_path": "public_data/collections/pMYTK/pMYT043.gb",
+    "created_at": "2026-01-27T13:05:44.181Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 96,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT012",
+    "gb_path": "public_data/collections/pMYTK/pMYT012.gb",
+    "created_at": "2026-01-27T13:05:44.184Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 97,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT002",
+    "gb_path": "public_data/collections/pMYTK/pMYT002.gb",
+    "created_at": "2026-01-27T13:05:44.188Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 98,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT053",
+    "gb_path": "public_data/collections/pMYTK/pMYT053.gb",
+    "created_at": "2026-01-27T13:05:44.190Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 99,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT067",
+    "gb_path": "public_data/collections/pMYTK/pMYT067.gb",
+    "created_at": "2026-01-27T13:05:44.193Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 100,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT036",
+    "gb_path": "public_data/collections/pMYTK/pMYT036.gb",
+    "created_at": "2026-01-27T13:05:44.195Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 101,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT094",
+    "gb_path": "public_data/collections/pMYTK/pMYT094.gb",
+    "created_at": "2026-01-27T13:05:44.199Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 102,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT085",
+    "gb_path": "public_data/collections/pMYTK/pMYT085.gb",
+    "created_at": "2026-01-27T13:05:44.202Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 103,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT076",
+    "gb_path": "public_data/collections/pMYTK/pMYT076.gb",
+    "created_at": "2026-01-27T13:05:44.205Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 104,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT042",
+    "gb_path": "public_data/collections/pMYTK/pMYT042.gb",
+    "created_at": "2026-01-27T13:05:44.208Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 105,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT013",
+    "gb_path": "public_data/collections/pMYTK/pMYT013.gb",
+    "created_at": "2026-01-27T13:05:44.212Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 106,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT003",
+    "gb_path": "public_data/collections/pMYTK/pMYT003.gb",
+    "created_at": "2026-01-27T13:05:44.214Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 107,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT052",
+    "gb_path": "public_data/collections/pMYTK/pMYT052.gb",
+    "created_at": "2026-01-27T13:05:44.217Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 108,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT066",
+    "gb_path": "public_data/collections/pMYTK/pMYT066.gb",
+    "created_at": "2026-01-27T13:05:44.220Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 109,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT037",
+    "gb_path": "public_data/collections/pMYTK/pMYT037.gb",
+    "created_at": "2026-01-27T13:05:44.222Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 110,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT095",
+    "gb_path": "public_data/collections/pMYTK/pMYT095.gb",
+    "created_at": "2026-01-27T13:05:44.225Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 111,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT017",
+    "gb_path": "public_data/collections/pMYTK/pMYT017.gb",
+    "created_at": "2026-01-27T13:05:44.228Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 112,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT046",
+    "gb_path": "public_data/collections/pMYTK/pMYT046.gb",
+    "created_at": "2026-01-27T13:05:44.230Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 113,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT081",
+    "gb_path": "public_data/collections/pMYTK/pMYT081.gb",
+    "created_at": "2026-01-27T13:05:44.233Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 114,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT072",
+    "gb_path": "public_data/collections/pMYTK/pMYT072.gb",
+    "created_at": "2026-01-27T13:05:44.236Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 115,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT023",
+    "gb_path": "public_data/collections/pMYTK/pMYT023.gb",
+    "created_at": "2026-01-27T13:05:44.240Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 116,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT062",
+    "gb_path": "public_data/collections/pMYTK/pMYT062.gb",
+    "created_at": "2026-01-27T13:05:44.243Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 117,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT091",
+    "gb_path": "public_data/collections/pMYTK/pMYT091.gb",
+    "created_at": "2026-01-27T13:05:44.246Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 118,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT056",
+    "gb_path": "public_data/collections/pMYTK/pMYT056.gb",
+    "created_at": "2026-01-27T13:05:44.249Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 119,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT007",
+    "gb_path": "public_data/collections/pMYTK/pMYT007.gb",
+    "created_at": "2026-01-27T13:05:44.252Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 120,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT079",
+    "gb_path": "public_data/collections/pMYTK/pMYT079.gb",
+    "created_at": "2026-01-27T13:05:44.256Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 121,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT038",
+    "gb_path": "public_data/collections/pMYTK/pMYT038.gb",
+    "created_at": "2026-01-27T13:05:44.258Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 122,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT069",
+    "gb_path": "public_data/collections/pMYTK/pMYT069.gb",
+    "created_at": "2026-01-27T13:05:44.261Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 123,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT049",
+    "gb_path": "public_data/collections/pMYTK/pMYT049.gb",
+    "created_at": "2026-01-27T13:05:44.264Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 124,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT018",
+    "gb_path": "public_data/collections/pMYTK/pMYT018.gb",
+    "created_at": "2026-01-27T13:05:44.267Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 125,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT008",
+    "gb_path": "public_data/collections/pMYTK/pMYT008.gb",
+    "created_at": "2026-01-27T13:05:44.270Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 126,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT059",
+    "gb_path": "public_data/collections/pMYTK/pMYT059.gb",
+    "created_at": "2026-01-27T13:05:44.273Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 127,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT048",
+    "gb_path": "public_data/collections/pMYTK/pMYT048.gb",
+    "created_at": "2026-01-27T13:05:44.277Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 128,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT019",
+    "gb_path": "public_data/collections/pMYTK/pMYT019.gb",
+    "created_at": "2026-01-27T13:05:44.280Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 129,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT009",
+    "gb_path": "public_data/collections/pMYTK/pMYT009.gb",
+    "created_at": "2026-01-27T13:05:44.284Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 130,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT058",
+    "gb_path": "public_data/collections/pMYTK/pMYT058.gb",
+    "created_at": "2026-01-27T13:05:44.286Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 131,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT078",
+    "gb_path": "public_data/collections/pMYTK/pMYT078.gb",
+    "created_at": "2026-01-27T13:05:44.290Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 132,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT039",
+    "gb_path": "public_data/collections/pMYTK/pMYT039.gb",
+    "created_at": "2026-01-27T13:05:44.293Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 133,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT068",
+    "gb_path": "public_data/collections/pMYTK/pMYT068.gb",
+    "created_at": "2026-01-27T13:05:44.297Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 134,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT088",
+    "gb_path": "public_data/collections/pMYTK/pMYT088.gb",
+    "created_at": "2026-01-27T13:05:44.301Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 135,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT089",
+    "gb_path": "public_data/collections/pMYTK/pMYT089.gb",
+    "created_at": "2026-01-27T13:05:44.304Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 136,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT075",
+    "gb_path": "public_data/collections/pMYTK/pMYT075.gb",
+    "created_at": "2026-01-27T13:05:44.307Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 137,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT024",
+    "gb_path": "public_data/collections/pMYTK/pMYT024.gb",
+    "created_at": "2026-01-27T13:05:44.309Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 138,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT086",
+    "gb_path": "public_data/collections/pMYTK/pMYT086.gb",
+    "created_at": "2026-01-27T13:05:44.312Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 139,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT010",
+    "gb_path": "public_data/collections/pMYTK/pMYT010.gb",
+    "created_at": "2026-01-27T13:05:44.315Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 140,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT041",
+    "gb_path": "public_data/collections/pMYTK/pMYT041.gb",
+    "created_at": "2026-01-27T13:05:44.318Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 141,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT051",
+    "gb_path": "public_data/collections/pMYTK/pMYT051.gb",
+    "created_at": "2026-01-27T13:05:44.320Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 142,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT096",
+    "gb_path": "public_data/collections/pMYTK/pMYT096.gb",
+    "created_at": "2026-01-27T13:05:44.323Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 143,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT065",
+    "gb_path": "public_data/collections/pMYTK/pMYT065.gb",
+    "created_at": "2026-01-27T13:05:44.326Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 144,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT045",
+    "gb_path": "public_data/collections/pMYTK/pMYT045.gb",
+    "created_at": "2026-01-27T13:05:44.331Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 145,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT014",
+    "gb_path": "public_data/collections/pMYTK/pMYT014.gb",
+    "created_at": "2026-01-27T13:05:44.333Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 146,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT020",
+    "gb_path": "public_data/collections/pMYTK/pMYT020.gb",
+    "created_at": "2026-01-27T13:05:44.336Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 147,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT071",
+    "gb_path": "public_data/collections/pMYTK/pMYT071.gb",
+    "created_at": "2026-01-27T13:05:44.339Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 148,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT082",
+    "gb_path": "public_data/collections/pMYTK/pMYT082.gb",
+    "created_at": "2026-01-27T13:05:44.342Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 149,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT092",
+    "gb_path": "public_data/collections/pMYTK/pMYT092.gb",
+    "created_at": "2026-01-27T13:05:44.345Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 150,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT061",
+    "gb_path": "public_data/collections/pMYTK/pMYT061.gb",
+    "created_at": "2026-01-27T13:05:44.349Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 151,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT004",
+    "gb_path": "public_data/collections/pMYTK/pMYT004.gb",
+    "created_at": "2026-01-27T13:05:44.351Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 152,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT055",
+    "gb_path": "public_data/collections/pMYTK/pMYT055.gb",
+    "created_at": "2026-01-27T13:05:44.355Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 153,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT044",
+    "gb_path": "public_data/collections/pMYTK/pMYT044.gb",
+    "created_at": "2026-01-27T13:05:44.358Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 154,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT015",
+    "gb_path": "public_data/collections/pMYTK/pMYT015.gb",
+    "created_at": "2026-01-27T13:05:44.361Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 155,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT021",
+    "gb_path": "public_data/collections/pMYTK/pMYT021.gb",
+    "created_at": "2026-01-27T13:05:44.364Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 156,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT070",
+    "gb_path": "public_data/collections/pMYTK/pMYT070.gb",
+    "created_at": "2026-01-27T13:05:44.366Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 157,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT083",
+    "gb_path": "public_data/collections/pMYTK/pMYT083.gb",
+    "created_at": "2026-01-27T13:05:44.369Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 158,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT093",
+    "gb_path": "public_data/collections/pMYTK/pMYT093.gb",
+    "created_at": "2026-01-27T13:05:44.373Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 159,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT060",
+    "gb_path": "public_data/collections/pMYTK/pMYT060.gb",
+    "created_at": "2026-01-27T13:05:44.377Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 160,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT005",
+    "gb_path": "public_data/collections/pMYTK/pMYT005.gb",
+    "created_at": "2026-01-27T13:05:44.380Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 161,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT054",
+    "gb_path": "public_data/collections/pMYTK/pMYT054.gb",
+    "created_at": "2026-01-27T13:05:44.382Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 162,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT074",
+    "gb_path": "public_data/collections/pMYTK/pMYT074.gb",
+    "created_at": "2026-01-27T13:05:44.385Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 163,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT025",
+    "gb_path": "public_data/collections/pMYTK/pMYT025.gb",
+    "created_at": "2026-01-27T13:05:44.388Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 164,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT087",
+    "gb_path": "public_data/collections/pMYTK/pMYT087.gb",
+    "created_at": "2026-01-27T13:05:44.391Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 165,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT011",
+    "gb_path": "public_data/collections/pMYTK/pMYT011.gb",
+    "created_at": "2026-01-27T13:05:44.394Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 166,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT040",
+    "gb_path": "public_data/collections/pMYTK/pMYT040.gb",
+    "created_at": "2026-01-27T13:05:44.396Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 167,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT050",
+    "gb_path": "public_data/collections/pMYTK/pMYT050.gb",
+    "created_at": "2026-01-27T13:05:44.400Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 168,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT001",
+    "gb_path": "public_data/collections/pMYTK/pMYT001.gb",
+    "created_at": "2026-01-27T13:05:44.403Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 169,
+  "fields": {
+    "collection": 4,
+    "name": "pMYT064",
+    "gb_path": "public_data/collections/pMYTK/pMYT064.gb",
+    "created_at": "2026-01-27T13:05:44.406Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 170,
+  "fields": {
+    "collection": 5,
+    "name": "pYSD044",
+    "gb_path": "public_data/collections/pYS/pYSD044.gb",
+    "created_at": "2026-01-27T13:05:44.410Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 171,
+  "fields": {
+    "collection": 5,
+    "name": "pYSD083",
+    "gb_path": "public_data/collections/pYS/pYSD083.gb",
+    "created_at": "2026-01-27T13:05:44.413Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 172,
+  "fields": {
+    "collection": 5,
+    "name": "pYSD021",
+    "gb_path": "public_data/collections/pYS/pYSD021.gb",
+    "created_at": "2026-01-27T13:05:44.417Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 173,
+  "fields": {
+    "collection": 5,
+    "name": "pYSD005",
+    "gb_path": "public_data/collections/pYS/pYSD005.gb",
+    "created_at": "2026-01-27T13:05:44.420Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 174,
+  "fields": {
+    "collection": 5,
+    "name": "pYSD001",
+    "gb_path": "public_data/collections/pYS/pYSD001.gb",
+    "created_at": "2026-01-27T13:05:44.425Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 175,
+  "fields": {
+    "collection": 5,
+    "name": "pYSD024",
+    "gb_path": "public_data/collections/pYS/pYSD024.gb",
+    "created_at": "2026-01-27T13:05:44.427Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 176,
+  "fields": {
+    "collection": 5,
+    "name": "pYSD041",
+    "gb_path": "public_data/collections/pYS/pYSD041.gb",
+    "created_at": "2026-01-27T13:05:44.431Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 177,
+  "fields": {
+    "collection": 5,
+    "name": "pYSD082",
+    "gb_path": "public_data/collections/pYS/pYSD082.gb",
+    "created_at": "2026-01-27T13:05:44.434Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 178,
+  "fields": {
+    "collection": 5,
+    "name": "pYSD061",
+    "gb_path": "public_data/collections/pYS/pYSD061.gb",
+    "created_at": "2026-01-27T13:05:44.438Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 179,
+  "fields": {
+    "collection": 5,
+    "name": "pYSD004",
+    "gb_path": "public_data/collections/pYS/pYSD004.gb",
+    "created_at": "2026-01-27T13:05:44.440Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 180,
+  "fields": {
+    "collection": 5,
+    "name": "pYSD009",
+    "gb_path": "public_data/collections/pYS/pYSD009.gb",
+    "created_at": "2026-01-27T13:05:44.444Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 181,
+  "fields": {
+    "collection": 5,
+    "name": "pYSD008",
+    "gb_path": "public_data/collections/pYS/pYSD008.gb",
+    "created_at": "2026-01-27T13:05:44.448Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 182,
+  "fields": {
+    "collection": 5,
+    "name": "pYSD085",
+    "gb_path": "public_data/collections/pYS/pYSD085.gb",
+    "created_at": "2026-01-27T13:05:44.451Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 183,
+  "fields": {
+    "collection": 5,
+    "name": "pYSD042",
+    "gb_path": "public_data/collections/pYS/pYSD042.gb",
+    "created_at": "2026-01-27T13:05:44.454Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 184,
+  "fields": {
+    "collection": 5,
+    "name": "pYSD003",
+    "gb_path": "public_data/collections/pYS/pYSD003.gb",
+    "created_at": "2026-01-27T13:05:44.456Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 185,
+  "fields": {
+    "collection": 5,
+    "name": "pYSD023",
+    "gb_path": "public_data/collections/pYS/pYSD023.gb",
+    "created_at": "2026-01-27T13:05:44.459Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 186,
+  "fields": {
+    "collection": 5,
+    "name": "pYSD081",
+    "gb_path": "public_data/collections/pYS/pYSD081.gb",
+    "created_at": "2026-01-27T13:05:44.461Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 187,
+  "fields": {
+    "collection": 5,
+    "name": "pYSD007",
+    "gb_path": "public_data/collections/pYS/pYSD007.gb",
+    "created_at": "2026-01-27T13:05:44.464Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 188,
+  "fields": {
+    "collection": 5,
+    "name": "pYSD022",
+    "gb_path": "public_data/collections/pYS/pYSD022.gb",
+    "created_at": "2026-01-27T13:05:44.467Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 189,
+  "fields": {
+    "collection": 5,
+    "name": "pYSD080",
+    "gb_path": "public_data/collections/pYS/pYSD080.gb",
+    "created_at": "2026-01-27T13:05:44.470Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 190,
+  "fields": {
+    "collection": 5,
+    "name": "pYSD063",
+    "gb_path": "public_data/collections/pYS/pYSD063.gb",
+    "created_at": "2026-01-27T13:05:44.473Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 191,
+  "fields": {
+    "collection": 5,
+    "name": "pYSD006",
+    "gb_path": "public_data/collections/pYS/pYSD006.gb",
+    "created_at": "2026-01-27T13:05:44.476Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 192,
+  "fields": {
+    "collection": 5,
+    "name": "pYSD084",
+    "gb_path": "public_data/collections/pYS/pYSD084.gb",
+    "created_at": "2026-01-27T13:05:44.479Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 193,
+  "fields": {
+    "collection": 5,
+    "name": "pYSD043",
+    "gb_path": "public_data/collections/pYS/pYSD043.gb",
+    "created_at": "2026-01-27T13:05:44.482Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 194,
+  "fields": {
+    "collection": 5,
+    "name": "pYSD002",
+    "gb_path": "public_data/collections/pYS/pYSD002.gb",
+    "created_at": "2026-01-27T13:05:44.485Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 195,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK088",
+    "gb_path": "public_data/collections/pYTK/pYTK088.gb",
+    "created_at": "2026-01-27T13:05:44.489Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 196,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK089",
+    "gb_path": "public_data/collections/pYTK/pYTK089.gb",
+    "created_at": "2026-01-27T13:05:44.492Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 197,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK020",
+    "gb_path": "public_data/collections/pYTK/pYTK020.gb",
+    "created_at": "2026-01-27T13:05:44.495Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 198,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK071",
+    "gb_path": "public_data/collections/pYTK/pYTK071.gb",
+    "created_at": "2026-01-27T13:05:44.500Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 199,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK082",
+    "gb_path": "public_data/collections/pYTK/pYTK082.gb",
+    "created_at": "2026-01-27T13:05:44.506Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 200,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK045",
+    "gb_path": "public_data/collections/pYTK/pYTK045.gb",
+    "created_at": "2026-01-27T13:05:44.509Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 201,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK014",
+    "gb_path": "public_data/collections/pYTK/pYTK014.gb",
+    "created_at": "2026-01-27T13:05:44.513Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 202,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK004",
+    "gb_path": "public_data/collections/pYTK/pYTK004.gb",
+    "created_at": "2026-01-27T13:05:44.516Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 203,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK055",
+    "gb_path": "public_data/collections/pYTK/pYTK055.gb",
+    "created_at": "2026-01-27T13:05:44.519Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 204,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK092",
+    "gb_path": "public_data/collections/pYTK/pYTK092.gb",
+    "created_at": "2026-01-27T13:05:44.523Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 205,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK061",
+    "gb_path": "public_data/collections/pYTK/pYTK061.gb",
+    "created_at": "2026-01-27T13:05:44.526Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 206,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK030",
+    "gb_path": "public_data/collections/pYTK/pYTK030.gb",
+    "created_at": "2026-01-27T13:05:44.530Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 207,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK010",
+    "gb_path": "public_data/collections/pYTK/pYTK010.gb",
+    "created_at": "2026-01-27T13:05:44.535Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 208,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK041",
+    "gb_path": "public_data/collections/pYTK/pYTK041.gb",
+    "created_at": "2026-01-27T13:05:44.539Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 209,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK075",
+    "gb_path": "public_data/collections/pYTK/pYTK075.gb",
+    "created_at": "2026-01-27T13:05:44.545Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 210,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK024",
+    "gb_path": "public_data/collections/pYTK/pYTK024.gb",
+    "created_at": "2026-01-27T13:05:44.547Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 211,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK086",
+    "gb_path": "public_data/collections/pYTK/pYTK086.gb",
+    "created_at": "2026-01-27T13:05:44.551Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 212,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK096",
+    "gb_path": "public_data/collections/pYTK/pYTK096.gb",
+    "created_at": "2026-01-27T13:05:44.555Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 213,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK034",
+    "gb_path": "public_data/collections/pYTK/pYTK034.gb",
+    "created_at": "2026-01-27T13:05:44.558Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 214,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK065",
+    "gb_path": "public_data/collections/pYTK/pYTK065.gb",
+    "created_at": "2026-01-27T13:05:44.560Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 215,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK051",
+    "gb_path": "public_data/collections/pYTK/pYTK051.gb",
+    "created_at": "2026-01-27T13:05:44.565Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 216,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK011",
+    "gb_path": "public_data/collections/pYTK/pYTK011.gb",
+    "created_at": "2026-01-27T13:05:44.570Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 217,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK040",
+    "gb_path": "public_data/collections/pYTK/pYTK040.gb",
+    "created_at": "2026-01-27T13:05:44.575Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 218,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK074",
+    "gb_path": "public_data/collections/pYTK/pYTK074.gb",
+    "created_at": "2026-01-27T13:05:44.577Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 219,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK025",
+    "gb_path": "public_data/collections/pYTK/pYTK025.gb",
+    "created_at": "2026-01-27T13:05:44.579Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 220,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK087",
+    "gb_path": "public_data/collections/pYTK/pYTK087.gb",
+    "created_at": "2026-01-27T13:05:44.583Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 221,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK035",
+    "gb_path": "public_data/collections/pYTK/pYTK035.gb",
+    "created_at": "2026-01-27T13:05:44.587Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 222,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK064",
+    "gb_path": "public_data/collections/pYTK/pYTK064.gb",
+    "created_at": "2026-01-27T13:05:44.590Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 223,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK050",
+    "gb_path": "public_data/collections/pYTK/pYTK050.gb",
+    "created_at": "2026-01-27T13:05:44.594Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 224,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK001",
+    "gb_path": "public_data/collections/pYTK/pYTK001.gb",
+    "created_at": "2026-01-27T13:05:44.596Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 225,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK021",
+    "gb_path": "public_data/collections/pYTK/pYTK021.gb",
+    "created_at": "2026-01-27T13:05:44.598Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 226,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK070",
+    "gb_path": "public_data/collections/pYTK/pYTK070.gb",
+    "created_at": "2026-01-27T13:05:44.603Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 227,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK083",
+    "gb_path": "public_data/collections/pYTK/pYTK083.gb",
+    "created_at": "2026-01-27T13:05:44.606Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 228,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK044",
+    "gb_path": "public_data/collections/pYTK/pYTK044.gb",
+    "created_at": "2026-01-27T13:05:44.610Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 229,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK015",
+    "gb_path": "public_data/collections/pYTK/pYTK015.gb",
+    "created_at": "2026-01-27T13:05:44.613Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 230,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK005",
+    "gb_path": "public_data/collections/pYTK/pYTK005.gb",
+    "created_at": "2026-01-27T13:05:44.616Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 231,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK054",
+    "gb_path": "public_data/collections/pYTK/pYTK054.gb",
+    "created_at": "2026-01-27T13:05:44.619Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 232,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK093",
+    "gb_path": "public_data/collections/pYTK/pYTK093.gb",
+    "created_at": "2026-01-27T13:05:44.621Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 233,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK060",
+    "gb_path": "public_data/collections/pYTK/pYTK060.gb",
+    "created_at": "2026-01-27T13:05:44.625Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 234,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK031",
+    "gb_path": "public_data/collections/pYTK/pYTK031.gb",
+    "created_at": "2026-01-27T13:05:44.627Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 235,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK043",
+    "gb_path": "public_data/collections/pYTK/pYTK043.gb",
+    "created_at": "2026-01-27T13:05:44.629Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 236,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK012",
+    "gb_path": "public_data/collections/pYTK/pYTK012.gb",
+    "created_at": "2026-01-27T13:05:44.632Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 237,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK084",
+    "gb_path": "public_data/collections/pYTK/pYTK084.gb",
+    "created_at": "2026-01-27T13:05:44.634Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 238,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK026",
+    "gb_path": "public_data/collections/pYTK/pYTK026.gb",
+    "created_at": "2026-01-27T13:05:44.636Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 239,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK077",
+    "gb_path": "public_data/collections/pYTK/pYTK077.gb",
+    "created_at": "2026-01-27T13:05:44.639Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 240,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK067",
+    "gb_path": "public_data/collections/pYTK/pYTK067.gb",
+    "created_at": "2026-01-27T13:05:44.642Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 241,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK036",
+    "gb_path": "public_data/collections/pYTK/pYTK036.gb",
+    "created_at": "2026-01-27T13:05:44.644Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 242,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK094",
+    "gb_path": "public_data/collections/pYTK/pYTK094.gb",
+    "created_at": "2026-01-27T13:05:44.647Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 243,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK002",
+    "gb_path": "public_data/collections/pYTK/pYTK002.gb",
+    "created_at": "2026-01-27T13:05:44.650Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 244,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK053",
+    "gb_path": "public_data/collections/pYTK/pYTK053.gb",
+    "created_at": "2026-01-27T13:05:44.653Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 245,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK080",
+    "gb_path": "public_data/collections/pYTK/pYTK080.gb",
+    "created_at": "2026-01-27T13:05:44.655Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 246,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK073",
+    "gb_path": "public_data/collections/pYTK/pYTK073.gb",
+    "created_at": "2026-01-27T13:05:44.658Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 247,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK022",
+    "gb_path": "public_data/collections/pYTK/pYTK022.gb",
+    "created_at": "2026-01-27T13:05:44.662Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 248,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK016",
+    "gb_path": "public_data/collections/pYTK/pYTK016.gb",
+    "created_at": "2026-01-27T13:05:44.665Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 249,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK047",
+    "gb_path": "public_data/collections/pYTK/pYTK047.gb",
+    "created_at": "2026-01-27T13:05:44.668Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 250,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK057",
+    "gb_path": "public_data/collections/pYTK/pYTK057.gb",
+    "created_at": "2026-01-27T13:05:44.671Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 251,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK006",
+    "gb_path": "public_data/collections/pYTK/pYTK006.gb",
+    "created_at": "2026-01-27T13:05:44.673Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 252,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK032",
+    "gb_path": "public_data/collections/pYTK/pYTK032.gb",
+    "created_at": "2026-01-27T13:05:44.677Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 253,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK063",
+    "gb_path": "public_data/collections/pYTK/pYTK063.gb",
+    "created_at": "2026-01-27T13:05:44.680Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 254,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK090",
+    "gb_path": "public_data/collections/pYTK/pYTK090.gb",
+    "created_at": "2026-01-27T13:05:44.684Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 255,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK081",
+    "gb_path": "public_data/collections/pYTK/pYTK081.gb",
+    "created_at": "2026-01-27T13:05:44.687Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 256,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK072",
+    "gb_path": "public_data/collections/pYTK/pYTK072.gb",
+    "created_at": "2026-01-27T13:05:44.691Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 257,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK023",
+    "gb_path": "public_data/collections/pYTK/pYTK023.gb",
+    "created_at": "2026-01-27T13:05:44.694Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 258,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK017",
+    "gb_path": "public_data/collections/pYTK/pYTK017.gb",
+    "created_at": "2026-01-27T13:05:44.697Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 259,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK046",
+    "gb_path": "public_data/collections/pYTK/pYTK046.gb",
+    "created_at": "2026-01-27T13:05:44.701Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 260,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK056",
+    "gb_path": "public_data/collections/pYTK/pYTK056.gb",
+    "created_at": "2026-01-27T13:05:44.704Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 261,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK007",
+    "gb_path": "public_data/collections/pYTK/pYTK007.gb",
+    "created_at": "2026-01-27T13:05:44.708Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 262,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK033",
+    "gb_path": "public_data/collections/pYTK/pYTK033.gb",
+    "created_at": "2026-01-27T13:05:44.712Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 263,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK062",
+    "gb_path": "public_data/collections/pYTK/pYTK062.gb",
+    "created_at": "2026-01-27T13:05:44.714Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 264,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK091",
+    "gb_path": "public_data/collections/pYTK/pYTK091.gb",
+    "created_at": "2026-01-27T13:05:44.718Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 265,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK042",
+    "gb_path": "public_data/collections/pYTK/pYTK042.gb",
+    "created_at": "2026-01-27T13:05:44.721Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 266,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK013",
+    "gb_path": "public_data/collections/pYTK/pYTK013.gb",
+    "created_at": "2026-01-27T13:05:44.724Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 267,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK085",
+    "gb_path": "public_data/collections/pYTK/pYTK085.gb",
+    "created_at": "2026-01-27T13:05:44.727Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 268,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK027",
+    "gb_path": "public_data/collections/pYTK/pYTK027.gb",
+    "created_at": "2026-01-27T13:05:44.730Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 269,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK076",
+    "gb_path": "public_data/collections/pYTK/pYTK076.gb",
+    "created_at": "2026-01-27T13:05:44.733Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 270,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK066",
+    "gb_path": "public_data/collections/pYTK/pYTK066.gb",
+    "created_at": "2026-01-27T13:05:44.736Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 271,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK037",
+    "gb_path": "public_data/collections/pYTK/pYTK037.gb",
+    "created_at": "2026-01-27T13:05:44.740Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 272,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK095",
+    "gb_path": "public_data/collections/pYTK/pYTK095.gb",
+    "created_at": "2026-01-27T13:05:44.742Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 273,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK003",
+    "gb_path": "public_data/collections/pYTK/pYTK003.gb",
+    "created_at": "2026-01-27T13:05:44.745Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 274,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK052",
+    "gb_path": "public_data/collections/pYTK/pYTK052.gb",
+    "created_at": "2026-01-27T13:05:44.749Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 275,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK049",
+    "gb_path": "public_data/collections/pYTK/pYTK049.gb",
+    "created_at": "2026-01-27T13:05:44.752Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 276,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK018",
+    "gb_path": "public_data/collections/pYTK/pYTK018.gb",
+    "created_at": "2026-01-27T13:05:44.755Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 277,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK008",
+    "gb_path": "public_data/collections/pYTK/pYTK008.gb",
+    "created_at": "2026-01-27T13:05:44.759Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 278,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK059",
+    "gb_path": "public_data/collections/pYTK/pYTK059.gb",
+    "created_at": "2026-01-27T13:05:44.762Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 279,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK079",
+    "gb_path": "public_data/collections/pYTK/pYTK079.gb",
+    "created_at": "2026-01-27T13:05:44.765Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 280,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK028",
+    "gb_path": "public_data/collections/pYTK/pYTK028.gb",
+    "created_at": "2026-01-27T13:05:44.768Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 281,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK038",
+    "gb_path": "public_data/collections/pYTK/pYTK038.gb",
+    "created_at": "2026-01-27T13:05:44.771Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 282,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK069",
+    "gb_path": "public_data/collections/pYTK/pYTK069.gb",
+    "created_at": "2026-01-27T13:05:44.774Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 283,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK078",
+    "gb_path": "public_data/collections/pYTK/pYTK078.gb",
+    "created_at": "2026-01-27T13:05:44.777Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 284,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK029",
+    "gb_path": "public_data/collections/pYTK/pYTK029.gb",
+    "created_at": "2026-01-27T13:05:44.779Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 285,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK039",
+    "gb_path": "public_data/collections/pYTK/pYTK039.gb",
+    "created_at": "2026-01-27T13:05:44.783Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 286,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK068",
+    "gb_path": "public_data/collections/pYTK/pYTK068.gb",
+    "created_at": "2026-01-27T13:05:44.788Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 287,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK048",
+    "gb_path": "public_data/collections/pYTK/pYTK048.gb",
+    "created_at": "2026-01-27T13:05:44.791Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 288,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK019",
+    "gb_path": "public_data/collections/pYTK/pYTK019.gb",
+    "created_at": "2026-01-27T13:05:44.794Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 289,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK009",
+    "gb_path": "public_data/collections/pYTK/pYTK009.gb",
+    "created_at": "2026-01-27T13:05:44.797Z"
+  }
+},
+{
+  "model": "plasmids.plasmid",
+  "pk": 290,
+  "fields": {
+    "collection": 6,
+    "name": "pYTK058",
+    "gb_path": "public_data/collections/pYTK/pYTK058.gb",
+    "created_at": "2026-01-27T13:05:44.800Z"
+  }
+}
+]

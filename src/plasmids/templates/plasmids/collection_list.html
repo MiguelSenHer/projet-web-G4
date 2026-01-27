@@ -1,0 +1,110 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}InSillyClo – Browse plasmids{% endblock %}
+
+{% block content %}
+<section class="container text-center mt-5">
+  <h1 class="hero-title">Browse plasmids</h1>
+</section>
+
+<main class="flex-grow-1">
+  <div class="container py-4">
+    {% if request.user.is_authenticated %}
+      <!-- Private collections -->
+      <div class="hero-subtitle mb-3">
+        Private collections
+      </div>
+
+        {% for c in collections %}
+          {% if not c.is_public and c.owner == request.user %}
+            <div class="card mb-3 p-3">
+              <div>
+                <div class="fw-bold">{{ c.name }}</div>
+                <div class="text-muted small">
+                  Private | Created {{ c.created_at|date:"Y-m-d H:i" }}
+                </div>
+                
+                {% if c.plasmids.count %}
+                  <div class="mt-3">
+                    <button
+                      class="btn btn-link p-0 text-muted small"
+                      type="button"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#plasmids-{{ c.id }}"
+                      aria-expanded="false"
+                      aria-controls="plasmids-{{ c.id }}"
+                    >
+                      Plasmids ({{ c.plasmids.count }})
+                    </button>
+
+                    <div class="collapse mt-2" id="plasmids-{{ c.id }}">
+                      <div class="d-flex flex-wrap gap-2">
+                        {% for plasmid in c.plasmids.all %}
+                          <a
+                            class="border rounded-pill px-3 py-1 small text-decoration-none"
+                            href="{% url 'plasmids:plasmid_view' plasmid.id %}"
+                          >
+                            {{ plasmid.name }}
+                          </a>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    <!-- Public collections -->
+    <div class="hero-subtitle mb-3">
+      Public collections
+    </div>
+
+    
+      {% for c in collections %}
+        {% if c.is_public %}
+          <div class="card mb-3 p-3">
+            <div>
+              <div class="fw-bold">{{ c.name }}</div>
+              <div class="text-muted small">
+                Public | Owner : admin_{{ c.owner.username }} | Created {{ c.created_at|date:"Y-m-d H:i" }}
+              </div>
+
+              {% if c.plasmids.count %}
+                <div class="mt-3">
+                  <button
+                    class="btn btn-link p-0 text-muted small"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#plasmids-{{ c.id }}"
+                    aria-expanded="false"
+                    aria-controls="plasmids-{{ c.id }}"
+                  >
+                    Plasmids ({{ c.plasmids.count }})
+                  </button>
+
+                  <div class="collapse mt-2" id="plasmids-{{ c.id }}">
+                    <div class="d-flex flex-wrap gap-2">
+                      {% for plasmid in c.plasmids.all %}
+                        <a
+                          class="border rounded-pill px-3 py-1 small text-decoration-none"
+                          href="{% url 'plasmids:plasmid_view' plasmid.id %}"
+                        >
+                          {{ plasmid.name }}
+                        </a>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+  </div>
+</main>
+{% endblock %}

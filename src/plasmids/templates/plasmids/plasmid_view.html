@@ -1,0 +1,117 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}InSillyClo – Plasmid View{% endblock %}
+
+{% block content %}
+<section class="container text-center mt-5">
+  <h1 class="hero-title">Plasmid View</h1>
+
+  <p class="hero-subtitle">
+    Implementation based on
+    <a href="https://moshi4.github.io/pyCirclize/" target="_blank">
+      https://moshi4.github.io/pyCirclize/
+    </a>
+    multiple examples.
+  </p>
+
+  {% if request.user.is_authenticated and job_id %}
+    <p class="text-muted">
+      Below is a detailed view of your plasmid based on the .gb file you provided.<br>
+    </p>
+  {% else %}
+    {# Texte public #}
+    <p class="text-muted">
+      Below is a detailed view of the public plasmid.<br>
+    </p>
+  {% endif %}
+    <p class="text-muted">
+      All genomic features and their annotated labels are shown.<br>
+      <strong>You can select specific features from the checkboxes then hit Update</strong>
+      to refresh the view.<br>
+      Potential Golden Gate cut sites are indicated with a red line, along with the
+      restriction enzyme label. Isochizomers are not shown for clarity.<br>
+      <strong>You can click on the restriction enzyme text labels (in red)</strong>
+      to get more information from the NEB catalogue.
+    </p>
+</section>
+
+<main class="flex-grow-1">
+  <div class="container py-4">
+
+    <form method="post" class="mb-4">
+      {% csrf_token %}
+      <hr>
+
+      <!-- CHECKBOXES -->
+      <div class="d-flex flex-wrap justify-content-center gap-3 mb-3">
+        {% for f in feature_types %}
+          <div class="form-check form-check-inline">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="feature_types"
+              value="{{ f.type }}"
+              id="feat-{{ forloop.counter }}"
+              {% if f.selected %}checked{% endif %}
+            >
+            <label
+              class="form-check-label"
+              for="feat-{{ forloop.counter }}"
+              style="color: {{ f.color }} !important;"
+            >
+              {{ f.type }}
+            </label>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- BUTTONS -->
+      <div class="d-flex justify-content-center gap-2">
+        <button class="btn btn-sm btn-outline-secondary" type="submit" name="action" value="clear">
+          Clear all
+        </button>
+        <button class="btn btn-sm btn-outline-secondary" type="submit" name="action" value="all">
+          Show all
+        </button>
+        <button class="btn btn-sm btn-primary" type="submit" name="action" value="update">
+          Update
+        </button>
+      </div>
+    </form>
+
+    <hr>
+
+    <!-- SVG -->
+    <div class="d-flex justify-content-center">
+      <div class="w-100 text-center overflow-auto">
+        {{ svg|safe }}
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- BACK -->
+    {% if request.user.is_authenticated and job_id %}
+      <div class="text-center mt-4">
+        <a href="{% url 'simulator:simulations_list' %}" class="btn btn-outline-secondary">
+          Back to my simulations
+        </a>
+      </div>
+    {% endif %}
+
+  </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const restriction_sites_links = {{ restriction_sites_sources|safe }};
+  document.querySelectorAll("text").forEach(t => {
+    const key = t.textContent.trim();
+    if (restriction_sites_links[key]) {
+      t.style.cursor = "pointer";
+      t.onclick = () => window.open(restriction_sites_links[key], "_blank");
+    }
+  });
+</script>
+{% endblock %}

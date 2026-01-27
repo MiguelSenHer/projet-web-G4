@@ -17,7 +17,7 @@ InSillyClo – My simulations
       <div class="d-flex flex-column gap-3">
 
         {% for job, gb_files in jobs_with_outputs %}
-          <div class="assembly-card">
+          <div class="card mb-3 p-3">
             <div class="d-flex flex-wrap align-items-center gap-3">
 
               <!-- Job ID -->
@@ -25,7 +25,7 @@ InSillyClo – My simulations
                 <div class="text-muted small">Job ID</div>
                 <div class="fw-semibold">{{ job.job_id }}</div>
               </div>
-
+              
               <!-- Status -->
               <div>
                 <div class="text-muted small">Status</div>
@@ -86,6 +86,22 @@ InSillyClo – My simulations
                       {% endif %}
                     </li>
 
+                    <li>
+                      {% if job.status == "SUCCESS" and gb_files %}
+                        <form method="post"
+                              action="{% url 'plasmids:save_collection' job.job_id %}">
+                          {% csrf_token %}
+                          <button type="submit" class="dropdown-item">
+                            Save my plasmids
+                          </button>
+                        </form>
+                      {% else %}
+                        <span class="dropdown-item text-muted">
+                          Save my plasmids
+                        </span>
+                      {% endif %}
+                    </li>
+
                     <li><hr class="dropdown-divider"></li>
 
                     <li>
@@ -105,7 +121,6 @@ InSillyClo – My simulations
               </div>
 
             </div>
-
             <!-- outputs list  -->
             {% if gb_files %}
               <div class="mt-3">

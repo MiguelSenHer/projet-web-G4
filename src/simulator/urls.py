@@ -10,8 +10,10 @@ from .views import (
     SimulationsListView,
     DownloadOutputsByJobView,
     ResumeSimulationView,
-    DeleteSimulationView, PlasmidView,
+    DeleteSimulationView
 )
+
+from plasmids.views import PlasmidView
 
 app_name = "simulator"
 
