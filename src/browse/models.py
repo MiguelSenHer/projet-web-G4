@@ -29,7 +29,8 @@ class Assembly(models.Model):
     creation_date = models.DateTimeField("Created At")
     separator = models.CharField(max_length=20, choices=SEPARATOR_CHOICES)
     restriction_enzyme = models.CharField(max_length=50, choices=ENZYME_CHOICES)
-    file = models.FileField(upload_to="assemblies/", blank=True, null=True)
+    file = models.FileField(upload_to="projet-web-G4/src/browse/public_data/browse", 
+                            blank=True, null=True)
     def __str__(self):
         return self.name
 
