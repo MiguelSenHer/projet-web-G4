@@ -59,7 +59,7 @@ Manage Teams - InSillyClo
 
               <!-- MEMBERS -->
               <h6>Members</h6>
-              <ul class="mb-3">
+              <ul class="mb-0">
                 {% for membership in item.members_preview %}
                   <li>
                     {{ membership.user.get_full_name|default:membership.user.email }}
@@ -75,11 +75,8 @@ Manage Teams - InSillyClo
 
               {% if item.members_count > 3 %}
                 <button
-                  class="btn btn-link p-0 small"
-                  data-team-id="{{ item.team.id }}"
-                  data-bs-toggle="modal"
-                  data-bs-target="#teamModal">
-                  See more
+                  class="btn btn-link" style="color: #041225;">
+                  More...
                 </button>
               {% endif %}
 
