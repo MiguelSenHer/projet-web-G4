@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import PasswordReset, Team, TeamMembership
 
-# Register your models here.
+admin.site.register(PasswordReset)
+admin.site.register(Team)
+admin.site.register(TeamMembership)
