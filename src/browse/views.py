@@ -21,6 +21,7 @@ def assembly_download(request, pk):
     if not assembly.file:
         raise Http404("No file associated with this assembly")
     file_path = assembly.file.path
+    print(file_path)
     if not os.path.exists(file_path):
         raise Http404("File not found on server")
     return FileResponse(
