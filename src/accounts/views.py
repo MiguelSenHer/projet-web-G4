@@ -46,14 +46,13 @@ def signup_view(request):
 
 # -----------------------
 # LOGIN
-# (your login.html uses raw inputs name=username/password)
 # -----------------------
 def login_view(request):
     if request.user.is_authenticated:
         return redirect("profile")
 
     if request.method == "POST":
-        username = request.POST.get("username", "").strip().lower()  # you use email here
+        username = request.POST.get("username", "").strip().lower() 
         password = request.POST.get("password", "")
 
         user = authenticate(request, username=username, password=password)
@@ -278,7 +277,7 @@ def teams_create_view(request):
                 Q(last_name__icontains=q)
             )
             .exclude(pk=request.user.pk)        
-            .exclude(id__in=selected_ids)         # hide already selected users
+            .exclude(id__in=selected_ids)       
             .order_by("email")[:20]
         )
 
