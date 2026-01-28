@@ -251,6 +251,7 @@ InsillyClo - Simulation Preview
         {% csrf_token %}
         <input type="hidden" name="filename" value="{{ filename }}">
         <input type="hidden" name="enzyme" value="{{ enzyme }}">
+        <input type="hidden" name="action" value="run_simulation">
         <button type="submit" class="btn btn-assembly">
           Run simulation
         </button>

@@ -1,0 +1,267 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}
+InsillyClo - Run Simulation
+{% endblock %}
+
+{% block content %}
+
+<section class="container text-center mt-5">
+  <h1 class="hero-title">Simulation run</h1>
+</section>
+
+<main class="flex-grow-1">
+  <div class="container py-4">
+
+    {% if status == "SUCCESS" %}
+      <!-- SUCCESS -->
+      <div class="alert alert-success">
+        <div class="fw-bold">Simulation completed successfully.</div>
+
+        <div class="mt-2">
+          <strong>Job ID:</strong> {{ job_id }}
+        </div>
+
+        <div class="mt-2">
+          <strong>
+            Your simulation job is kept for this browser session.
+            You may create an account and log in to save it permanently in database.
+          </strong>
+        </div>
+      </div>
+
+      <!-- DOWNLOAD RESULTS -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="hero-subtitle mb-3">
+            Download results
+          </div>
+          <hr>
+
+          <div class="text-muted small mb-3">
+            <ul class="mb-0">
+              <li>Input plasmids in <code>.gb</code> format (shortened to those used by the simulator)</li>
+              <li><code>DB_produced_plasmid.csv</code> (generic names and plasmid types)</li>
+              <li><code>auto-gg-combination-to-make.csv</code> (for Auto-GG application)</li>
+            </ul>
+          </div>
+
+          <div class="text-center">
+            <a
+              href="{% url 'simulator:download_results' %}"
+              class="btn btn-assembly"
+            >
+              <i class="bi bi-download"></i>
+              Download results
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPUTE DILUTION -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="hero-subtitle mb-3">
+            Compute dilution
+          </div>
+          <hr>
+
+          <form method="post" enctype="multipart/form-data" class="mt-3">
+            {% csrf_token %}
+
+            <!-- Default mass concentration -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">
+                Default mass concentration of input plasmids
+              </label>
+              <div class="text-muted small mb-2">
+                Default concentration to consider (ng/µL). No default value.
+              </div>
+              <input
+                type="number"
+                class="form-control"
+                name="default_mass_concentration"
+                step="any"
+                inputmode="decimal"
+              >
+            </div>
+
+            <!-- Final volume -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">
+                Final volume of the reaction
+              </label>
+              <div class="text-muted small mb-2">
+                Default volume (µL) of the output plasmid to produce. Default value: 10.0
+              </div>
+              <input
+                type="number"
+                class="form-control"
+                name="final_volume"
+                step="any"
+                inputmode="decimal"
+                value="10.0"
+              >
+            </div>
+
+            <!-- Enzyme and buffer volume -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">
+                Enzyme and buffer volume
+              </label>
+              <div class="text-muted small mb-2">
+                Volume (µL) of enzyme and buffer required per output well. Default value: 2.0
+              </div>
+              <input
+                type="number"
+                class="form-control"
+                name="enzyme_buffer_volume"
+                step="any"
+                inputmode="decimal"
+                value="2.0"
+              >
+            </div>
+
+            <!-- Minimal tip volume -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">
+                Minimal tip volume
+              </label>
+              <div class="text-muted small mb-2">
+                Minimal volume (µL) allowed to pipet. Default value: 0.0
+              </div>
+              <input
+                type="number"
+                class="form-control"
+                name="minimal_tip_volume"
+                step="any"
+                inputmode="decimal"
+                value="0.0"
+              >
+            </div>
+
+            <!-- Tip volume from intermediate -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">
+                Tip volume from intermediate dilution
+              </label>
+              <div class="text-muted small mb-2">
+                Volume (µL) taken from intermediate dilutions. Default value: 1.0
+              </div>
+              <input
+                type="number"
+                class="form-control"
+                name="tip_volume_from_intermediate"
+                step="any"
+                inputmode="decimal"
+                value="1.0"
+              >
+            </div>
+
+            <!-- Remaining volume -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">
+                Minimum remaining volume in intermediate dilution
+              </label>
+              <div class="text-muted small mb-2">
+                Minimal volume (µL) left in a well. Default value: 2.0
+              </div>
+              <input
+                type="number"
+                class="form-control"
+                name="min_remaining_volume_intermediate"
+                step="any"
+                inputmode="decimal"
+                value="2.0"
+              >
+            </div>
+
+            <!-- Final concentration -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">
+                Concentration of an input plasmid in final reaction
+              </label>
+              <div class="text-muted small mb-2">
+                Concentration (fmol/µL) in output mix. Default value: 2.0
+              </div>
+              <input
+                type="number"
+                class="form-control"
+                name="input_plasmid_concentration_final"
+                step="any"
+                inputmode="decimal"
+                value="2.0"
+              >
+            </div>
+
+            <!-- UPDATED CONCENTRATION FILE -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">
+                Updated plasmid concentration file
+              </label>
+
+              <div class="text-muted small mb-2">
+                Current value:
+                <a href="{{ concentration_file_url }}" target="_blank">
+                  input-plasmid-concentrations.csv
+                </a>
+              </div>
+
+              <div class="text-muted small mt-1">
+                CSV format: first column <code>pID</code>, second column
+                <code>Mass Concentration</code>, separator <code>;</code>.
+                <br>
+                This file is generated automatically after the simulation.
+                You can download it, modify the values, and re-upload it here to override
+                the concentrations used for dilution computation.
+              </div>
+
+              <input
+                type="file"
+                class="form-control mt-2"
+                name="concentration_file"
+                accept=".csv"
+              >
+            </div>
+
+            <div class="text-center mt-4">
+              <button type="submit" class="btn btn-assembly">
+                <i class="bi bi-calculator"></i>
+                Compute dilution
+              </button>
+            </div>
+
+            <input type="hidden" name="action" value="compute_dilution">
+          </form>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'simulator:preview' %}" class="btn btn-outline-secondary">
+          Back
+        </a>
+      </div>
+
+    {% elif status == "FAIL" %}
+      <!-- ERROR -->
+      <div class="alert alert-danger">
+        <div class="fw-bold">Simulation failed</div>
+
+        {% if error %}
+          <div class="mt-3">
+            <pre class="mt-2 p-3 border rounded bg-light" style="white-space: pre-wrap;">{{ error }}</pre>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="d-flex gap-2 mt-3">
+        <a href="{% url 'simulator:preview' %}" class="btn btn-outline-secondary">
+          Back
+        </a>
+      </div>
+    {% endif %}
+
+  </div>
+</main>
+
+{% endblock %}
