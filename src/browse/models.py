@@ -1,7 +1,12 @@
 from contextlib import nullcontext
 from django.db import models
 from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 
+
+assembly_storage = FileSystemStorage(
+    location=str(settings.BASE_DIR / "browse" / "public_data" / "assemblies")
+)
 
 class Assembly(models.Model):
     SEPARATOR_CHOICES = [
@@ -29,7 +34,7 @@ class Assembly(models.Model):
     creation_date = models.DateTimeField("Created At")
     separator = models.CharField(max_length=20, choices=SEPARATOR_CHOICES)
     restriction_enzyme = models.CharField(max_length=50, choices=ENZYME_CHOICES)
-    file = models.FileField(upload_to="src/browse/public_data/assemblies/", blank=True, null=True)
+    file = models.FileField(upload_to="", blank=True, null=True, storage=assembly_storage)
     def __str__(self):
         return self.name
 
