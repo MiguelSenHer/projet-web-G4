@@ -50,6 +50,7 @@ def design_home(request):
         {"options": options, "active_page": "designer"}
         )
 
+@login_required
 def designer_properties(request):
     assembly = None
     if request.method == "POST":
@@ -63,7 +64,7 @@ def designer_properties(request):
         form = AssemblyForm()
     return render(request, "designer/designer_properties.html", {"form": form, "assembly":assembly})
 
-
+@login_required
 def designer_input_parts(request, pk):
     assembly = get_object_or_404(Assembly, pk=pk)
     if request.method == "POST":
@@ -90,7 +91,7 @@ def designer_input_parts(request, pk):
         {"assembly": assembly, "formset": formset}
     )
 
-    
+@login_required   
 def designer_summary(request, pk):
     assembly = get_object_or_404(Assembly, id=pk)
     input_parts = assembly.inputparts_set.prefetch_related("allowed_types")
