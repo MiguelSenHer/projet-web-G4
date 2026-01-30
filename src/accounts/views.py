@@ -12,8 +12,8 @@ from .forms import SignUpForm
 from .models import PasswordReset, Team, TeamMembership
 from django.db.models import Q
 from django.db import transaction
-from django.db import IntegrityError
 from django.db.models import Case, When, IntegerField
+from django.shortcuts import get_object_or_404
 
 User = get_user_model()
 
@@ -46,14 +46,13 @@ def signup_view(request):
 
 # -----------------------
 # LOGIN
-# (your login.html uses raw inputs name=username/password)
 # -----------------------
 def login_view(request):
     if request.user.is_authenticated:
         return redirect("profile")
 
     if request.method == "POST":
-        username = request.POST.get("username", "").strip().lower()  # you use email here
+        username = request.POST.get("username", "").strip().lower() 
         password = request.POST.get("password", "")
 
         user = authenticate(request, username=username, password=password)
@@ -87,17 +86,17 @@ def forgot_password_view(request):
         email = request.POST.get("email", "").strip().lower()
         if not email:
             messages.error(request, "Please enter an email address.")
-            return redirect("forgot-password")
+            return redirect("forgot_password")
 
         user = User.objects.filter(email__iexact=email).first()
         if not user:
             messages.error(request, f"No account found with email '{email}'.")
-            return redirect("forgot-password")
+            return redirect("forgot_password")
 
         reset = PasswordReset.objects.create(user=user)
 
         reset_url = request.build_absolute_uri(
-            reverse("reset-password", kwargs={"reset_id": reset.reset_id})
+            reverse("reset_password", kwargs={"reset_id": reset.reset_id})
         )
 
         EmailMessage(
@@ -108,7 +107,7 @@ def forgot_password_view(request):
             [email],
         ).send(fail_silently=False)
 
-        return redirect("password-reset-sent")
+        return redirect("password_reset_sent")
 
     return render(request, "accounts/forgot_password.html")
 
@@ -127,12 +126,12 @@ def reset_password_view(request, reset_id):
     reset = PasswordReset.objects.filter(reset_id=reset_id).first()
     if not reset:
         messages.error(request, "Invalid reset link.")
-        return redirect("forgot-password")
+        return redirect("forgot_password")
 
     if reset.is_expired(minutes=10):
         reset.delete()
         messages.error(request, "Reset link has expired. Please request a new one.")
-        return redirect("forgot-password")
+        return redirect("forgot_password")
 
     if request.method == "POST":
         password = request.POST.get("password", "")
@@ -140,12 +139,12 @@ def reset_password_view(request, reset_id):
 
         if password != confirm:
             messages.error(request, "Passwords do not match.")
-            return redirect("reset-password", reset_id=reset_id)
+            return redirect("reset_password", reset_id=reset_id)
 
         if len(password) < 5:
             messages.error(request,
                            "Password must be at least 5 characters long.")
-            return redirect("reset-password", reset_id=reset_id)
+            return redirect("reset_password", reset_id=reset_id)
 
         user = reset.user
         user.set_password(password)
@@ -167,7 +166,7 @@ def profile_view(request):
     if request.method == "POST":
         form_type = request.POST.get("form_type")
 
-        # change password block (uses Django built-in form)
+        # change password block (Django built-in form)
         if form_type == "change_password":
             password_form = PasswordChangeForm(request.user, request.POST)
             if password_form.is_valid():
@@ -278,7 +277,7 @@ def teams_create_view(request):
                 Q(last_name__icontains=q)
             )
             .exclude(pk=request.user.pk)        
-            .exclude(id__in=selected_ids)         # hide already selected users
+            .exclude(id__in=selected_ids)       
             .order_by("email")[:20]
         )
 
@@ -340,8 +339,8 @@ def teams_create_view(request):
                 messages.success(request, "Team created successfully.")
                 return redirect("teams")
 
-            except IntegrityError as e:
-                messages.error(request, str(e))
+            except Exception:
+                messages.error(request, "An unexpected error occurred. Please try again.")
                 return redirect(request.path)
 
         messages.error(request, "Invalid action.")
@@ -356,3 +355,88 @@ def teams_create_view(request):
             "user_q": q,
         },
     )
+
+@login_required
+def team_detail_view(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
+
+    membership = TeamMembership.objects.filter(
+        team=team,
+        user=request.user
+    ).first()
+
+    if not membership:
+        messages.error(request, "You are not a member of this team.")
+        return redirect("teams")
+
+    members = (
+        team.memberships
+        .select_related("user")
+        .order_by("role", "joined_at")
+    )
+
+    # simulations = team.simulations.all()
+
+    return render(request, "accounts/team_details.html", {
+        "team": team,
+        "members": members,
+        "membership": membership,
+        # "simulations": simulations,
+    })
+
+@login_required
+def team_manage_view(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
+
+    membership = TeamMembership.objects.filter(
+        team=team,
+        user=request.user,
+        role=TeamMembership.Role.LEADER
+    ).first()
+
+    if not membership:
+        messages.error(request, "Only the team leader can manage this team.")
+        return redirect("team_details", team_id=team.id)
+
+    members = team.memberships.select_related("user")
+
+    q = request.GET.get("user_q", "").strip()
+    candidates = User.objects.none()
+
+    if q:
+        candidates = (
+            User.objects
+            .filter(email__icontains=q)
+            .exclude(id__in=members.values_list("user_id", flat=True))
+        )
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+
+        if action == "rename":
+            team.name = request.POST.get("team_name", "").strip()
+            team.save()
+            messages.success(request, "Team name updated.")
+
+        elif action == "remove":
+            TeamMembership.objects.filter(
+                team=team,
+                user_id=request.POST.get("user_id"),
+                role=TeamMembership.Role.MEMBER
+            ).delete()
+
+        elif action == "add":
+            TeamMembership.objects.get_or_create(
+                team=team,
+                user_id=request.POST.get("user_id"),
+                defaults={"role": TeamMembership.Role.MEMBER},
+            )
+
+        return redirect("team_manage", team_id=team.id)
+
+    return render(request, "accounts/team_manage.html", {
+        "team": team,
+        "members": members,
+        "candidates": candidates,
+        "user_q": q,
+    })

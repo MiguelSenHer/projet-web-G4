@@ -1,0 +1,88 @@
+{% extends "frontend/base.html" %}
+{% block title %}Team – {{ team.name }}{% endblock %}
+
+{% block content %}
+<section class="login-section">
+
+  <div class="container">
+    <h2 class="panel-title mb-2">TEAM DETAILS</h2>
+
+    <div class="row g-4">
+      <div class="col-lg-12">
+        <div class="card team-card">
+          <div class="card-body">
+
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <h3 class="mb-1">{{ team.name }}</h3>
+                <p class="mb-0 text-muted small">
+                  Created {{ team.created_at|date:"Y-m-d" }}
+                </p>
+                <p class="mb-0">
+                  Role:
+                  <strong>
+                    {% if membership.role == "LEADER" %}
+                      Leader
+                    {% else %}
+                      Member
+                    {% endif %}
+                  </strong>
+                </p>
+              </div>
+
+            </div>
+
+            <hr>
+
+            <!-- MEMBERS -->
+            <h6>Members</h6>
+            <ul class="mb-0">
+              {% for m in members %}
+                <li>
+                  {{ m.user.get_full_name|default:m.user.email }}
+                  —
+                  {% if m.role == "LEADER" %}
+                    Leader
+                  {% else %}
+                    Member
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+
+          </div>
+        </div>
+        {% if membership.role == "LEADER" %} 
+        <a href="{% url 'team_manage' team.id %}" class="btn btn-create mt-3"> 
+            Edit team </a> 
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+
+  <div class="container mt-4">
+    <h2 class="panel-title mb-2">TEAM SIMULATIONS</h2>
+
+    <div class="row g-4">
+      <div class="col-lg-12">
+        <div class="card team-card">
+          <div class="card-body">
+            <p class="text-muted small mb-0">
+              No simulations yet.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BACK -->
+  <div class="text-center mt-4">
+    <a href="{% url 'teams' %}" class="text-muted" style="text-decoration: none;">
+      ← Back to my teams
+    </a>
+  </div>
+
+</section>
+{% endblock %}

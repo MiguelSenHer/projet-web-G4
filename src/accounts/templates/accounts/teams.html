@@ -43,13 +43,13 @@ Manage Teams - InSillyClo
                 </div>
 
                 {% if item.is_leader %}
-                  <a href="#" class="team-action-btn">
+                  <a href="{% url 'team_details' item.team.id %}" class="team-action-btn">
                     <span>Manage team</span>
                     <span class="icon">⚙</span>
                   </a>
                 {% else %}
                   <span class="team-action-btn">
-                    <span>Check team</span>
+                    <span>View team</span>
                     <span class="icon">👁</span>
                   </span>
                 {% endif %}
