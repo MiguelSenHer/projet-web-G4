@@ -4,24 +4,34 @@ import pandas as pd
 from django.conf import settings
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, render
+from django.db.models import Q
 
 from browse.models import Assembly
 import os
 
-
-# View to browse templates
+# View to browse templates with access control
 def browse_templates(request):
-    assemblies = Assembly.objects.prefetch_related("inputparts_set")
-    return render(request, "browse/browse.html", {"assemblies": assemblies, "active_page": "browse"})
+    # Base Queryset
+    qs = Assembly.objects.prefetch_related("inputparts_set")
+    if not request.user.is_authenticated:
+        assemblies = qs.filter(is_public=True)
+    else:
+        assemblies = qs.filter(Q(is_public=True) | Q(owner=request.user))
+    return render(request, "browse/browse.html", {
+        "assemblies": assemblies, 
+        "active_page": "browse"
+    })
 
 
-# View to download the .xlsx associated with a template 
+# View to download the .xlsx associated with a template with access control
 def assembly_download(request, pk):
     assembly = get_object_or_404(Assembly, pk=pk)
+    if not assembly.is_public:
+        if not request.user.is_authenticated or assembly.owner != request.user:
+            raise Http404("You do not have permission to download this file.")
     if not assembly.file:
         raise Http404("No file associated with this assembly")
     file_path = assembly.file.path
-    print(file_path)
     if not os.path.exists(file_path):
         raise Http404("File not found on server")
     return FileResponse(
@@ -31,9 +41,12 @@ def assembly_download(request, pk):
     )
 
 
-# View to check details of an assembly
+# View to check details of an assembly with access control
 def assembly_details(request, pk):
     assembly = get_object_or_404(Assembly, id=pk)
+    if not assembly.is_public:
+        if not request.user.is_authenticated or assembly.owner != request.user:
+            raise Http404("You do not have permission to view this assembly.")
     input_parts = assembly.inputparts_set.prefetch_related("allowed_types")
     return render(
         request,

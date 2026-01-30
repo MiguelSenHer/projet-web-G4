@@ -37,6 +37,9 @@ class Assembly(models.Model):
     file = models.FileField(upload_to="", blank=True, null=True, storage=assembly_storage)
     def __str__(self):
         return self.name
+    
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    is_public = models.BooleanField(default=False)
 
 class InputParts(models.Model):
     SEPARATOR_CHOICES = [
