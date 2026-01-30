@@ -1,0 +1,95 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}
+Manage team - {{ team.name }}
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <form method="post" id="rename-form">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="rename">
+
+    <div class="card p-4 mb-4">
+      <h4>Rename team</h4>
+      <input
+        class="form-control"
+        name="team_name"
+        value="{{ team.name }}"
+        placeholder="Team name">
+    </div>
+  </form>
+
+  <div class="card p-4 mb-4">
+    <h4>Members</h4>
+    <ul class="list-unstyled mb-0">
+      {% for m in members %}
+        <li class="d-flex justify-content-between align-items-center mb-2">
+          {{ m.user.get_full_name|default:m.user.email }}
+
+          {% if m.role != "LEADER" %}
+            <form method="post" class="mb-0">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="remove">
+              <input type="hidden" name="user_id" value="{{ m.user.id }}">
+              <button type="submit" class="btn btn-sm btn-outline-danger">
+                Remove
+              </button>
+            </form>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+
+  <div class="card p-4 mb-4">
+    <h4>Add members</h4>
+
+    <form method="get" class="d-flex gap-2 mb-3">
+      <input
+        class="form-control"
+        name="user_q"
+        placeholder="Search users by email"
+        value="{{ user_q }}">
+      <button type="submit" class="btn btn-outline-secondary">
+        Search
+      </button>
+    </form>
+
+    {% if candidates %}
+      {% for u in candidates %}
+        <form method="post" class="d-flex justify-content-between align-items-center mb-2">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="add">
+          <input type="hidden" name="user_id" value="{{ u.id }}">
+          <span>{{ u.email }}</span>
+          <button type="submit" class="btn btn-sm btn-outline-secondary">
+            Add
+          </button>
+        </form>
+      {% endfor %}
+    {% else %}
+      <p class="text-muted small">No users found.</p>
+    {% endif %}
+  </div>
+
+
+  <div class="text-end mt-4">
+    <button
+      type="submit"
+      form="rename-form"
+      class="btn btn-create w-100">
+      Save changes
+    </button>
+  </div>
+
+</div>
+
+<div class="text-center mt-4">
+  <a href="{% url 'teams' %}" class="text-muted" style="text-decoration: none;">
+    ← Back to my teams
+  </a>
+</div>
+{% endblock %}
