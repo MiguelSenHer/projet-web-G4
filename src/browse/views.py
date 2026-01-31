@@ -11,15 +11,20 @@ import os
 
 # View to browse templates with access control
 def browse_templates(request):
-    # Base Queryset
-    qs = Assembly.objects.prefetch_related("inputparts_set")
+    view_filter = request.GET.get('view', 'all')
     if not request.user.is_authenticated:
-        assemblies = qs.filter(is_public=True)
+        qs = Assembly.objects.filter(is_public=True)
     else:
-        assemblies = qs.filter(Q(is_public=True) | Q(owner=request.user))
+        qs = Assembly.objects.filter(Q(is_public=True) | Q(owner=request.user))
+        if view_filter == 'public':
+            qs = qs.filter(is_public=True)
+        elif view_filter == 'private':
+            qs = qs.filter(is_public=False, owner=request.user)
+    assemblies = qs.prefetch_related("inputparts_set").distinct()
     return render(request, "browse/browse.html", {
         "assemblies": assemblies, 
-        "active_page": "browse"
+        "active_page": "browse",
+        "current_filter": view_filter
     })
 
 

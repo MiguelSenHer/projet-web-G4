@@ -10,6 +10,16 @@
 
     <h1 class="text-center text-uppercase mb-4">Assemblies</h1>
 
+    <div class="d-flex justify-content-center mb-4">
+  <div class="btn-group shadow-sm" role="group">
+    <a href="?view=all" class="btn btn-outline-primary {% if current_filter == 'all' %}active{% endif %}">All</a>
+    <a href="?view=public" class="btn btn-outline-primary {% if current_filter == 'public' %}active{% endif %}">Public</a>
+    {% if user.is_authenticated %}
+      <a href="?view=private" class="btn btn-outline-primary {% if current_filter == 'private' %}active{% endif %}">My Private</a>
+    {% endif %}
+  </div>
+</div>
+
     {% for assembly in assemblies %}
     <div class="card public-assembly mb-4">
       <div class="card-body row">
@@ -20,6 +30,9 @@
 
           <div class="fw-bolder">
             {{ assembly.name }}
+            {% if not assembly.is_public %}
+              <span class="badge bg-secondary ms-1" style="font-size: 0.6rem;">PRIVATE</span>
+            {% endif %}
           </div>
 
           <small class="text-secondary">
