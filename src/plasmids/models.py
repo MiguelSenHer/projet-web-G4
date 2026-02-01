@@ -19,15 +19,20 @@ class Collection(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     is_public = models.BooleanField(default=False)
+    team = models.ForeignKey(
+        "accounts.Team",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="collections",
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=["owner", "name"], name="uniq_collection_name_per_owner"),
         ]
-
-    def __str__(self):
-        return self.name
 
 
 class Plasmid(models.Model):
@@ -38,9 +43,6 @@ class Plasmid(models.Model):
 
     def gb_abspath(self):   
         return Path(apps.get_app_config("plasmids").path) / self.gb_path
-
-    def __str__(self):
-        return self.name
 
     # Visualize plasmid using pycirclize
     def visualize(self, selected_types=None, action=None):
