@@ -6,98 +6,128 @@
 <section class="container text-center mt-5">
   <h1 class="hero-title">Plasmid View</h1>
 
-  <p class="hero-subtitle">
-    Implementation based on
-    <a href="https://moshi4.github.io/pyCirclize/" target="_blank">
-      https://moshi4.github.io/pyCirclize/
-    </a>
-    multiple examples.
-  </p>
-
   {% if request.user.is_authenticated and job_id %}
     <p class="text-muted">
-      Below is a detailed view of your plasmid based on the .gb file you provided.<br>
+      Below is a detailed view of your plasmid based on the .gb file you provided.
     </p>
   {% else %}
-    {# Texte public #}
     <p class="text-muted">
-      Below is a detailed view of the public plasmid.<br>
+      Below is a detailed view of the public plasmid.
     </p>
   {% endif %}
-    <p class="text-muted">
-      All genomic features and their annotated labels are shown.<br>
-      <strong>You can select specific features from the checkboxes then hit Update</strong>
-      to refresh the view.<br>
-      Potential Golden Gate cut sites are indicated with a red line, along with the
-      restriction enzyme label. Isochizomers are not shown for clarity.<br>
-      <strong>You can click on the restriction enzyme text labels (in red)</strong>
-      to get more information from the NEB catalogue.
-    </p>
+
+  <div class="mx-auto mt-3">
+    <div class="bg-body-tertiary border rounded-3 p-3 p-md-4 text-start">
+
+      <ul class="text-muted mb-0 ps-3">
+        <li class="mb-1">
+          All genomic features and their annotated labels are shown.
+        </li>
+        <li class="mb-1">
+          <strong>Select specific annotations then hit Update</strong> to refresh the view.
+        </li>
+        <li class="mb-1">
+          Potential Golden Gate cut sites are indicated with a red line, along with the
+          restriction enzyme label. Isochizomers are not shown for clarity.
+        </li>
+        <li class="mb-0">
+          <strong>You can click on the restriction enzyme text labels (in red)</strong>
+          to get more information from the NEB catalogue.
+        </li>
+      </ul>
+    </div>
+  </div>
 </section>
+
+
+
 
 <main class="flex-grow-1">
   <div class="container py-4">
 
-    <form method="post" class="mb-4">
-      {% csrf_token %}
-      <hr>
-
-      <!-- CHECKBOXES -->
-      <div class="d-flex flex-wrap justify-content-center gap-3 mb-3">
-        {% for f in feature_types %}
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              name="feature_types"
-              value="{{ f.type }}"
-              id="feat-{{ forloop.counter }}"
-              {% if f.selected %}checked{% endif %}
-            >
-            <label
-              class="form-check-label"
-              for="feat-{{ forloop.counter }}"
-              style="color: {{ f.color }} !important;"
-            >
-              {{ f.type }}
-            </label>
+    <div class="row g-3 align-items-start">
+      <!-- SVG (left) -->
+      <div class="col-12 col-lg-9">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-2 p-md-3">
+            <div class="w-100 text-center overflow-auto">
+              {{ svg|safe }}
+            </div>
           </div>
-        {% endfor %}
+        </div>
       </div>
 
-      <!-- BUTTONS -->
-      <div class="d-flex justify-content-center gap-2">
-        <button class="btn btn-sm btn-outline-secondary" type="submit" name="action" value="clear">
-          Clear all
-        </button>
-        <button class="btn btn-sm btn-outline-secondary" type="submit" name="action" value="all">
-          Show all
-        </button>
-        <button class="btn btn-sm btn-primary" type="submit" name="action" value="update">
-          Update
-        </button>
-      </div>
-    </form>
+      <!-- Features -->
+      <div class="col-12 col-lg-3">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-3">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="fw-semibold">Features</div>
+              <span class="badge text-bg-light border">{{ feature_types|length }}</span>
+            </div>
 
-    <hr>
+            <form method="post" class="m-0">
+              {% csrf_token %}
 
-    <!-- SVG -->
-    <div class="d-flex justify-content-center">
-      <div class="w-100 text-center overflow-auto">
-        {{ svg|safe }}
+              <div class="list-group" style="max-height: 55vh; overflow:auto;">
+                {% for f in feature_types %}
+                  <label class="list-group-item d-flex align-items-center gap-2 py-2">
+                    <input
+                      class="form-check-input m-0"
+                      type="checkbox"
+                      name="feature_types"
+                      value="{{ f.type }}"
+                      {% if f.selected %}checked{% endif %}
+                    >
+                    <span class="flex-grow-1 text-truncate">
+                      <span
+                        class="badge rounded-pill border me-2"
+                        style="background: {{ f.color }}; color: transparent;"
+                      >
+                        &nbsp;
+                      </span>
+                      <span style="color: {{ f.color }} !important;">
+                        {{ f.type }}
+                      </span>
+                    </span>
+                  </label>
+                {% endfor %}
+              </div>
+
+              <!-- Buttons -->
+              <div class="d-grid gap-2 mt-3">
+                <button class="btn btn-outline-secondary btn-sm" type="submit" name="action" value="clear">
+                  Clear all
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" type="submit" name="action" value="all">
+                  Show all
+                </button>
+                <button class="btn btn-primary btn-sm" type="submit" name="action" value="update">
+                  Update
+                </button>
+              </div>
+            </form>
+
+            {% if request.user.is_authenticated and job_id %}
+              <hr class="my-3">
+              <a href="{% url 'simulator:simulations_list' %}" class="btn btn-outline-secondary btn-sm w-100">
+                Back to my simulations
+              </a>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Reference -->
+        <div class="text-center mt-3">
+          <small class="text-muted">
+            <i class="bi bi-box-arrow-up-right"></i>
+            <a href="https://moshi4.github.io/pyCirclize/" target="_blank" class="text-decoration-none">
+              https://moshi4.github.io/pyCirclize/
+            </a>
+          </small>
+        </div>
       </div>
     </div>
-
-    <hr>
-
-    <!-- BACK -->
-    {% if request.user.is_authenticated and job_id %}
-      <div class="text-center mt-4">
-        <a href="{% url 'simulator:simulations_list' %}" class="btn btn-outline-secondary">
-          Back to my simulations
-        </a>
-      </div>
-    {% endif %}
 
   </div>
 </main>
@@ -105,12 +135,23 @@
 
 {% block extra_js %}
 <script>
+  const svg = document.querySelector("svg");
+  if (svg) {
+    svg.removeAttribute("width");
+    svg.removeAttribute("height");
+    svg.style.width = "100%";
+    svg.style.height = "auto";
+    svg.style.maxWidth = "100%";
+    svg.style.display = "block";
+  }
   const restriction_sites_links = {{ restriction_sites_sources|safe }};
   document.querySelectorAll("text").forEach(t => {
     const key = t.textContent.trim();
     if (restriction_sites_links[key]) {
       t.style.cursor = "pointer";
-      t.onclick = () => window.open(restriction_sites_links[key], "_blank");
+      t.onclick = () => {
+        window.open(restriction_sites_links[key], "_blank");
+      };
     }
   });
 </script>
