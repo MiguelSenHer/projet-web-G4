@@ -14,6 +14,8 @@ from django.db.models import Q
 from django.db import transaction
 from django.db.models import Case, When, IntegerField
 from django.shortcuts import get_object_or_404
+from django.core.exceptions import PermissionDenied
+from plasmids.models import Collection
 
 User = get_user_model()
 
@@ -375,14 +377,85 @@ def team_detail_view(request, team_id):
         .order_by("role", "joined_at")
     )
 
-    # simulations = team.simulations.all()
+    collections = (
+        Collection.objects
+        .filter(team=team)
+        .select_related("owner")
+        .order_by("-created_at")
+    )
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+
+        # ADMIN here can make collection public
+        if action == "make_public":
+            if not request.user.is_superuser:
+                raise PermissionDenied
+
+            collection_id = request.POST.get("collection_id")
+            collection = get_object_or_404(Collection, id=collection_id, team=team)
+
+            collection.is_public = True
+            collection.save()
+            messages.success(request, f"Collection '{collection.name}' is now public.")
+            return redirect("team_details", team_id=team.id)
+        
+        if action == "attach_collection":
+            if membership.role != TeamMembership.Role.LEADER:
+                raise PermissionDenied
+
+            collection_id = request.POST.get("collection_id")
+            collection = get_object_or_404(
+                Collection,
+                id=collection_id,
+                owner=request.user,
+                team__isnull=True
+            )
+
+            collection.team = team
+            collection.save()
+
+            messages.success(
+                request,
+                f"Collection '{collection.name}' added to the team."
+            )
+            return redirect("team_details", team_id=team.id)
+
+        if action == "detach_collection":
+            if membership.role != TeamMembership.Role.LEADER:
+                raise PermissionDenied
+
+            collection_id = request.POST.get("collection_id")
+            collection = get_object_or_404(
+                Collection,
+                id=collection_id,
+                team=team
+            )
+
+            collection.team = None
+            collection.save()
+
+            messages.success(
+                request,
+                f"Collection '{collection.name}' removed from the team."
+            )
+            return redirect("team_details", team_id=team.id)
+
+
+    available_collections = Collection.objects.filter(
+        owner=request.user,
+        team__isnull=True
+    )
 
     return render(request, "accounts/team_details.html", {
         "team": team,
         "members": members,
         "membership": membership,
-        # "simulations": simulations,
+        "collections": collections,
+        "available_collections": available_collections,
+        "is_admin": request.user.is_superuser,
     })
+
 
 @login_required
 def team_manage_view(request, team_id):
@@ -440,3 +513,33 @@ def team_manage_view(request, team_id):
         "candidates": candidates,
         "user_q": q,
     })
+
+@login_required
+def admin_users_view(request):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+
+    users = (
+        User.objects
+        .all()
+        .order_by("-last_login", "email")
+    )
+
+    return render(
+        request,
+        "accounts/admin_users.html",
+        {
+            "users": users,
+        }
+    )
+
+@login_required
+def admin_requests_view(request):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+
+    return render(
+        request,
+        "accounts/admin_requests.html",
+        {}
+    )

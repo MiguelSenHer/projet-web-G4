@@ -1,0 +1,58 @@
+{% extends "frontend/base.html" %}
+{% block title %}Admin - Users{% endblock %}
+
+{% block content %}
+<section class="login-section">
+
+  <div class="container">
+    <h2 class="panel-title mb-3">USERS (ADMIN)</h2>
+
+    <div class="card team-card">
+      <div class="card-body">
+
+        <table class="table table-sm mb-0">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Name</th>
+              <th>Last login</th>
+              <th>Staff</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in users %}
+              <tr>
+                <td>{{ u.email }}</td>
+                <td>{{ u.get_full_name|default:"—" }}</td>
+                <td>
+                  {% if u.last_login %}
+                    {{ u.last_login|date:"Y-m-d H:i" }}
+                  {% else %}
+                    Never
+                  {% endif %}
+                </td>
+                <td>
+                  {% if u.is_superuser %}
+                    Admin
+                  {% else %}
+                    User
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+      </div>
+    </div>
+
+    <div class="text-center mt-4">
+      <a href="{% url 'profile' %}" class="text-muted">
+        ← Back to profile
+      </a>
+    </div>
+
+  </div>
+
+</section>
+{% endblock %}
