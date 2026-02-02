@@ -58,6 +58,7 @@ def designer_properties(request):
         if form.is_valid():
             assembly = form.save(commit=False)
             assembly.creation_date = timezone.now()
+            assembly.owner = request.user
             assembly.save()
             return redirect("designer:designer_input_parts", pk=assembly.pk)
     else:

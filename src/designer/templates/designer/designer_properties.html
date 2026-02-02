@@ -68,6 +68,17 @@
 
                 </div>
 
+                <div class="mb-4">
+                    <div class="form-check form-switch">
+                        {{ form.is_public }}
+                    <label class="form-check-label fw-semibold" for="{{ form.is_public.id_for_label }}">
+                        Make this assembly public?
+                    </label>
+                    <div class="form-text text-muted">
+                        If checked, other users will be able to see and use this template in the Browse section.
+                    </div>
+                </div>
+            </div>
                 <!-- Actions -->
                 <div class="card-footer bg-white border-0">
 
