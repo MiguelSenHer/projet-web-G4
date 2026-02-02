@@ -13,6 +13,7 @@ from django.db.models import Q, Case, When, IntegerField
 from django.db import transaction
 from django.core.exceptions import PermissionDenied
 from plasmids.models import Collection
+from browse.models import Assembly
 
 User = get_user_model()
 
@@ -454,6 +455,9 @@ def team_detail_view(request, team_id):
     })
 
 
+# -----------------------
+# Team Management
+# -----------------------
 @login_required
 def team_manage_view(request, team_id):
     team = get_object_or_404(Team, id=team_id)
@@ -511,6 +515,9 @@ def team_manage_view(request, team_id):
         "user_q": q,
     })
 
+# ------------------------
+# ADMIN VIEWS - Users list
+# ------------------------
 @login_required
 def admin_users_view(request):
     if not request.user.is_superuser:
@@ -539,7 +546,9 @@ def admin_users_view(request):
         {"users": users},
     )
 
-
+# -------------------------------------
+# ADMIN manage users requests -> public
+# -------------------------------------
 @login_required
 def admin_requests_view(request):
     if not request.user.is_superuser:
@@ -548,7 +557,7 @@ def admin_requests_view(request):
     pending_requests = (
         AdminRequest.objects
         .filter(status=AdminRequest.Status.PENDING)
-        .select_related("user", "collection")
+        .select_related("user", "collection", "assembly")
         .prefetch_related("collection__plasmids")
         .order_by("-created_at")
     )
@@ -556,7 +565,7 @@ def admin_requests_view(request):
     completed_requests = (
         AdminRequest.objects
         .exclude(status=AdminRequest.Status.PENDING)
-        .select_related("user", "collection")
+        .select_related("user", "collection", "assembly")
         .order_by("-processed_at")
     )
 
@@ -565,13 +574,19 @@ def admin_requests_view(request):
         action = request.POST.get("action")
 
         if action == "approve":
+
             if req.request_type == AdminRequest.RequestType.MAKE_COLLECTION_PUBLIC:
-                req.collection.is_public = True
-                req.collection.save()
+                if req.collection:
+                    req.collection.is_public = True
+                    req.collection.save()
+
+            elif req.request_type == AdminRequest.RequestType.MAKE_ASSEMBLY_PUBLIC:
+                if req.assembly:
+                    req.assembly.is_public = True
+                    req.assembly.save()
 
             req.status = AdminRequest.Status.APPROVED
             req.processed_at = timezone.now()
-            req.save()
             req.processed_by = request.user
             req.save()
 
@@ -599,7 +614,9 @@ def admin_requests_view(request):
         "completed_requests": completed_requests,
     })
 
-
+# --------------------------------------------
+# user sends request to make collection public
+# --------------------------------------------
 @login_required
 def request_make_collection_public(request, collection_id):
     collection = get_object_or_404(
@@ -630,6 +647,9 @@ def request_make_collection_public(request, collection_id):
     return redirect("plasmids:collections_list")
 
 
+# ------------------------------------------
+# user requests view - list of his requests
+# ------------------------------------------
 @login_required
 def user_requests_view(request):
     requests = (
@@ -641,3 +661,31 @@ def user_requests_view(request):
     return render(request, "accounts/user_requests.html", {
         "requests": requests
     })
+
+
+# ------------------------------------------
+# user sends request to make assembly public
+# ------------------------------------------
+@login_required
+def request_make_assembly_public(request, assembly_id):
+    assembly = get_object_or_404(
+        Assembly,
+        id=assembly_id,
+        owner=request.user,
+        is_public=False
+    )
+
+    AdminRequest.objects.filter(
+        assembly=assembly
+    ).delete()
+
+    AdminRequest.objects.create(
+        user=request.user,
+        request_type=AdminRequest.RequestType.MAKE_ASSEMBLY_PUBLIC,
+        assembly=assembly,
+        message="Please make this assembly public."
+    )
+
+    messages.info(request, "Your request has been sent.")
+
+    return redirect("browse:browse_templates")
