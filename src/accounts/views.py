@@ -572,11 +572,15 @@ def admin_requests_view(request):
             req.status = AdminRequest.Status.APPROVED
             req.processed_at = timezone.now()
             req.save()
+            req.processed_by = request.user
+            req.save()
 
         elif action == "reject":
             req.status = AdminRequest.Status.REJECTED
             req.admin_message = request.POST.get("admin_message", "")
             req.processed_at = timezone.now()
+            req.save()
+            req.processed_by = request.user
             req.save()
 
         return redirect("admin_requests")
@@ -604,7 +608,7 @@ def request_make_collection_public(request, collection_id):
     )
 
     messages.success(request, "Your request has been sent to the admin.")
-    return redirect("profile")
+    return redirect("plasmids:collections_list")
 
 
 @login_required

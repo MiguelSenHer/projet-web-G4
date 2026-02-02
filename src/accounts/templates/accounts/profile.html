@@ -6,17 +6,6 @@ Profile - InSillyClo
 
 {% block content %}
 
-{% if messages %}
-  <div class="container mt-3">
-    {% for message in messages %}
-      <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-    {% endfor %}
-  </div>
-{% endif %}
-
 <section class="login-section">
   <div class="container py-4">
 
@@ -38,7 +27,25 @@ Profile - InSillyClo
       </a>
       </div>
     </div>
+    {% else %}
+    <!-- REGULAR USERS LINK -->
+    <div class="card mb-4" >
+      <div class="card-body">
+        <h5 class="fw-bold mb-1">User panel</h5>
+        <p class="text-muted mb-0">
+          Inbox Requests.
+        </p> 
+      <a href="{% url 'admin_users' %}" class="btn btn-outline-dark mt-3">
+        <span class="icon">⚙</span> List of Users  
+      </a>
+      <br>
+      <a href="{% url 'admin_requests' %}" class="btn btn-outline-dark mt-3">
+        <span class="icon">⚙</span> Inbox Requests
+      </a>
+      </div>
+    </div>
     {% endif %}
+
 
     <!-- PROFILE SETTINGS -->
     <div class="card mb-4">

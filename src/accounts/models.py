@@ -54,6 +54,13 @@ class TeamMembership(models.Model):
         return f"{self.team} - {self.user} ({self.role})"
 
 class AdminRequest(models.Model):
+    processed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="processed_requests"
+    )
 
     class RequestType(models.TextChoices):
         MAKE_COLLECTION_PUBLIC = "MAKE_COLLECTION_PUBLIC", "Make collection public"

@@ -1,4 +1,17 @@
 from django.urls import path
+"""
+URL Configuration for the Accounts Application
+This module defines all URL routes for the accounts app, handling user authentication,
+profile management, team operations, and administrative functions.
+Routes:
+    - Authentication: signup, login, logout
+    - Password Management: forgot-password, password reset
+    - User Profile: profile view and user requests
+    - Team Management: list, create, view details, and manage teams
+    - Admin Functions: user management and request administration
+    - Public Collections: requests to make collections public
+All views are imported from the accounts.views module.
+"""
 from . import views
 
 urlpatterns = [
@@ -17,7 +30,6 @@ urlpatterns = [
     path("teams/<int:team_id>/manage/", views.team_manage_view, name="team_manage"),
     path("admin/users/", views.admin_users_view, name="admin_users"),
     path("admin/requests/", views.admin_requests_view, name="admin_requests"),
-    path("requests/make-public/<int:collection_id>/", views.request_make_collection_public, name="request_make_public"
-),
-
+    path("requests/make-public/<int:collection_id>/", views.request_make_collection_public, name="request_make_public"),
+    path("profile/user_requests/", views.user_requests_view, name="user_requests"),
 ]

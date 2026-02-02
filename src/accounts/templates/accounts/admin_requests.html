@@ -15,21 +15,27 @@
         {% for r in pending_requests %}
         <div class="border rounded p-3 mb-3">
 
+          <div class="small text-muted">
+            Requested on: {{ r.created_at|date:"Y-m-d H:i" }}
+          </div>
+
           <strong>{{ r.user.email }}</strong><br>
           <span class="text-muted small">{{ r.get_request_type_display }}</span>
 
           {% if r.collection %}
             <div class="mt-2 small">
               <strong>Collection:</strong> {{ r.collection.name }}<br>
-              {{ r.collection.plasmids.count }} plasmids
 
-              <ul class="mt-1">
-                {% for p in r.collection.plasmids.all|slice:":3" %}
-                  <li>{{ p.name }}</li>
+              <div class="d-flex flex-wrap gap-2 mt-2">
+                {% for p in r.collection.plasmids.all %}
+                  <span class="badge rounded-pill bg-light text-secondary border">
+                    {{ p.name }}
+                  </span>
                 {% endfor %}
-              </ul>
+              </div>
             </div>
           {% endif %}
+
 
           <form method="post" class="mt-2">
             {% csrf_token %}
@@ -60,13 +66,25 @@
           <div class="border rounded p-2 mb-2 small">
             <strong>{{ r.user.email }}</strong> —
             {{ r.get_request_type_display }}
-            <span class="badge bg-secondary">{{ r.status }}</span>
+            <span class="badge 
+              {% if r.status == 'APPROVED' %}bg-success
+              {% elif r.status == 'REJECTED' %}bg-danger
+              {% else %}bg-secondary{% endif %}">
+              {{ r.status }}
+            </span>
 
             {% if r.admin_message %}
               <div class="fst-italic text-muted">
                 Admin message: "{{ r.admin_message }}"
               </div>
             {% endif %}
+            
+            {% if r.processed_by %}
+              <div class="small text-muted mt-1">
+                Processed by: {{ r.processed_by.email }}
+              </div>
+            {% endif %}
+
           </div>
           {% empty %}
           <p>No completed requests.</p>
