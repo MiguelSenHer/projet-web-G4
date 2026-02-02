@@ -54,17 +54,9 @@ class TeamMembership(models.Model):
         return f"{self.team} - {self.user} ({self.role})"
 
 class AdminRequest(models.Model):
-    processed_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="processed_requests"
-    )
-
     class RequestType(models.TextChoices):
         MAKE_COLLECTION_PUBLIC = "MAKE_COLLECTION_PUBLIC", "Make collection public"
-        OTHER = "OTHER", "Other"
+        MAKE_ASSEMBLY_PUBLIC = "MAKE_ASSEMBLY_PUBLIC", "Make assembly public"
 
     class Status(models.TextChoices):
         PENDING = "PENDING", "Pending"
@@ -89,6 +81,12 @@ class AdminRequest(models.Model):
         on_delete=models.CASCADE
     )
 
+    assembly = models.ForeignKey(
+        "browse.Assembly",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE
+    )
     message = models.TextField(blank=True)
 
     admin_message = models.TextField(
@@ -105,5 +103,13 @@ class AdminRequest(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     processed_at = models.DateTimeField(null=True, blank=True)
 
+    processed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="processed_requests"
+    )
+    
     def __str__(self):
         return f"{self.user.email} - {self.request_type} - {self.status}"
