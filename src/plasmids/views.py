@@ -10,7 +10,6 @@ from django.views.generic import ListView, TemplateView
 from django.db.models import Q
 
 
-# View to save plasmids from a simulation job to user's collection
 class SaveCollectionView(LoginRequiredMixin, View):
     def dispatch(self, request, *args, **kwargs):
         job_id = self.kwargs["job_id"]
@@ -67,24 +66,33 @@ class BrowseCollectionsView(ListView):
     context_object_name = "collections"
 
     def get_queryset(self):
+        view_filter = self.request.GET.get("view", "all")
+
         qs = (
             Collection.objects
             .select_related("owner")
             .prefetch_related("plasmids")
             .order_by("-created_at")
-            .distinct()
         )
 
-        # Not logged in -> only public collections
+        # Not logged in -> only public
         if not self.request.user.is_authenticated:
             return qs.filter(is_public=True)
 
-        # Logged in -> public collections + own collections
-        return qs.filter(Q(is_public=True) | Q(owner=self.request.user))
-    
+        # Logged in -> public + mine
+        qs = qs.filter(Q(is_public=True) | Q(owner=self.request.user))
+
+        if view_filter == "public":
+            qs = qs.filter(is_public=True)
+        elif view_filter == "private":
+            qs = qs.filter(is_public=False, owner=self.request.user)
+
+        return qs
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["active_page"] = "plasmids"
+        context["current_filter"] = self.request.GET.get("view", "all")
         return context
 
 

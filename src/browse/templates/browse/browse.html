@@ -1,91 +1,128 @@
 {% extends 'frontend/base.html' %}
 
-{% block title %}InsillyClo-Browse Assemblies{% endblock %}
+{% block title %}InsillyClo – Browse Assemblies{% endblock %}
 
 {% block content %}
+<section class="container text-center mt-5">
+  <h1 class="hero-title">Browse assemblies</h1>
+</section>
 <main class="flex-grow-1">
-    <div class="container py-4">
-
-        <h1 class="text-center text-uppercase mb-4">Assemblies</h1>
-
-        <div class="d-flex justify-content-center mb-4">
-            <div class="btn-group shadow-sm" role="group">
-                <a href="?view=all" class="btn btn-outline-primary {% if current_filter == 'all' %}active{% endif %}">All</a>
-                <a href="?view=public" class="btn btn-outline-primary {% if current_filter == 'public' %}active{% endif %}">Public</a>
-                {% if user.is_authenticated %}
-                    <a href="?view=private" class="btn btn-outline-primary {% if current_filter == 'private' %}active{% endif %}">My Private</a>
-                {% endif %}
-            </div>
-        </div>
-
-        {% for assembly in assemblies %}
-            <div class="card public-assembly mb-4 shadow-sm">
-                <div class="card-body row align-items-center">
-
-                    <a class="col-12 col-xl-2 col-lg-3 col-md-3 me-md-4 text-decoration-none"
-                       href="{% url 'browse:assembly_details' assembly.id %}">
-                        <div class="fw-bolder text-dark">
-                            {{ assembly.name }}
-                            {% if not assembly.is_public %}
-                                <span class="badge bg-secondary ms-1" style="font-size: 0.6rem;">PRIVATE</span>
-                            {% endif %}
-                        </div>
-                        <small class="text-secondary">
-                            Updated At: {{ assembly.creation_date|date:"M d, Y" }}
-                        </small>
-                    </a>
-
-                    <div class="col border-start border-primary border-4 ps-md-4">
-                        <div class="mb-1">
-                            <span class="fw-bolder">Output Separator:</span>
-                            <code class="text-dark">{{ assembly.separator }}</code>
-                        </div>
-                        <div class="mb-2">
-                            <span class="fw-bolder">Restriction Enzyme:</span>
-                            <span class="badge bg-light text-primary border border-primary">{{ assembly.restriction_enzyme }}</span>
-                        </div>
-
-                        <div class="d-flex flex-wrap gap-1">
-                            {% for part in assembly.inputparts_set.all %}
-                                <div class="px-3 py-0 border border-3 rounded-5 border-designer small fw-semibold">
-                                    {{ part.part_name }}
-                                </div>
-                            {% empty %}
-                                <span class="text-muted small fst-italic">No input parts defined</span>
-                            {% endfor %}
-                        </div>
-                    </div>
-
-                    <div class="col-auto d-flex flex-column align-items-center gap-2 border-start ps-4">
-                        {% if assembly.file %}
-                            <a href="{% url 'browse:assembly_download' assembly.pk %}"
-                               class="btn btn-sm btn-outline-primary" 
-                               title="Download Excel Template">
-                                <i class="bi bi-cloud-arrow-down fs-5"></i>
-                            </a>
-                        {% else %}
-                            <span class="text-muted small fst-italic">No file</span>
-                        {% endif %}
-
-                            <form method="post" action="{% url 'request_make_public' assembly.id %}">
-                            {% csrf_token %}
-                            <button
-                              type="submit"
-                              class="btn btn-link p-0 text-warning text-decoration-none small"
-                            >
-                            Request to make public
-                            </button>
-                            </form>
-                    </div>
-                </div>
-            </div>
-        {% empty %}
-            <div class="text-center py-5">
-                <i class="bi bi-folder2-open display-1 text-light"></i>
-                <p class="text-muted mt-3">No assemblies found for this filter.</p>
-            </div>
-        {% endfor %}
-
+  <div class="container py-4">
+    <div class="d-flex justify-content-center mb-4">
+      <div class="btn-group shadow-sm" role="group">
+        <a href="?view=all"
+           class="btn btn-outline-primary {% if current_filter == 'all' %}active{% endif %}">
+          All
+        </a>
+        <a href="?view=public"
+           class="btn btn-outline-primary {% if current_filter == 'public' %}active{% endif %}">
+          Public
+        </a>
+        {% if user.is_authenticated %}
+          <a href="?view=private"
+             class="btn btn-outline-primary {% if current_filter == 'private' %}active{% endif %}">
+            Private
+          </a>
+        {% endif %}
+      </div>
     </div>
+
+    {% for assembly in assemblies %}
+      <div class="card public-assembly mb-4 shadow-sm">
+        <div class="card-body row align-items-center">
+
+          <a class="col-12 col-xl-2 col-lg-3 col-md-3 me-md-4 text-decoration-none"
+             href="{% url 'browse:assembly_details' assembly.id %}">
+            <div class="fw-bolder text-dark">
+              {{ assembly.name }}
+              {% if not assembly.is_public %}
+                <span class="badge bg-secondary ms-1" style="font-size: 0.6rem;">
+                  PRIVATE
+                </span>
+              {% endif %}
+            </div>
+            <small class="text-secondary">
+              Updated At: {{ assembly.creation_date|date:"M d, Y" }}
+            </small>
+          </a>
+
+          <div class="col border-start border-primary border-4 ps-md-4">
+            <div class="mb-1">
+              <span class="fw-bolder">Output Separator:</span>
+              <code class="text-dark">{{ assembly.separator }}</code>
+            </div>
+            <div class="mb-2">
+              <span class="fw-bolder">Restriction Enzyme:</span>
+              <span class="badge bg-light text-primary border border-primary">
+                {{ assembly.restriction_enzyme }}
+              </span>
+            </div>
+
+            <div class="d-flex flex-wrap gap-1">
+              {% for part in assembly.inputparts_set.all %}
+                <div class="px-3 py-0 border border-3 rounded-5 border-designer small fw-semibold">
+                  {{ part.part_name }}
+                </div>
+              {% empty %}
+                <span class="text-muted small fst-italic">
+                  No input parts defined
+                </span>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="col-auto d-flex flex-column align-items-center gap-2 border-start ps-4">
+
+            {% if assembly.file %}
+              <a href="{% url 'browse:assembly_download' assembly.pk %}"
+                 class="btn btn-sm btn-outline-primary"
+                 title="Download Excel Template">
+                <i class="bi bi-cloud-arrow-down fs-5"></i>
+              </a>
+            {% else %}
+              <span class="text-muted small fst-italic">No file</span>
+            {% endif %}
+
+            {% if not assembly.is_public %}
+              <div class="dropdown">
+                <button
+                  class="btn btn-sm btn-outline-primary"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  <i class="bi bi-gear"></i>
+                </button>
+
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li>
+                    <form
+                      method="post"
+                      action="{% url 'request_make_public' assembly.id %}"
+                      class="px-3 py-1"
+                    >
+                      {% csrf_token %}
+                      <button type="submit" class="dropdown-item">
+                        Request to make public
+                      </button>
+                    </form>
+                  </li>
+                </ul>
+              </div>
+            {% endif %}
+
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="text-center py-5">
+        <i class="bi bi-folder2-open display-1 text-light"></i>
+        <p class="text-muted mt-3">
+          No assemblies found for this filter.
+        </p>
+      </div>
+    {% endfor %}
+
+  </div>
 </main>
 {% endblock %}
