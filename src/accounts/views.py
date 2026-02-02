@@ -575,6 +575,10 @@ def admin_requests_view(request):
             req.processed_by = request.user
             req.save()
 
+            messages.success(
+                request,
+                f"Request approved successfully for {req.user.email}."
+            )
         elif action == "reject":
             req.status = AdminRequest.Status.REJECTED
             req.admin_message = request.POST.get("admin_message", "")
@@ -582,6 +586,11 @@ def admin_requests_view(request):
             req.save()
             req.processed_by = request.user
             req.save()
+
+            messages.success(
+                request,
+                f"Request rejected successfully for {req.user.email}."
+            )
 
         return redirect("admin_requests")
 
@@ -600,6 +609,12 @@ def request_make_collection_public(request, collection_id):
         is_public=False
     )
 
+    # Remove any existing requests for this collection
+    AdminRequest.objects.filter(
+        collection=collection
+    ).delete()
+
+    # old request replaced by new one
     AdminRequest.objects.create(
         user=request.user,
         request_type=AdminRequest.RequestType.MAKE_COLLECTION_PUBLIC,
@@ -607,7 +622,11 @@ def request_make_collection_public(request, collection_id):
         message="Please make this collection public."
     )
 
-    messages.success(request, "Your request has been sent to the admin.")
+    messages.info(
+        request,
+        "Your request has been sent."
+    )
+
     return redirect("plasmids:collections_list")
 
 

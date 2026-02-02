@@ -9,42 +9,41 @@ Profile - InSillyClo
 <section class="login-section">
   <div class="container py-4">
 
-    
-    <!-- ADMIN USERS LINK -->
-    {% if user.is_superuser %}
-    <div class="card mb-4" >
-      <div class="card-body">
-        <h5 class="fw-bold mb-1">Admin panel</h5>
-        <p class="text-muted mb-0">
-          Access administrative tools and manage users.
-        </p> 
-      <a href="{% url 'admin_users' %}" class="btn btn-outline-dark mt-3">
-        <span class="icon">⚙</span> List of Users  
-      </a>
-      <br>
-      <a href="{% url 'admin_requests' %}" class="btn btn-outline-dark mt-3">
-        <span class="icon">⚙</span> Inbox Requests
-      </a>
-      </div>
-    </div>
-    {% else %}
-    <!-- REGULAR USERS LINK -->
-    <div class="card mb-4" >
-      <div class="card-body">
-        <h5 class="fw-bold mb-1">User panel</h5>
-        <p class="text-muted mb-0">
-          Inbox Requests.
-        </p> 
-      <a href="{% url 'admin_users' %}" class="btn btn-outline-dark mt-3">
-        <span class="icon">⚙</span> List of Users  
-      </a>
-      <br>
-      <a href="{% url 'admin_requests' %}" class="btn btn-outline-dark mt-3">
-        <span class="icon">⚙</span> Inbox Requests
-      </a>
-      </div>
-    </div>
-    {% endif %}
+{% if user.is_superuser %}
+<div class="card mb-4">
+  <div class="card-body">
+    <h5 class="fw-bold mb-1">Admin panel</h5>
+    <p class="text-muted mb-0">
+      Access administrative tools and manage users.
+    </p>
+
+    <a href="{% url 'admin_users' %}" class="btn btn-outline-dark mt-3">
+      ⚙ List of users
+    </a>
+
+    <br>
+
+    <a href="{% url 'admin_requests' %}" class="btn btn-outline-dark mt-3">
+      📥 Inbox requests
+    </a>
+  </div>
+</div>
+
+{% else %}
+<div class="card mb-4">
+  <div class="card-body">
+    <h5 class="fw-bold mb-1">My requests</h5>
+    <p class="text-muted mb-0">
+      Track the status of your requests.
+    </p>
+
+    <a href="{% url 'user_requests' %}" class="btn btn-outline-dark mt-3">
+      📄 View Requests Status
+    </a>
+  </div>
+</div>
+{% endif %}
+
 
 
     <!-- PROFILE SETTINGS -->

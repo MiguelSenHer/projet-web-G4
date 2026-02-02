@@ -6,31 +6,48 @@ Profile - InSillyClo
 
 {% block content %}
 
+<section class="login-section">
+  <div class="container py-4">
+  <h2>My requests</h2>
 
-<h2>My requests</h2>
+  <div class="card mb-0">
+    <div class="card-body">
 
-{% for r in requests %}
-<div class="border rounded p-3 mb-2">
+      {% for r in requests %}
+      <div class="border rounded p-1 mb-1">
 
-  <strong>{{ r.get_request_type_display }}</strong><br>
-  Status:
-  <span class="badge bg-info">{{ r.status }}</span>
+        <strong>{{ r.get_request_type_display }}</strong><br>
+        Requested on: {{ r.created_at|date:"Y-m-d H:i" }}<br>
+        Status:
+        <span class="badge 
+          {% if r.status == 'PENDING' %}bg-info
+          {% elif r.status == 'APPROVED' %}bg-success
+          {% elif r.status == 'REJECTED' %}bg-danger
+          {% endif %}
+        ">
+          {{ r.status }}
+        </span>
 
-  {% if r.collection %}
-    <div class="small">
-      Collection: {{ r.collection.name }}
+        {% if r.collection %}
+          <div class="small">
+            Collection: {{ r.collection.name }}
+          </div>
+        {% endif %}
+
+        {% if r.admin_message %}
+          <div class="text-muted fst-italic mt-1">
+            Admin message: "{{ r.admin_message }}"
+          </div>
+        {% endif %}
+
+      </div>
+      {% empty %}
+      <p>No sent requests yet.</p>
+      {% endfor %}
+
+      </div>
     </div>
-  {% endif %}
-
-  {% if r.admin_message %}
-    <div class="text-muted fst-italic mt-1">
-      Admin message: "{{ r.admin_message }}"
-    </div>
-  {% endif %}
-
-</div>
-{% empty %}
-<p>No requests yet.</p>
-{% endfor %}
+  </div>
+</section>
 
 {% endblock %}
