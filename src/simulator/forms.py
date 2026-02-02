@@ -186,9 +186,12 @@ class UploadInputsForm(forms.Form):
                 raise ValidationError("Mapping zip may only contain .csv, .tsv or .txt files.")
         return f
     
-    # Save input files relative to job and extract if zip
+    # Save input files relative to job
     def save(self, job):
         base = Path(settings.MEDIA_ROOT) / "simulator" / "jobs" / job.job_id / "inputs"
+
+        added = []
+        skipped = []
 
         for kind in ("genbank", "mapping"):
             f = self.cleaned_data.get(kind)
@@ -200,10 +203,27 @@ class UploadInputsForm(forms.Form):
 
             if f.name.lower().endswith(".zip"):
                 with zipfile.ZipFile(f) as z:
-                    z.extractall(dest_dir)
+                    for name in z.namelist():
+                        if name.endswith("/"):
+                            continue
+                        out = dest_dir / Path(name).name
+                        if out.exists():
+                            skipped.append(out.name)
+                            continue
+                        with z.open(name) as src, out.open("wb") as dst:
+                            dst.write(src.read())
+                        added.append(out.name)
             else:
                 out = dest_dir / f.name
-                with out.open("wb") as dst:
-                    for chunk in f.chunks():
-                        dst.write(chunk)
-        return job
+                if out.exists():
+                    skipped.append(out.name)
+                else:
+                    with out.open("wb") as dst:
+                        for chunk in f.chunks():
+                            dst.write(chunk)
+                    added.append(out.name)
+
+        return {
+            "added": added,
+            "skipped": skipped,
+        }

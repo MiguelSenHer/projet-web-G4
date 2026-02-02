@@ -10,6 +10,17 @@ InSillyClo – My simulations
   <h1 class="hero-title">My simulations</h1>
 </section>
 
+{% if messages %}
+  <div class="container mt-3">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
 <main class="flex-grow-1">
   <div class="container py-4">
 
@@ -56,7 +67,7 @@ InSillyClo – My simulations
               <div>
                 <div class="dropdown">
                   <button
-                    class="btn btn-assembly"
+                    class="btn btn-sm btn-outline-primary"
                     type="button"
                     data-bs-toggle="dropdown"
                     aria-expanded="false"

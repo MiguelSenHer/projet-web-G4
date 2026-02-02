@@ -12,6 +12,7 @@ from .models import SimulationJob
 import shutil
 from django.conf import settings
 from zipfile import ZipFile
+from django.contrib import messages
 
 from plasmids.models import Plasmid
 
@@ -65,14 +66,31 @@ class TemplatePreviewView(FormView):
 
             shutil.rmtree(base / "inputs" / "genbank", ignore_errors=True)
             shutil.rmtree(base / "inputs" / "mapping", ignore_errors=True)
+
+            messages.success(request, "All inputs were cleared successfully.")
             return redirect("simulator:preview")
 
         return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
-        form.save(self.job)
-        return redirect("simulator:preview")
+        result = form.save(self.job)
 
+        uploaded_names = []
+        if "genbank" in self.request.FILES:
+            uploaded_names.append(self.request.FILES["genbank"].name)
+        if "mapping" in self.request.FILES:
+            uploaded_names.append(self.request.FILES["mapping"].name)
+
+        for fname in uploaded_names:
+            messages.success(
+                self.request,
+                (
+                    f"Uploaded file: {fname} "
+                    f"({len(result['added'])} added, {len(result['skipped'])} skipped)"
+                )
+            )
+
+        return redirect("simulator:preview")
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
