@@ -3,6 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse
+from plasmids.models import Collection
 import json
 from pathlib import Path
 from django.http import Http404, FileResponse
@@ -267,6 +268,12 @@ class DeleteSimulationView(LoginRequiredMixin, View):
 
         job_dir = Path(settings.MEDIA_ROOT) / "simulator" / "jobs" / job.job_id
         shutil.rmtree(job_dir, ignore_errors=True)
+
+        Collection.objects.filter(
+            owner=request.user,
+            name=f"Simulation {job.job_id}",
+            is_public=False,
+        ).delete()
 
         job.delete()
         return redirect("simulator:simulations_list")
