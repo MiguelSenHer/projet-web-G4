@@ -12,5 +12,151 @@
         "owner": 1,
         "is_public": true
     }
+},
+{
+    "model": "browse.inputparts",
+    "pk": 2,
+    "fields": {
+        "assembly": 1,
+        "part_name": "ConI",
+        "typed": true,
+        "mandatory": false,
+        "separator": null,
+        "include_in_output_name": false,
+        "allowed_types": []
+    }
+},
+{
+    "model": "browse.inputparts",
+    "pk": 3,
+    "fields": {
+        "assembly": 1,
+        "part_name": "Promoter",
+        "typed": false,
+        "mandatory": true,
+        "separator": ".",
+        "include_in_output_name": true,
+        "allowed_types": [
+            1,
+            2
+        ]
+    }
+},
+{
+    "model": "browse.inputparts",
+    "pk": 4,
+    "fields": {
+        "assembly": 1,
+        "part_name": "Gene",
+        "typed": false,
+        "mandatory": true,
+        "separator": ".",
+        "include_in_output_name": true,
+        "allowed_types": [
+            3,
+            4
+        ]
+    }
+},
+{
+    "model": "browse.inputparts",
+    "pk": 5,
+    "fields": {
+        "assembly": 1,
+        "part_name": "Terminator",
+        "typed": false,
+        "mandatory": true,
+        "separator": ".",
+        "include_in_output_name": true,
+        "allowed_types": [
+            5,
+            6
+        ]
+    }
+},
+{
+    "model": "browse.inputparts",
+    "pk": 6,
+    "fields": {
+        "assembly": 1,
+        "part_name": "Conr",
+        "typed": true,
+        "mandatory": false,
+        "separator": ".",
+        "include_in_output_name": false,
+        "allowed_types": []
+    }
+},
+{
+    "model": "browse.inputparts",
+    "pk": 7,
+    "fields": {
+        "assembly": 1,
+        "part_name": "Backbone",
+        "typed": false,
+        "mandatory": true,
+        "separator": ".",
+        "include_in_output_name": true,
+        "allowed_types": [
+            7,
+            8
+        ]
+    }
+},
+{
+    "model": "browse.type",
+    "pk": 1,
+    "fields": {
+        "type_name": "2"
+    }
+},
+{
+    "model": "browse.type",
+    "pk": 2,
+    "fields": {
+        "type_name": "2a, 2b"
+    }
+},
+{
+    "model": "browse.type",
+    "pk": 3,
+    "fields": {
+        "type_name": "3"
+    }
+},
+{
+    "model": "browse.type",
+    "pk": 4,
+    "fields": {
+        "type_name": "3a, 3b"
+    }
+},
+{
+    "model": "browse.type",
+    "pk": 5,
+    "fields": {
+        "type_name": "4"
+    }
+},
+{
+    "model": "browse.type",
+    "pk": 6,
+    "fields": {
+        "type_name": "4a, 4b"
+    }
+},
+{
+    "model": "browse.type",
+    "pk": 7,
+    "fields": {
+        "type_name": "6"
+    }
+},
+{
+    "model": "browse.type",
+    "pk": 8,
+    "fields": {
+        "type_name": "6a, 6b, 6c"
+    }
 }
 ]
