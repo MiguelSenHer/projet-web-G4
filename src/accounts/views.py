@@ -519,19 +519,29 @@ def admin_users_view(request):
     if not request.user.is_superuser:
         raise PermissionDenied
 
-    users = (
-        User.objects
-        .all()
-        .order_by("-last_login", "email")
-    )
+    if request.method == "POST":
+        user_id = request.POST.get("user_id")
+        user = get_object_or_404(User, id=user_id)
+
+        if not user.is_superuser:
+            user.is_superuser = True
+            user.is_staff = True
+            user.save()
+            messages.success(
+                request,
+                f"{user.email} is now an administrator."
+            )
+
+        return redirect("admin_users")
+
+    users = User.objects.all().order_by("-last_login", "email")
 
     return render(
         request,
         "accounts/admin_users.html",
-        {
-            "users": users,
-        }
+        {"users": users},
     )
+
 
 @login_required
 def admin_requests_view(request):

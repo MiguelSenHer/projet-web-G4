@@ -5,12 +5,12 @@
 <section class="login-section">
 
   <div class="container">
-    <h2 class="panel-title mb-3">USERS (ADMIN)</h2>
+    <h2 class="panel-title mb-3">Admin Access - List of Users</h2>
 
     <div class="card team-card">
       <div class="card-body">
 
-        <table class="table table-sm mb-0">
+        <table class="table table-sm mb-0 align-middle">
           <thead>
             <tr>
               <th>Email</th>
@@ -33,9 +33,17 @@
                 </td>
                 <td>
                   {% if u.is_superuser %}
-                    Admin
+                    <span class="badge bg-success">Admin</span>
                   {% else %}
-                    User
+                    <span class="badge bg-secondary">User</span>
+
+                    <form method="post" class="d-inline ms-2">
+                      {% csrf_token %}
+                      <input type="hidden" name="user_id" value="{{ u.id }}">
+                      <button class="btn btn-sm btn-outline-success">
+                        Make admin
+                      </button>
+                    </form>
                   {% endif %}
                 </td>
               </tr>

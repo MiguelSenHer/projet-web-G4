@@ -20,7 +20,27 @@ Profile - InSillyClo
 <section class="login-section">
   <div class="container py-4">
 
-    <!-- PROFILE SETTINGS (minimal card like Create Team) -->
+    
+    <!-- ADMIN USERS LINK -->
+    {% if user.is_superuser %}
+    <div class="card mb-4" >
+      <div class="card-body">
+        <h5 class="fw-bold mb-1">Admin panel</h5>
+        <p class="text-muted mb-0">
+          Access administrative tools and manage users.
+        </p> 
+      <a href="{% url 'admin_users' %}" class="btn btn-outline-dark mt-3">
+        <span class="icon">⚙</span> List of Users  
+      </a>
+      <br>
+      <a href="{% url 'admin_requests' %}" class="btn btn-outline-dark mt-3">
+        <span class="icon">⚙</span> Inbox Requests
+      </a>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- PROFILE SETTINGS -->
     <div class="card mb-4">
       <div class="card-body">
 
@@ -145,7 +165,7 @@ Profile - InSillyClo
                 </div>
               </div>
 
-              <!-- ACTIVITY (simple, minimal) -->
+              <!-- ACTIVITY -->
               <div class="col-12">
                 <div class="card">
                   <div class="card-body">
@@ -174,27 +194,7 @@ Profile - InSillyClo
       </div>
     </div>
 
-    <!-- ADMIN USERS LINK -->
-    {% if user.is_superuser %}
-    <div class="card mb-4" >
-      <div class="card-body">
-        <h5 class="fw-bold mb-1">Admin panel</h5>
-        <p class="text-muted mb-0">
-          Access administrative tools and manage users.
-        </p> 
-      <a href="{% url 'admin_users' %}" class="btn btn-outline-dark mt-3">
-        Admin - Users
-      </a>
-      <br>
-      <a href="{% url 'admin_requests' %}" class="btn btn-outline-dark mt-3">
-        Admin - Requests
-      </a>
-      </div>
-    </div>
-    {% endif %}
-
-
-    <!-- TEAM MANAGEMENT (same minimal style as Create Team) -->
+    <!-- TEAM MANAGEMENT -->
     <div class="card">
       <div class="card-body">
         <h5 class="fw-bold mb-2">Team management</h5>
