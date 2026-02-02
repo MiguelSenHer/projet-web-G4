@@ -48,10 +48,10 @@ Manage Teams - InSillyClo
                     <span class="icon">⚙</span>
                   </a>
                 {% else %}
-                  <span class="team-action-btn">
+                  <a href="{% url 'team_details' item.team.id %}" class="team-action-btn">
                     <span>View team</span>
                     <span class="icon">👁</span>
-                  </span>
+                  </a>
                 {% endif %}
               </div>
 
