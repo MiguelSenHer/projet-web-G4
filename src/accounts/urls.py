@@ -17,4 +17,7 @@ urlpatterns = [
     path("teams/<int:team_id>/manage/", views.team_manage_view, name="team_manage"),
     path("admin/users/", views.admin_users_view, name="admin_users"),
     path("admin/requests/", views.admin_requests_view, name="admin_requests"),
+    path("requests/make-public/<int:collection_id>/", views.request_make_collection_public, name="request_make_public"
+),
+
 ]

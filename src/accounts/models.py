@@ -52,3 +52,51 @@ class TeamMembership(models.Model):
 
     def __str__(self):
         return f"{self.team} - {self.user} ({self.role})"
+
+class AdminRequest(models.Model):
+
+    class RequestType(models.TextChoices):
+        MAKE_COLLECTION_PUBLIC = "MAKE_COLLECTION_PUBLIC", "Make collection public"
+        OTHER = "OTHER", "Other"
+
+    class Status(models.TextChoices):
+        PENDING = "PENDING", "Pending"
+        APPROVED = "APPROVED", "Approved"
+        REJECTED = "REJECTED", "Rejected"
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="admin_requests"
+    )
+
+    request_type = models.CharField(
+        max_length=50,
+        choices=RequestType.choices
+    )
+
+    collection = models.ForeignKey(
+        "plasmids.Collection",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE
+    )
+
+    message = models.TextField(blank=True)
+
+    admin_message = models.TextField(
+        blank=True,
+        help_text="Reason given by admin when rejecting"
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user.email} - {self.request_type} - {self.status}"

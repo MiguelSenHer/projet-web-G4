@@ -1,0 +1,36 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}
+Profile - InSillyClo
+{% endblock %}
+
+{% block content %}
+
+
+<h2>My requests</h2>
+
+{% for r in requests %}
+<div class="border rounded p-3 mb-2">
+
+  <strong>{{ r.get_request_type_display }}</strong><br>
+  Status:
+  <span class="badge bg-info">{{ r.status }}</span>
+
+  {% if r.collection %}
+    <div class="small">
+      Collection: {{ r.collection.name }}
+    </div>
+  {% endif %}
+
+  {% if r.admin_message %}
+    <div class="text-muted fst-italic mt-1">
+      Admin message: "{{ r.admin_message }}"
+    </div>
+  {% endif %}
+
+</div>
+{% empty %}
+<p>No requests yet.</p>
+{% endfor %}
+
+{% endblock %}

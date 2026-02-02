@@ -1,5 +1,5 @@
 {% extends "frontend/base.html" %}
-{% block title %}Admin - Users{% endblock %}
+{% block title %}Admin - Requests{% endblock %}
 
 {% block content %}
 <section class="login-section">
@@ -10,6 +10,67 @@
     <div class="card team-card">
       <div class="card-body">
 
+        <h4>Pending requests</h4>
+
+        {% for r in pending_requests %}
+        <div class="border rounded p-3 mb-3">
+
+          <strong>{{ r.user.email }}</strong><br>
+          <span class="text-muted small">{{ r.get_request_type_display }}</span>
+
+          {% if r.collection %}
+            <div class="mt-2 small">
+              <strong>Collection:</strong> {{ r.collection.name }}<br>
+              {{ r.collection.plasmids.count }} plasmids
+
+              <ul class="mt-1">
+                {% for p in r.collection.plasmids.all|slice:":3" %}
+                  <li>{{ p.name }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+
+          <form method="post" class="mt-2">
+            {% csrf_token %}
+            <input type="hidden" name="request_id" value="{{ r.id }}">
+
+            <textarea name="admin_message"
+                      class="form-control mb-2"
+                      placeholder="Message if rejected (optional)"></textarea>
+
+            <button name="action" value="approve" class="btn btn-success btn-sm">
+              Approve
+            </button>
+
+            <button name="action" value="reject" class="btn btn-danger btn-sm">
+              Reject
+            </button>
+          </form>
+
+        </div>
+        {% empty %}
+        <p>No pending requests.</p>
+        {% endfor %}
+
+
+        <h4 class="mt-4">Completed requests</h4>
+        
+          {% for r in completed_requests %}
+          <div class="border rounded p-2 mb-2 small">
+            <strong>{{ r.user.email }}</strong> —
+            {{ r.get_request_type_display }}
+            <span class="badge bg-secondary">{{ r.status }}</span>
+
+            {% if r.admin_message %}
+              <div class="fst-italic text-muted">
+                Admin message: "{{ r.admin_message }}"
+              </div>
+            {% endif %}
+          </div>
+          {% empty %}
+          <p>No completed requests.</p>
+          {% endfor %}
 
       </div>
     </div>

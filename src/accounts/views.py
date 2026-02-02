@@ -1,19 +1,16 @@
-from django.shortcuts import render, redirect
+from django.utils import timezone
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth import login, logout, authenticate, get_user_model, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
-from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.urls import reverse
 from .forms import SignUpForm
-from .models import PasswordReset, Team, TeamMembership
-from django.db.models import Q
+from .models import AdminRequest, PasswordReset, Team, TeamMembership
+from django.db.models import Q, Case, When, IntegerField
 from django.db import transaction
-from django.db.models import Case, When, IntegerField
-from django.shortcuts import get_object_or_404
 from django.core.exceptions import PermissionDenied
 from plasmids.models import Collection
 
@@ -548,8 +545,76 @@ def admin_requests_view(request):
     if not request.user.is_superuser:
         raise PermissionDenied
 
-    return render(
-        request,
-        "accounts/admin_requests.html",
-        {}
+    pending_requests = (
+        AdminRequest.objects
+        .filter(status=AdminRequest.Status.PENDING)
+        .select_related("user", "collection")
+        .prefetch_related("collection__plasmids")
+        .order_by("-created_at")
     )
+
+    completed_requests = (
+        AdminRequest.objects
+        .exclude(status=AdminRequest.Status.PENDING)
+        .select_related("user", "collection")
+        .order_by("-processed_at")
+    )
+
+    if request.method == "POST":
+        req = get_object_or_404(AdminRequest, id=request.POST.get("request_id"))
+        action = request.POST.get("action")
+
+        if action == "approve":
+            if req.request_type == AdminRequest.RequestType.MAKE_COLLECTION_PUBLIC:
+                req.collection.is_public = True
+                req.collection.save()
+
+            req.status = AdminRequest.Status.APPROVED
+            req.processed_at = timezone.now()
+            req.save()
+
+        elif action == "reject":
+            req.status = AdminRequest.Status.REJECTED
+            req.admin_message = request.POST.get("admin_message", "")
+            req.processed_at = timezone.now()
+            req.save()
+
+        return redirect("admin_requests")
+
+    return render(request, "accounts/admin_requests.html", {
+        "pending_requests": pending_requests,
+        "completed_requests": completed_requests,
+    })
+
+
+@login_required
+def request_make_collection_public(request, collection_id):
+    collection = get_object_or_404(
+        Collection,
+        id=collection_id,
+        owner=request.user,
+        is_public=False
+    )
+
+    AdminRequest.objects.create(
+        user=request.user,
+        request_type=AdminRequest.RequestType.MAKE_COLLECTION_PUBLIC,
+        collection=collection,
+        message="Please make this collection public."
+    )
+
+    messages.success(request, "Your request has been sent to the admin.")
+    return redirect("profile")
+
+
+@login_required
+def user_requests_view(request):
+    requests = (
+        AdminRequest.objects
+        .filter(user=request.user)
+        .order_by("-created_at")
+    )
+
+    return render(request, "accounts/user_requests.html", {
+        "requests": requests
+    })
