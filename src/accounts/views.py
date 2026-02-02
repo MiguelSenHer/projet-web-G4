@@ -488,23 +488,37 @@ def team_manage_view(request, team_id):
         action = request.POST.get("action")
 
         if action == "rename":
-            team.name = request.POST.get("team_name", "").strip()
-            team.save()
-            messages.success(request, "Team name updated.")
+            new_name = request.POST.get("team_name", "").strip()
+            if not new_name:
+                messages.error(request, "Team name cannot be empty.")
+            else:
+                team.name = new_name
+                team.save()
+                messages.success(request, "Team name updated.")
 
         elif action == "remove":
-            TeamMembership.objects.filter(
+            deleted, _ = TeamMembership.objects.filter(
                 team=team,
                 user_id=request.POST.get("user_id"),
                 role=TeamMembership.Role.MEMBER
             ).delete()
 
+            if deleted:
+                messages.warning(request, "Member removed from the team.")
+            else:
+                messages.error(request, "Unable to remove this member.")
+
         elif action == "add":
-            TeamMembership.objects.get_or_create(
+            obj, created = TeamMembership.objects.get_or_create(
                 team=team,
                 user_id=request.POST.get("user_id"),
                 defaults={"role": TeamMembership.Role.MEMBER},
             )
+
+            if created:
+                messages.success(request, "Member added to the team.")
+            else:
+                messages.info(request, "This user is already a member of the team.")
 
         return redirect("team_manage", team_id=team.id)
 
