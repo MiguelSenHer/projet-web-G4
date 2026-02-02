@@ -3,6 +3,7 @@ from django.db import models
 from pathlib import Path
 from io import StringIO
 from django.http import Http404
+import shutil
 from django.apps import apps
 
 from Bio.SeqFeature import SeqFeature, SimpleLocation
@@ -13,6 +14,13 @@ import matplotlib
 from matplotlib.patches import Patch
 from matplotlib.lines import Line2D
 matplotlib.use("Agg")
+
+
+import shutil
+from pathlib import Path
+
+from django.conf import settings
+from django.db import models
 
 
 class Collection(models.Model):
@@ -26,13 +34,37 @@ class Collection(models.Model):
         blank=True,
         related_name="collections",
     )
-
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["owner", "name"], name="uniq_collection_name_per_owner"),
+            models.UniqueConstraint(
+                fields=["owner", "name"],
+                name="uniq_collection_name_per_owner",
+            ),
         ]
+
+    def save(self, *args, **kwargs):
+        was_public = None
+        if self.pk:
+            was_public = Collection.objects.get(pk=self.pk).is_public
+
+        super().save(*args, **kwargs)
+
+        if was_public is False and self.is_public is True:
+            public_dir = (
+                Path(settings.BASE_DIR) / "plasmids" / "public_data" / "collections" / str(self.id)
+            )
+
+            public_dir.mkdir(parents=True, exist_ok=True)
+
+            for plasmid in self.plasmids.all():
+                src = Path(plasmid.gb_path)
+                dst = public_dir / src.name
+                shutil.copy2(src, dst)
+
+                plasmid.gb_path = str(dst)
+                plasmid.save(update_fields=["gb_path"])
 
 
 class Plasmid(models.Model):
