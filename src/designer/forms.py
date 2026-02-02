@@ -10,7 +10,6 @@ class AssemblyForm(forms.ModelForm):
             "comment",
             "separator",
             "restriction_enzyme",
-            "is_public",
         ]
 
 
