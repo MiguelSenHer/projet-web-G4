@@ -67,7 +67,7 @@ def designer_properties(request):
 
 @login_required
 def designer_input_parts(request, pk):
-    assembly = get_object_or_404(Assembly, pk=pk)
+    assembly = get_object_or_404(Assembly, pk=pk, owner=request.user)
     if request.method == "POST":
         formset = InputPartsFormSet(request.POST, instance=assembly)
         if formset.is_valid():
@@ -94,7 +94,7 @@ def designer_input_parts(request, pk):
 
 @login_required   
 def designer_summary(request, pk):
-    assembly = get_object_or_404(Assembly, id=pk)
+    assembly = get_object_or_404(Assembly, id=pk, owner=request.user)
     input_parts = assembly.inputparts_set.prefetch_related("allowed_types")
     return render(
         request,
