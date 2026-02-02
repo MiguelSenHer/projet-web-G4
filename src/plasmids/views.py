@@ -30,11 +30,15 @@ class SaveCollectionView(LoginRequiredMixin, View):
         if not gb_paths:
             raise Http404
         
-        collection, _ = Collection.objects.get_or_create(
+        collection, created = Collection.objects.get_or_create(
             owner=request.user,
-            name=f"Simulation {self.job.job_id}",
-            is_public=False,
+            name=f"Simulation_{self.job.job_id}",
+            defaults={"is_public": False},
         )
+
+        if not created:
+            messages.info(request, "This collection is already saved in Browse plasmid collections.")
+            return redirect("simulator:simulations_list")
 
         existing_paths = set(
             Plasmid.objects.filter(collection=collection)

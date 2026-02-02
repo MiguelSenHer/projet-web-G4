@@ -29,12 +29,12 @@
 
               <div class="dropdown">
                 <button
-                  class="btn btn-sm btn-light border-0"
+                  class="btn btn-assembly"
                   type="button"
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                 >
-                  <i class="bi bi-three-dots-vertical"></i>
+                  <i class="bi bi-gear"></i>
                 </button>
 
                 <ul class="dropdown-menu dropdown-menu-end">
@@ -47,7 +47,7 @@
                       {% csrf_token %}
                       <button
                         type="submit"
-                        class="btn btn-link p-0 text-warning text-decoration-none small"
+                        class="dropdown-item"
                       >
                         Request to make public
                       </button>
@@ -103,7 +103,7 @@
             <div>
               <div class="fw-bold">{{ c.name }}</div>
               <div class="text-muted small">
-                Public | Owner : admin_{{ c.owner.username }} | Created {{ c.created_at|date:"Y-m-d H:i" }}
+                Public | Owner : {{ c.owner.username }} | Created {{ c.created_at|date:"Y-m-d H:i" }}
               </div>
 
               {% if c.plasmids.count %}
