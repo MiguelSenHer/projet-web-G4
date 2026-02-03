@@ -124,35 +124,56 @@
         {% endwith %}
 
         <!-- MAPPING TABLES -->
-        {% for m in ms %}
-        <div class="d-flex align-items-center gap-2">
-          <a
-            class="border rounded-pill px-3 py-1 small text-decoration-none"
-            href="{% url 'plasmids:mapping_view' m.id %}"
-            target="_blank"
-            rel="noopener"
-          >
-            {{ m.name }}
-          </a>
-
-          {% if not m.is_public %}
-            <form
-              method="post"
-              action="{% url 'request_make_mapping_table_public' m.id %}"
-              class="d-inline"
-            >
-              {% csrf_token %}
+        {% with ms=c.mapping_tables.all %}
+          {% if ms %}
+            <div class="mt-2">
               <button
-                type="submit"
-                class="btn btn-sm btn-outline-secondary"
-                title="Request to make public"
+                class="btn btn-link p-0 text-muted small"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#mappings-{{ c.id }}"
+                aria-expanded="false"
+                aria-controls="mappings-{{ c.id }}"
               >
-                <i class="bi bi-unlock"></i>
+                Mapping tables ({{ ms|length }})
               </button>
-            </form>
+
+              <div class="collapse mt-2" id="mappings-{{ c.id }}">
+                <div class="d-flex flex-column gap-2">
+                  {% for m in ms %}
+                    <div class="d-flex align-items-center gap-2">
+                      <a
+                        class="border rounded-pill px-3 py-1 small text-decoration-none"
+                        href="{% url 'plasmids:mapping_view' m.id %}"
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        {{ m.name }}
+                      </a>
+
+                      {% if not m.is_public %}
+                        <form
+                          method="post"
+                          action="{% url 'request_make_mapping_table_public' m.id %}"
+                          class="d-inline"
+                        >
+                          {% csrf_token %}
+                          <button
+                            type="submit"
+                            class="btn btn-sm btn-outline-secondary"
+                            title="Request to make public"
+                          >
+                            <i class="bi bi-unlock"></i>
+                          </button>
+                        </form>
+                      {% endif %}
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
           {% endif %}
-        </div>
-      {% endfor %}
+        {% endwith %}
 
       </div>
     {% empty %}
