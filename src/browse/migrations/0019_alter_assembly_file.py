@@ -16,11 +16,8 @@ class Migration(migrations.Migration):
                 blank=True,
                 null=True,
                 storage=django.core.files.storage.FileSystemStorage(
-<<<<<<< HEAD
-                    location="/Users/miguel/projet-web-G4/src/browse/public_data/assemblies"
-=======
+
                     location="/Users/Cherif/projetweb2526/projet-web-G4/src/browse/public_data/assemblies"
->>>>>>> 7359e580 (Added mapping tables to browse)
                 ),
                 upload_to="",
             ),
