@@ -253,7 +253,7 @@ class SimulationsListView(LoginRequiredMixin, ListView):
                     if p.is_file()
                 ]
 
-            # OUTPUT plasmids (produced)
+            # OUTPUT plasmids
             output_gb_files = []
             outputs_dir = base / "outputs"
             if outputs_dir.exists():
@@ -262,7 +262,17 @@ class SimulationsListView(LoginRequiredMixin, ListView):
                     if p.is_file()
                 ]
 
-            jobs_with_io.append((job, input_gb_files, output_gb_files))
+            # MAPPING tables
+            mapping_files = []
+            mapping_dir = base / "inputs" / "mapping"
+            mapping_files = []
+            if mapping_dir.exists():
+                mapping_files = [
+                    (p.name, f"{settings.MEDIA_URL}simulator/jobs/{job.job_id}/inputs/mapping/{p.name}")
+                    for p in mapping_dir.rglob("*") if p.is_file()
+                ]
+
+            jobs_with_io.append((job, input_gb_files, output_gb_files, mapping_files))
 
         context["jobs_with_io"] = jobs_with_io
         context["active_page"] = "simulations"

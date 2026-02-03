@@ -16,13 +16,6 @@ from matplotlib.lines import Line2D
 matplotlib.use("Agg")
 
 
-import shutil
-from pathlib import Path
-
-from django.conf import settings
-from django.db import models
-
-
 class Collection(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
@@ -65,6 +58,33 @@ class Collection(models.Model):
 
                 plasmid.gb_path = str(dst)
                 plasmid.save(update_fields=["gb_path"])
+            
+            # Copy plasmids
+            for plasmid in self.plasmids.all():
+                src = Path(plasmid.gb_path)
+                dst = public_dir / src.name
+                shutil.copy2(src, dst)
+
+                plasmid.gb_path = str(dst)
+                plasmid.save(update_fields=["gb_path"])
+
+            # Copy mapping tables
+            for mapping in self.mapping_tables.all():
+                src = Path(mapping.mapping_path)
+                if not src.exists():
+                    continue
+                dst = public_dir / src.name
+                shutil.copy2(src, dst)
+
+                mapping.mapping_path = str(dst)
+                mapping.save(update_fields=["mapping_path"])
+
+
+class MappingTable(models.Model):
+    collection = models.ForeignKey(Collection, on_delete=models.CASCADE, related_name="mapping_tables")
+    name = models.CharField(max_length=200)
+    mapping_path = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 class Plasmid(models.Model):

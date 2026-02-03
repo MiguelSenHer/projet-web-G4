@@ -4,22 +4,23 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.views import View
 from simulator.models import SimulationJob
-from plasmids.models import Collection, Plasmid
+from plasmids.models import Collection, Plasmid, MappingTable
 from django.contrib import messages
 from django.views.generic import ListView, TemplateView
 from django.db.models import Q
+from django.http import FileResponse
 
 
+# View to save i/o plasmids or mapping tables from a simulation job to user's collection
 class SaveCollectionView(LoginRequiredMixin, View):
     def dispatch(self, request, *args, **kwargs):
-        self.mode = self.kwargs["mode"]  # "inputs" or "outputs"
+        self.mode = self.kwargs["mode"]  # "inputs" , "outputs" or "mapping"
         job_id = self.kwargs["job_id"]
 
-        if self.mode not in ("inputs", "outputs"):
+        if self.mode not in ("inputs", "outputs", "mapping"):
             raise Http404
 
         self.job = get_object_or_404(SimulationJob, job_id=job_id)
-
         if self.job.user_id is not None and self.job.user_id != request.user.id:
             raise Http404
 
@@ -30,16 +31,35 @@ class SaveCollectionView(LoginRequiredMixin, View):
 
         if self.mode == "inputs":
             gb_dir = base / "inputs" / "genbank"
+            gb_paths = [p for p in gb_dir.rglob("*.gb") if p.is_file()] if gb_dir.exists() else []
+            mapping_paths = []
+
             collection_name = f"Input_plasmids_{self.job.job_id}"
             already_msg = "Input plasmids are already saved in Browse plasmid collections."
             success_msg = "Input plasmids saved to your collection."
-        else:
+
+        elif self.mode == "outputs":
             gb_dir = base / "outputs"
+            gb_paths = [p for p in gb_dir.rglob("*.gb") if p.is_file()] if gb_dir.exists() else []
+            mapping_paths = []
+
             collection_name = f"Output_plasmids_{self.job.job_id}"
             already_msg = "Output plasmids are already saved in Browse plasmid collections."
             success_msg = "Output plasmids saved to your collection."
 
-        gb_paths = [p for p in gb_dir.rglob("*.gb") if p.is_file()]
+        else:  # mapping
+            mapping_dir = base / "inputs" / "mapping"
+            gb_paths = []
+            mapping_paths = []
+            if mapping_dir.exists():
+                mapping_paths = [
+                    p for p in mapping_dir.rglob("*")
+                    if p.is_file() and p.suffix.lower() in (".csv", ".tsv", ".txt")
+                ]
+
+            collection_name = f"Mapping_tables_{self.job.job_id}"
+            already_msg = "Mapping tables are already saved in Browse plasmid collections."
+            success_msg = "Mapping tables saved to your collection."
 
         collection, created = Collection.objects.get_or_create(
             owner=request.user,
@@ -51,11 +71,20 @@ class SaveCollectionView(LoginRequiredMixin, View):
             messages.info(request, already_msg)
             return redirect("simulator:simulations_list")
 
+        # Save plasmids
         for p in gb_paths:
             Plasmid.objects.create(
                 collection=collection,
                 name=p.stem,
                 gb_path=str(p),
+            )
+
+        # Save mapping tables
+        for p in mapping_paths:
+            MappingTable.objects.create(
+                collection=collection,
+                name=p.name,
+                mapping_path=str(p),
             )
 
         messages.success(request, success_msg)
@@ -65,7 +94,7 @@ class SaveCollectionView(LoginRequiredMixin, View):
 # View to browse plasmid collections
 class BrowseCollectionsView(ListView):
     model = Collection
-    template_name = "plasmids/collections_list.html"
+    template_name = "plasmids/collection_list.html"
     context_object_name = "collections"
 
     def get_queryset(self):
@@ -74,7 +103,7 @@ class BrowseCollectionsView(ListView):
         qs = (
             Collection.objects
             .select_related("owner")
-            .prefetch_related("plasmids")
+            .prefetch_related("plasmids", "mapping_tables")
             .order_by("-created_at")
         )
 
@@ -160,3 +189,20 @@ class PlasmidView(TemplateView):
         context["plasmid_name"] = self.plasmid.name
 
         return context
+
+
+# View to download mapping table file
+class MappingView(View):
+    def get(self, request, mapping_id, *args, **kwargs):
+        mapping = get_object_or_404(MappingTable, id=mapping_id)
+
+        # permissions: public collection OR owner
+        if not mapping.collection.is_public:
+            if not request.user.is_authenticated or mapping.collection.owner_id != request.user.id:
+                raise Http404
+
+        p = Path(mapping.mapping_path)
+        if not p.exists():
+            raise Http404
+
+        return FileResponse(open(p, "rb"), content_type="text/csv")
