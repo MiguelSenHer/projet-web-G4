@@ -357,6 +357,8 @@ def teams_create_view(request):
         },
     )
 
+## Still issue here for  mapping tables management 
+## to be fixed when mapping models are stabilized
 @login_required
 def team_detail_view(request, team_id):
     team = get_object_or_404(Team, id=team_id)
@@ -381,6 +383,12 @@ def team_detail_view(request, team_id):
         .filter(team=team)
         .select_related("owner")
         .order_by("-created_at")
+    )
+
+    assemblies = (
+        Assembly.objects
+        .filter(team=team)
+        .order_by("-creation_date")
     )
 
     if request.method == "POST":
@@ -440,20 +448,68 @@ def team_detail_view(request, team_id):
             )
             return redirect("team_details", team_id=team.id)
 
+        if action == "attach_assembly":
+            if membership.role != TeamMembership.Role.LEADER:
+                raise PermissionDenied
+
+            assembly_id = request.POST.get("assembly_id")
+            assembly = get_object_or_404(
+                Assembly,
+                id=assembly_id,
+                owner=request.user,
+                team__isnull=True
+            )
+
+            assembly.team = team
+            assembly.save()
+
+            messages.success(
+                request,
+                f"Assembly '{assembly.name}' added to the team."
+            )
+            return redirect("team_details", team_id=team.id)
+
+        if action == "detach_assembly":
+            if membership.role != TeamMembership.Role.LEADER:
+                raise PermissionDenied
+
+            assembly_id = request.POST.get("assembly_id")
+            assembly = get_object_or_404(
+                Assembly,
+                id=assembly_id,
+                team=team
+            )
+
+            assembly.team = None
+            assembly.save()
+
+            messages.success(
+                request,
+                f"Assembly '{assembly.name}' removed from the team."
+            )
+            return redirect("team_details", team_id=team.id)
+        
 
     available_collections = Collection.objects.filter(
         owner=request.user,
         team__isnull=True
     )
+    available_assemblies = Assembly.objects.filter(
+        owner=request.user,
+        team__isnull=True
+    ).order_by("-creation_date")
 
     return render(request, "accounts/team_details.html", {
         "team": team,
         "members": members,
         "membership": membership,
         "collections": collections,
+        "assemblies": assemblies,
         "available_collections": available_collections,
+        "available_assemblies": available_assemblies,
         "is_admin": request.user.is_superuser,
     })
+
 
 
 # -----------------------

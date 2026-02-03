@@ -72,7 +72,7 @@
         </div>
         {% if membership.role == "LEADER" %} 
         <a href="{% url 'team_manage' team.id %}" class="btn btn-create mt-3"> 
-            Edit team </a> 
+            Edit team members </a> 
         {% endif %}
       </div>
     </div>
@@ -99,7 +99,7 @@
                         Owner: {{ c.owner.get_full_name|default:c.owner.email }}
                         ·
                         {% if c.is_public %}
-                          <span class="badge bg-success">Public</span>
+                          <span class="badge bg-success">Available for team</span>
                         {% else %}
                           <span class="badge bg-secondary">Private</span>
                         {% endif %}
@@ -169,6 +169,80 @@
       </div>
     </div>
   </div>
+
+
+<div class="container mt-4">
+  <h2 class="panel-title mb-2">TEAM ASSEMBLIES</h2>
+
+  <div class="row g-4">
+    <div class="col-lg-12">
+      <div class="card team-card">
+        <div class="card-body">
+
+          {% if assemblies %}
+            <ul class="mb-0 list-unstyled">
+              {% for a in assemblies %}
+                <li class="d-flex justify-content-between align-items-center mb-2">
+
+                  <div>
+                    <strong>{{ a.name }}</strong>
+                    <div class="text-muted small">
+                      Owner: {{ a.owner.get_full_name|default:a.owner.email }}
+                      ·
+                      {% if a.team %}
+                        <span class="badge bg-success">Available for team</span>
+                      {% else %}
+                        <span class="badge bg-secondary">Private</span>
+                      {% endif %}
+                    </div>
+                  </div>
+
+                  {% if membership.role == "LEADER" %}
+                    <form method="post" class="d-inline">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="detach_assembly">
+                      <input type="hidden" name="assembly_id" value="{{ a.id }}">
+                      <button class="btn btn-sm btn-outline-danger">
+                        Remove
+                      </button>
+                    </form>
+                  {% endif %}
+
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted small mb-0">
+              No assemblies for this team yet.
+            </p>
+          {% endif %}
+
+          {% if membership.role == "LEADER" and available_assemblies %}
+            <hr>
+            <h6 class="mb-2">Add an existing assembly</h6>
+
+            <form method="post" class="d-flex gap-2">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="attach_assembly">
+
+              <select name="assembly_id" class="form-select" required>
+                {% for a in available_assemblies %}
+                  <option value="{{ a.id }}">{{ a.name }}</option>
+                {% endfor %}
+              </select>
+
+              <button class="btn btn-outline-primary">
+                Add
+              </button>
+            </form>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
   <!-- BACK -->
   <div class="text-center mt-4">
