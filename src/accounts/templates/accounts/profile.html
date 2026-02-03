@@ -198,11 +198,11 @@ Profile - InSillyClo
 
                     <div class="text-muted small">
                       <div class="mb-1">
-                        <strong>Account created:</strong> {{ user.date_joined|date:"M d, Y" }}
+                        <strong>Account created:</strong> {{ user.date_joined|date:"d M Y" }}
                       </div>
                       {% if user.last_login %}
                         <div>
-                          <strong>Last login:</strong> {{ user.last_login|date:"M d, Y \\a\\t H:i" }}
+                          <strong>Last login:</strong> {{ user.last_login|date:"d M, Y \\a\\t H:i" }}
                         </div>
                       {% endif %}
                     </div>

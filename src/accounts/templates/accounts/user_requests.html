@@ -8,42 +8,94 @@ Profile - InSillyClo
 
 <section class="login-section">
   <div class="container py-4">
-  <h2>My requests</h2>
+    <h2>My requests</h2>
 
-  <div class="card mb-0">
-    <div class="card-body">
+    <div class="card mb-0">
+      <div class="card-body">
 
-      {% for r in requests %}
-      <div class="border rounded p-1 mb-1">
+        {% for r in requests %}
+        <div class="border rounded p-3 mb-1">
 
-        <strong>{{ r.get_request_type_display }}</strong><br>
-        Requested on: {{ r.created_at|date:"Y-m-d H:i" }}<br>
-        Status:
-        <span class="badge 
-          {% if r.status == 'PENDING' %}bg-info
-          {% elif r.status == 'APPROVED' %}bg-success
-          {% elif r.status == 'REJECTED' %}bg-danger
+          <strong>{{ r.get_request_type_display }}</strong><br>
+          Requested on: {{ r.created_at|date:"d M Y, H:i" }}<br>
+
+          Status:
+          <span class="badge 
+            {% if r.status == 'PENDING' %}bg-info
+            {% elif r.status == 'APPROVED' %}bg-success
+            {% elif r.status == 'REJECTED' %}bg-danger
+            {% endif %}
+          ">
+            {{ r.status }}
+          </span>
+
+          {% if r.processed_at %}
+            <p class="text-muted small mb-1">
+              Processed on:
+              <strong>{{ r.processed_at|date:"d M Y, H:i" }}</strong>
+            </p>
           {% endif %}
-        ">
-          {{ r.status }}
-        </span>
 
-        {% if r.collection %}
-          <div class="small">
-            Collection: {{ r.collection.name }}
-          </div>
-        {% endif %}
+          {# ================= COLLECTION DETAILS ================= #}
+          {% if r.collection %}
+            <div class="small mt-1">
+              <strong>Collection:</strong> {{ r.collection.name }}
 
-        {% if r.admin_message %}
-          <div class="text-muted fst-italic mt-1">
-            Admin message: "{{ r.admin_message }}"
-          </div>
-        {% endif %}
+              <div class="d-flex flex-wrap gap-2 mt-1">
+                {% for p in r.collection.plasmids.all %}
+                  <span class="badge rounded-pill bg-light text-secondary border">
+                    {{ p.name }}
+                  </span>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
 
-      </div>
-      {% empty %}
-      <p>No sent requests yet.</p>
-      {% endfor %}
+          {# ================= ASSEMBLY DETAILS ================= #}
+          {% if r.assembly %}
+            <div class="small mt-1">
+              <strong>Assembly:</strong> {{ r.assembly.name }}
+
+              <div class="d-flex gap-4 mt-1">
+                <div>
+                  <span class="text-muted">Output Separator:</span>
+                  <span>{{ r.assembly.get_separator_display }}</span>
+                </div>
+
+                <div>
+                  <span class="text-muted">Restriction Enzyme:</span>
+                  <span class="badge bg-primary">
+                    {{ r.assembly.get_restriction_enzyme_display }}
+                  </span>
+                </div>
+              </div>
+
+              {% if r.assembly.inputparts_set.exists %}
+                <div class="mt-1">
+                  <span class="text-muted">Assembly input parts:</span>
+
+                  <div class="d-flex flex-wrap gap-2 mt-1">
+                    {% for part in r.assembly.inputparts_set.all %}
+                      <span class="badge rounded-pill bg-light text-secondary border">
+                        {{ part.part_name }}{% if part.mandatory %}*{% endif %}
+                      </span>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
+
+          {% if r.admin_message %}
+            <div class="text-muted fst-italic mt-1">
+              Admin message: "{{ r.admin_message }}"
+            </div>
+          {% endif %}
+
+        </div>
+        {% empty %}
+          <p>No sent requests yet.</p>
+        {% endfor %}
 
       </div>
     </div>

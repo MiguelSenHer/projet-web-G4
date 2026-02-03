@@ -44,7 +44,7 @@
                 <td>{{ u.get_full_name|default:"—" }}</td>
                 <td>
                   {% if u.last_login %}
-                    {{ u.last_login|date:"Y-m-d H:i" }}
+                    {{ u.last_login|date:"d M Y, H:i" }}
                   {% else %}
                     Never
                   {% endif %}
