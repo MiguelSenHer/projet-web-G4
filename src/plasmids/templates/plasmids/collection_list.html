@@ -43,6 +43,7 @@
     {% for c in collections %}
       <div class="card mb-3 p-3">
 
+        {% with ps=c.plasmids.all ms=c.mapping_tables.all %}
         <div class="d-flex justify-content-between align-items-start">
           <div>
             <div class="fw-bold text-dark">
@@ -63,6 +64,7 @@
             </div>
           </div>
 
+          {# ONE dropdown per card, and the action depends on what this card contains #}
           {% if not c.is_public %}
             <div class="dropdown">
               <button
@@ -75,104 +77,115 @@
               </button>
 
               <ul class="dropdown-menu dropdown-menu-end">
-                <li>
-                  <form
-                    method="post"
-                    action="{% url 'request_make_collection_public' c.id %}"
-                    class="px-3 py-1"
-                  >
-                    {% csrf_token %}
-                    <button type="submit" class="dropdown-item">
-                      Request to make public
-                    </button>
-                  </form>
-                </li>
+
+                {# CASE 1: this card is a PLASMID COLLECTION -> request collection public with c.id #}
+                {% if ps %}
+                  <li>
+                    <form
+                      method="post"
+                      action="{% url 'request_make_collection_public' c.id %}"
+                      class="px-3 py-1"
+                    >
+                      {% csrf_token %}
+                      <button type="submit" class="dropdown-item">
+                        Request to make public
+                      </button>
+                    </form>
+                  </li>
+
+                {# CASE 2: this card is MAPPING TABLES -> request mapping public with m.id (still inside same dropdown) #}
+                {% elif ms %}
+                  <li class="px-3 pt-2 pb-1 text-muted small">
+                    Request to make public
+                  </li>
+                  {% for m in ms %}
+                    {% if not m.is_public %}
+                      <li>
+                        <form
+                          method="post"
+                          action="{% url 'request_make_mapping_table_public' m.id %}"
+                          class="px-3 py-1"
+                        >
+                          {% csrf_token %}
+                          <button type="submit" class="dropdown-item">
+                            {{ m.name }}
+                          </button>
+                        </form>
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+
+                  {% if not ms %}
+                    <li><span class="dropdown-item text-muted">No mapping tables</span></li>
+                  {% endif %}
+
+                {% else %}
+                  <li><span class="dropdown-item text-muted">Nothing to publish</span></li>
+                {% endif %}
               </ul>
             </div>
           {% endif %}
         </div>
 
         <!-- PLASMIDS -->
-        {% with ps=c.plasmids.all %}
-          {% if ps %}
-            <div class="mt-3">
-              <button
-                class="btn btn-link p-0 text-muted small"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#plasmids-{{ c.id }}"
-                aria-expanded="false"
-                aria-controls="plasmids-{{ c.id }}"
-              >
-                Plasmids ({{ ps|length }})
-              </button>
+        {% if ps %}
+          <div class="mt-3">
+            <button
+              class="btn btn-link p-0 text-muted small"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#plasmids-{{ c.id }}"
+              aria-expanded="false"
+              aria-controls="plasmids-{{ c.id }}"
+            >
+              Plasmids ({{ ps|length }})
+            </button>
 
-              <div class="collapse mt-2" id="plasmids-{{ c.id }}">
-                <div class="d-flex flex-wrap gap-2">
-                  {% for plasmid in ps %}
-                    <a
-                      class="border rounded-pill px-3 py-1 small text-decoration-none"
-                      href="{% url 'plasmids:plasmid_view' plasmid.id %}"
-                    >
-                      {{ plasmid.name }}
-                    </a>
-                  {% endfor %}
-                </div>
+            <div class="collapse mt-2" id="plasmids-{{ c.id }}">
+              <div class="d-flex flex-wrap gap-2">
+                {% for plasmid in ps %}
+                  <a
+                    class="border rounded-pill px-3 py-1 small text-decoration-none"
+                    href="{% url 'plasmids:plasmid_view' plasmid.id %}"
+                  >
+                    {{ plasmid.name }}
+                  </a>
+                {% endfor %}
               </div>
             </div>
-          {% endif %}
-        {% endwith %}
+          </div>
+        {% endif %}
 
         <!-- MAPPING TABLES -->
-        {% with ms=c.mapping_tables.all %}
-          {% if ms %}
-            <div class="mt-2">
-              <button
-                class="btn btn-link p-0 text-muted small"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#mappings-{{ c.id }}"
-                aria-expanded="false"
-                aria-controls="mappings-{{ c.id }}"
-              >
-                Mapping tables ({{ ms|length }})
-              </button>
+        {% if ms %}
+          <div class="mt-2">
+            <button
+              class="btn btn-link p-0 text-muted small"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#mappings-{{ c.id }}"
+              aria-expanded="false"
+              aria-controls="mappings-{{ c.id }}"
+            >
+              Mapping tables ({{ ms|length }})
+            </button>
 
-              <div class="collapse mt-2" id="mappings-{{ c.id }}">
-                <div class="d-flex flex-column gap-2">
-
-                  {% for m in ms %}
-                    <div class="d-flex justify-content-between align-items-center gap-3">
-
-                      <a
-                        class="border rounded-pill px-3 py-1 small text-decoration-none"
-                        href="{% url 'plasmids:mapping_view' m.id %}"
-                        target="_blank"
-                        rel="noopener"
-                      >
-                        {{ m.name }}
-                      </a>
-
-                      {% if not m.is_public %}
-                        <form
-                          method="post"
-                          action="{% url 'request_make_mapping_table_public' m.id %}"
-                          class="m-0"
-                        >
-                          {% csrf_token %}
-                          <button type="submit" class="btn btn-sm btn-outline-primary">
-                            Request to make public
-                          </button>
-                        </form>
-                      {% endif %}
-
-                    </div>
-                  {% endfor %}
-
-                </div>
+            <div class="collapse mt-2" id="mappings-{{ c.id }}">
+              <div class="d-flex flex-wrap gap-2">
+                {% for m in ms %}
+                  <a
+                    class="border rounded-pill px-3 py-1 small text-decoration-none"
+                    href="{% url 'plasmids:mapping_view' m.id %}"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    {{ m.name }}
+                  </a>
+                {% endfor %}
               </div>
             </div>
-          {% endif %}
+          </div>
+        {% endif %}
         {% endwith %}
 
       </div>
