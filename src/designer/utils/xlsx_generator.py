@@ -9,6 +9,8 @@ def generate_assembly_xlsx(assembly):
     ws = wb.active
     ws.title = "Assembly"
     bold = Font(bold=True)
+    ws.column_dimensions["A"].width = 25
+    ws.column_dimensions["B"].width = 35
     ws["A1"] = "Assembly settings"
     ws["A1"].font = bold
     ws["A2"] = "Restriction enzyme"
