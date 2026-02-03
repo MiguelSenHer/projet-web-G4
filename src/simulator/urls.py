@@ -1,6 +1,7 @@
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
+
 from .views import (
     UploadTemplateView,
     TemplatePreviewView,
@@ -10,11 +11,9 @@ from .views import (
     SimulationsListView,
     DownloadOutputsByJobView,
     ResumeSimulationView,
-    DeleteSimulationView
+    DeleteSimulationView,
+    PlasmidView,
 )
-
-from plasmids.views import PlasmidView
-
 app_name = "simulator"
 
 urlpatterns = [
@@ -27,5 +26,5 @@ urlpatterns = [
     path("outputs/download/<str:job_id>/", DownloadOutputsByJobView.as_view(), name="download_by_job"),
     path("resume/<str:job_id>/", ResumeSimulationView.as_view(), name="resume_job"),
     path("delete/<str:job_id>/", DeleteSimulationView.as_view(), name="delete_job"),
-    path("view/<str:job_id>/plasmid/<str:filename>/", PlasmidView.as_view(), name="plasmid_view"),
+    path("plasmid/<str:job_id>/<str:mode>/<str:filename>/", PlasmidView.as_view(), name="plasmid_view"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

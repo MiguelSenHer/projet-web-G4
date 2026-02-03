@@ -12,7 +12,12 @@ from django.db.models import Q
 
 class SaveCollectionView(LoginRequiredMixin, View):
     def dispatch(self, request, *args, **kwargs):
+        self.mode = self.kwargs["mode"]  # "inputs" or "outputs"
         job_id = self.kwargs["job_id"]
+
+        if self.mode not in ("inputs", "outputs"):
+            raise Http404
+
         self.job = get_object_or_404(SimulationJob, job_id=job_id)
 
         if self.job.user_id is not None and self.job.user_id != request.user.id:
@@ -21,41 +26,39 @@ class SaveCollectionView(LoginRequiredMixin, View):
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        outputs_dir = Path(self.job.template.path).parent / "outputs"
-        if not outputs_dir.exists():
-            raise Http404
+        base = Path(self.job.template.path).parent
 
-        gb_paths = [p for p in outputs_dir.rglob("*.gb") if p.is_file()]
-        if not gb_paths:
-            raise Http404
-        
+        if self.mode == "inputs":
+            gb_dir = base / "inputs" / "genbank"
+            collection_name = f"Input_plasmids_{self.job.job_id}"
+            already_msg = "Input plasmids are already saved in Browse plasmid collections."
+            success_msg = "Input plasmids saved to your collection."
+        else:
+            gb_dir = base / "outputs"
+            collection_name = f"Output_plasmids_{self.job.job_id}"
+            already_msg = "Output plasmids are already saved in Browse plasmid collections."
+            success_msg = "Output plasmids saved to your collection."
+
+        gb_paths = [p for p in gb_dir.rglob("*.gb") if p.is_file()]
+
         collection, created = Collection.objects.get_or_create(
             owner=request.user,
-            name=f"Simulation_{self.job.job_id}",
+            name=collection_name,
             defaults={"is_public": False},
         )
 
         if not created:
-            messages.info(request, "This collection is already saved in Browse plasmid collections.")
+            messages.info(request, already_msg)
             return redirect("simulator:simulations_list")
 
-        existing_paths = set(
-            Plasmid.objects.filter(collection=collection)
-            .values_list("gb_path", flat=True)
-        )
-
         for p in gb_paths:
-            gb_path = str(p)
-            if gb_path in existing_paths:
-                continue
-
             Plasmid.objects.create(
                 collection=collection,
                 name=p.stem,
-                gb_path=gb_path,
+                gb_path=str(p),
             )
 
-        messages.success(request, "Plasmids saved to your collection.")
+        messages.success(request, success_msg)
         return redirect("simulator:simulations_list")
 
 

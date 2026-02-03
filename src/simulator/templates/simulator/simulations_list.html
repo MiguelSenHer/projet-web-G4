@@ -27,7 +27,7 @@ InSillyClo – My simulations
     {% if jobs %}
       <div class="d-flex flex-column gap-3">
 
-        {% for job, gb_files in jobs_with_outputs %}
+        {% for job, input_gb_files, output_gb_files in jobs_with_io %}
           <div class="card mb-3 p-3">
             <div class="d-flex flex-wrap align-items-center gap-3">
 
@@ -36,7 +36,7 @@ InSillyClo – My simulations
                 <div class="text-muted small">Job ID</div>
                 <div class="fw-semibold">{{ job.job_id }}</div>
               </div>
-              
+
               <!-- Status -->
               <div>
                 <div class="text-muted small">Status</div>
@@ -97,18 +97,38 @@ InSillyClo – My simulations
                       {% endif %}
                     </li>
 
+                    <li><hr class="dropdown-divider"></li>
+
+                    <!-- SAVE INPUT PLASMIDS -->
                     <li>
-                      {% if job.status == "SUCCESS" and gb_files %}
+                      {% if input_gb_files %}
                         <form method="post"
-                              action="{% url 'plasmids:save_collection' job.job_id %}">
+                              action="{% url 'plasmids:save_collection' 'inputs' job.job_id %}">
                           {% csrf_token %}
                           <button type="submit" class="dropdown-item">
-                            Save my plasmids
+                            Save input plasmids
                           </button>
                         </form>
                       {% else %}
                         <span class="dropdown-item text-muted">
-                          Save my plasmids
+                          Save input plasmids
+                        </span>
+                      {% endif %}
+                    </li>
+
+                    <!-- SAVE OUTPUT PLASMIDS -->
+                    <li>
+                      {% if job.status == "SUCCESS" and output_gb_files %}
+                        <form method="post"
+                              action="{% url 'plasmids:save_collection' 'outputs' job.job_id %}">
+                          {% csrf_token %}
+                          <button type="submit" class="dropdown-item">
+                            Save output plasmids
+                          </button>
+                        </form>
+                      {% else %}
+                        <span class="dropdown-item text-muted">
+                          Save output plasmids
                         </span>
                       {% endif %}
                     </li>
@@ -132,8 +152,38 @@ InSillyClo – My simulations
               </div>
 
             </div>
-            <!-- outputs list  -->
-            {% if gb_files %}
+
+            <!-- Inputs list -->
+            {% if input_gb_files %}
+              <div class="mt-3">
+                <button
+                  class="btn btn-link p-0 text-muted small"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#inputs-{{ job.job_id }}"
+                  aria-expanded="false"
+                  aria-controls="inputs-{{ job.job_id }}"
+                >
+                  Input plasmids ({{ input_gb_files|length }})
+                </button>
+
+                <div class="collapse mt-2" id="inputs-{{ job.job_id }}">
+                  <div class="d-flex flex-wrap gap-2">
+                    {% for input_plasmid in input_gb_files %}
+                      <a
+                        class="border rounded-pill px-3 py-1 small text-decoration-none"
+                        href="{% url 'simulator:plasmid_view' job.job_id 'inputs' input_plasmid %}"
+                      >
+                        {{ input_plasmid }}
+                      </a>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+
+            <!-- Outputs list -->
+            {% if output_gb_files %}
               <div class="mt-3">
                 <button
                   class="btn btn-link p-0 text-muted small"
@@ -143,15 +193,15 @@ InSillyClo – My simulations
                   aria-expanded="false"
                   aria-controls="outputs-{{ job.job_id }}"
                 >
-                  Output plasmids ({{ gb_files|length }})
+                  Output plasmids ({{ output_gb_files|length }})
                 </button>
 
                 <div class="collapse mt-2" id="outputs-{{ job.job_id }}">
                   <div class="d-flex flex-wrap gap-2">
-                    {% for output_plasmid in gb_files %}
+                    {% for output_plasmid in output_gb_files %}
                       <a
                         class="border rounded-pill px-3 py-1 small text-decoration-none"
-                        href="{% url 'simulator:plasmid_view' job.job_id output_plasmid %}"
+                        href="{% url 'simulator:plasmid_view' job.job_id 'outputs' output_plasmid %}"
                       >
                         {{ output_plasmid }}
                       </a>

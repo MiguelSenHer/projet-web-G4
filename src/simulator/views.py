@@ -91,6 +91,7 @@ class TemplatePreviewView(FormView):
             )
 
         return redirect("simulator:preview")
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -227,32 +228,44 @@ class DownloadResultsView(View):
         return FileResponse(zip_path.open("rb"), as_attachment=True, filename=zip_path.name)
 
 
-# View to list user's simulation jobs
+# View to list user's simulation jobs and retrieve inputs/outputs
 class SimulationsListView(LoginRequiredMixin, ListView):
     model = SimulationJob
     template_name = "simulator/simulations_list.html"
     context_object_name = "jobs"
 
     def get_queryset(self):
-        return (SimulationJob.objects.filter(user=self.request.user).order_by("-updated_at"))
-    
+        return SimulationJob.objects.filter(user=self.request.user).order_by("-updated_at")
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        jobs_with_outputs = []
+        jobs_with_io = []
         for job in context["jobs"]:
-            gb_files = []
-            outputs_dir = Path(job.template.path).parent / "outputs"
+            base = Path(job.template.path).parent
+
+            # INPUT plasmids (uploaded)
+            input_gb_files = []
+            inputs_dir = base / "inputs" / "genbank"
+            if inputs_dir.exists():
+                input_gb_files = [
+                    p.name.split(".gb")[0] for p in inputs_dir.rglob("*.gb")
+                    if p.is_file()
+                ]
+
+            # OUTPUT plasmids (produced)
+            output_gb_files = []
+            outputs_dir = base / "outputs"
             if outputs_dir.exists():
-                gb_files = [
+                output_gb_files = [
                     p.name.split(".gb")[0] for p in outputs_dir.rglob("*.gb")
                     if p.is_file()
                 ]
-            jobs_with_outputs.append((job, gb_files))
 
-        context["jobs_with_outputs"] = jobs_with_outputs
+            jobs_with_io.append((job, input_gb_files, output_gb_files))
+
+        context["jobs_with_io"] = jobs_with_io
         context["active_page"] = "simulations"
-
         return context
 
 
@@ -277,7 +290,7 @@ class ResumeSimulationView(LoginRequiredMixin, View):
 
         request.session["current_job_id"] = job.job_id
         return redirect("simulator:preview")
-    
+
 
 # View to delete a simulation job from the simulations list
 class DeleteSimulationView(LoginRequiredMixin, View):
@@ -295,8 +308,8 @@ class DeleteSimulationView(LoginRequiredMixin, View):
 
         job.delete()
         return redirect("simulator:simulations_list")
-    
 
+        
 # View to display plasmid diagram with visualize method from Plasmid model
 class PlasmidView(TemplateView):
     template_name = "plasmids/plasmid_view.html"
@@ -304,18 +317,25 @@ class PlasmidView(TemplateView):
     def dispatch(self, request, *args, **kwargs):
         job_id = self.kwargs["job_id"]
         filename = self.kwargs["filename"]
+        mode = self.kwargs["mode"]  # "inputs" or "outputs"
 
         self.job = get_object_or_404(SimulationJob, job_id=job_id)
         if self.job.user_id is not None and self.job.user_id != request.user.id:
             raise Http404
-      
+
         base = Path(self.job.template.path).parent
-        gb_path = base / "outputs" / f"{filename}.gb"
+
+        if mode == "outputs":
+            gb_path = base / "outputs" / f"{filename}.gb"
+        elif mode == "inputs":
+            gb_path = base / "inputs" / "genbank" / f"{filename}.gb"
+        else:
+            raise Http404
+
         if not gb_path.exists():
             raise Http404
-      
-        self.plasmid = Plasmid(name=filename, gb_path=str(gb_path))
 
+        self.plasmid = Plasmid(name=filename, gb_path=str(gb_path))
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -330,9 +350,9 @@ class PlasmidView(TemplateView):
         else:
             action = None
             selected_types = None
-        
-        context.update(self.plasmid.visualize(selected_types=selected_types, action=action))
 
+        context.update(self.plasmid.visualize(selected_types=selected_types, action=action))
         context["job_id"] = self.job.job_id
         context["plasmid_name"] = self.plasmid.name
+        context["mode"] = self.kwargs["mode"]  # optional, if you want to display it
         return context
