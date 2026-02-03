@@ -43,10 +43,9 @@
         <!-- NAVIGATION -->
         <div class="d-flex justify-content-between align-items-center mt-5">
 
-            <a href="{% url 'designer:designer_properties' %}"
-               class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-2"></i>
-                Return
+            <a href="{% url 'designer:designer_properties_edit' assembly.pk %}" 
+                class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i> Return
             </a>
 
             <div class="d-flex gap-3">
@@ -90,17 +89,20 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     document.addEventListener("click", function (e) {
-        const deleteBtn = e.target.closest(".delete-form");
-        if (!deleteBtn) return;
-
-        const row = deleteBtn.closest(".formset-row");
-        const deleteInput = row.querySelector("input[name$='-DELETE']");
-
-        if (deleteInput) {
-            deleteInput.checked = true;
-            row.style.display = "none";
-        }
-    });
+    const deleteBtn = e.target.closest(".delete-form");
+    if (!deleteBtn) return;
+    const row = deleteBtn.closest(".formset-row");
+    const deleteInput = row.querySelector("input[name$='-DELETE']");
+    if (deleteInput) {
+        // This is an existing row from the database
+        deleteInput.checked = true;
+        row.style.display = "none";
+    } else {
+        // This is a brand new row added via JS (has no DELETE input yet)
+        row.remove();
+        totalForms.value = parseInt(totalForms.value) - 1;
+    }
+});
 
 });
 </script>
