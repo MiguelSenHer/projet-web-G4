@@ -78,7 +78,7 @@
                 <li>
                   <form
                     method="post"
-                    action="{% url 'request_make_public' c.id %}"
+                    action="{% url 'request_make_collection_public' c.id %}"
                     class="px-3 py-1"
                   >
                     {% csrf_token %}
@@ -124,37 +124,35 @@
         {% endwith %}
 
         <!-- MAPPING TABLES -->
-        {% with ms=c.mapping_tables.all %}
-          {% if ms %}
-            <div class="mt-2">
-              <button
-                class="btn btn-link p-0 text-muted small"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#mappings-{{ c.id }}"
-                aria-expanded="false"
-                aria-controls="mappings-{{ c.id }}"
-              >
-                Mapping tables ({{ ms|length }})
-              </button>
+        {% for m in ms %}
+        <div class="d-flex align-items-center gap-2">
+          <a
+            class="border rounded-pill px-3 py-1 small text-decoration-none"
+            href="{% url 'plasmids:mapping_view' m.id %}"
+            target="_blank"
+            rel="noopener"
+          >
+            {{ m.name }}
+          </a>
 
-              <div class="collapse mt-2" id="mappings-{{ c.id }}">
-                <div class="d-flex flex-wrap gap-2">
-                  {% for m in ms %}
-                    <a
-                      class="border rounded-pill px-3 py-1 small text-decoration-none"
-                      href="{% url 'plasmids:mapping_view' m.id %}"
-                      target="_blank"
-                      rel="noopener"
-                    >
-                      {{ m.name }}
-                    </a>
-                  {% endfor %}
-                </div>
-              </div>
-            </div>
+          {% if not m.is_public %}
+            <form
+              method="post"
+              action="{% url 'request_make_mapping_table_public' m.id %}"
+              class="d-inline"
+            >
+              {% csrf_token %}
+              <button
+                type="submit"
+                class="btn btn-sm btn-outline-secondary"
+                title="Request to make public"
+              >
+                <i class="bi bi-unlock"></i>
+              </button>
+            </form>
           {% endif %}
-        {% endwith %}
+        </div>
+      {% endfor %}
 
       </div>
     {% empty %}
