@@ -13,6 +13,7 @@ from django.db.models import Q, Case, When, IntegerField
 from django.db import transaction
 from django.core.exceptions import PermissionDenied
 from plasmids.models import Collection
+from plasmids.models import MappingTable
 from browse.models import Assembly
 
 User = get_user_model()
