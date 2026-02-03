@@ -34,7 +34,7 @@
         <div class="border rounded p-3 mb-3">
 
           <div class="small text-muted">
-            Requested on: {{ r.created_at|date:"Y-m-d H:i" }}
+            Requested on: {{ r.created_at|date:"d M Y, H:i" }}
           </div>
 
           <strong>{{ r.user.email }}</strong><br>
@@ -54,6 +54,39 @@
             </div>
           {% endif %}
 
+          {% if r.assembly %}
+            <div class="mt-2 small">
+              <strong>Assembly:</strong> {{ r.assembly.name }}
+
+              <div class="d-flex gap-4 mt-1">
+                <div>
+                  <strong>Output Separator:</strong>
+                  <span>{{ r.assembly.get_separator_display }}</span>
+                </div>
+
+                <div>
+                  <strong>Restriction Enzyme:</strong>
+                  <span class="badge bg-primary">
+                    {{ r.assembly.get_restriction_enzyme_display }}
+                  </span>
+                </div>
+              </div>
+
+              {% if r.assembly.inputparts_set.exists %}
+                <div class="mt-2">
+                  <strong>Assembly input parts:</strong>
+
+                  <div class="d-flex flex-wrap mt-1">
+                    {% for part in r.assembly.inputparts_set.all %}
+                      <span class="badge rounded-pill bg-light text-secondary border">
+                        {{ part.part_name }}
+                      </span>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
 
           <form method="post" class="mt-2">
             {% csrf_token %}
@@ -77,36 +110,91 @@
         <p>No pending requests.</p>
         {% endfor %}
 
-
         <h4 class="mt-4">Completed requests</h4>
-        
-          {% for r in completed_requests %}
-          <div class="border rounded p-2 mb-2 small">
-            <strong>{{ r.user.email }}</strong> —
-            {{ r.get_request_type_display }}
-            <span class="badge 
-              {% if r.status == 'APPROVED' %}bg-success
-              {% elif r.status == 'REJECTED' %}bg-danger
-              {% else %}bg-secondary{% endif %}">
-              {{ r.status }}
-            </span>
 
-            {% if r.admin_message %}
-              <div class="fst-italic text-muted">
-                Admin message: "{{ r.admin_message }}"
-              </div>
-            {% endif %}
-            
-            {% if r.processed_by %}
-              <div class="small text-muted mt-1">
-                Processed by: {{ r.processed_by.email }}
-              </div>
-            {% endif %}
+        {% for r in completed_requests %}
+        <div class="border rounded p-2 mb-2 small">
 
-          </div>
-          {% empty %}
-          <p>No completed requests.</p>
-          {% endfor %}
+          <strong>{{ r.user.email }}</strong> —
+          {{ r.get_request_type_display }}
+          <span class="badge 
+            {% if r.status == 'APPROVED' %}bg-success
+            {% elif r.status == 'REJECTED' %}bg-danger
+            {% else %}bg-secondary{% endif %}">
+            {{ r.status }}
+          </span>
+
+          {% if r.admin_message %}
+            <div class="fst-italic text-muted">
+              Admin message: "{{ r.admin_message }}"
+            </div>
+          {% endif %}
+
+          {# ✅ COLLECTION DETAILS NOW ALSO SHOWN WHEN COMPLETED #}
+          {% if r.collection %}
+            <div class="mt-2 small">
+              <strong>Collection:</strong> {{ r.collection.name }}
+
+              <div class="d-flex flex-wrap gap-2 mt-1">
+                {% for p in r.collection.plasmids.all %}
+                  <span class="badge rounded-pill bg-light text-secondary border">
+                    {{ p.name }}
+                  </span>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+          {% if r.assembly %}
+            <div class="mt-2 small">
+              <strong>Assembly:</strong> {{ r.assembly.name }}
+
+              <div class="d-flex gap-4 mt-1">
+                <div>
+                  <span class="text-muted">Output Separator:</span>
+                  <span>{{ r.assembly.get_separator_display }}</span>
+                </div>
+
+                <div>
+                  <span class="text-muted">Restriction Enzyme:</span>
+                  <span class="badge bg-primary">
+                    {{ r.assembly.get_restriction_enzyme_display }}
+                  </span>
+                </div>
+              </div>
+
+              {% if r.assembly.inputparts_set.exists %}
+                <div class="mt-2">
+                  <span class="text-muted">Assembly input parts:</span>
+
+                  <div class="d-flex flex-wrap gap-2 mt-1">
+                    {% for part in r.assembly.inputparts_set.all %}
+                      <span class="badge rounded-pill bg-light text-secondary border">
+                        {{ part.part_name }}{% if part.mandatory %}*{% endif %}
+                      </span>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
+
+          {% if r.processed_by %}
+            <div class="small text-muted mt-1">
+              Processed by: {{ r.processed_by.email }}
+            </div>
+          {% endif %}
+          {% if r.processed_at %}
+            <p class="text-muted small mb-1">
+              Processed on:
+              <strong>{{ r.processed_at|date:"d M Y, H:i" }}</strong>
+            </p>
+          {% endif %}
+
+        </div>
+        {% empty %}
+        <p>No completed requests.</p>
+        {% endfor %}
 
       </div>
     </div>
@@ -118,6 +206,5 @@
     </div>
 
   </div>
-
 </section>
 {% endblock %}
