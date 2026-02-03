@@ -31,6 +31,13 @@ class Assembly(models.Model):
     ]
     name = models.CharField(max_length=200)
     comment = models.TextField(blank=True, null=True)
+    team = models.ForeignKey(
+        "accounts.Team",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="assemblies",
+    )
     creation_date = models.DateTimeField("Created At")
     separator = models.CharField(max_length=20, choices=SEPARATOR_CHOICES)
     restriction_enzyme = models.CharField(max_length=50, choices=ENZYME_CHOICES)
