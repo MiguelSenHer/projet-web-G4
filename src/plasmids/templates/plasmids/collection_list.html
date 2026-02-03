@@ -64,7 +64,6 @@
             </div>
           </div>
 
-          {# ONE dropdown per card, and the action depends on what this card contains #}
           {% if not c.is_public %}
             <div class="dropdown">
               <button
@@ -78,8 +77,8 @@
 
               <ul class="dropdown-menu dropdown-menu-end">
 
-                {# CASE 1: this card is a PLASMID COLLECTION -> request collection public with c.id #}
-                {% if ps %}
+                {# CASE 1: plasmid collection -> request collection public #}
+                {% if ps|length %}
                   <li>
                     <form
                       method="post"
@@ -93,11 +92,12 @@
                     </form>
                   </li>
 
-                {# CASE 2: this card is MAPPING TABLES -> request mapping public with m.id (still inside same dropdown) #}
-                {% elif ms %}
+                {# CASE 2: mapping tables -> request mapping public (one entry per mapping table) #}
+                {% elif ms|length %}
                   <li class="px-3 pt-2 pb-1 text-muted small">
                     Request to make public
                   </li>
+
                   {% for m in ms %}
                     {% if not m.is_public %}
                       <li>
@@ -115,10 +115,6 @@
                     {% endif %}
                   {% endfor %}
 
-                  {% if not ms %}
-                    <li><span class="dropdown-item text-muted">No mapping tables</span></li>
-                  {% endif %}
-
                 {% else %}
                   <li><span class="dropdown-item text-muted">Nothing to publish</span></li>
                 {% endif %}
@@ -128,7 +124,7 @@
         </div>
 
         <!-- PLASMIDS -->
-        {% if ps %}
+        {% if ps|length %}
           <div class="mt-3">
             <button
               class="btn btn-link p-0 text-muted small"
@@ -157,7 +153,7 @@
         {% endif %}
 
         <!-- MAPPING TABLES -->
-        {% if ms %}
+        {% if ms|length %}
           <div class="mt-2">
             <button
               class="btn btn-link p-0 text-muted small"

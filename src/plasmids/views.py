@@ -85,7 +85,7 @@ class SaveCollectionView(LoginRequiredMixin, View):
                 collection=collection,
                 name=p.name,
                 owner=request.user,
-                defaults={"is_public": False},
+                is_public=False,
                 mapping_path=str(p),
             )
 
