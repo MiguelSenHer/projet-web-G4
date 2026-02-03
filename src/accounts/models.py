@@ -57,7 +57,7 @@ class AdminRequest(models.Model):
     class RequestType(models.TextChoices):
         MAKE_COLLECTION_PUBLIC = "MAKE_COLLECTION_PUBLIC", "Make collection public"
         MAKE_ASSEMBLY_PUBLIC = "MAKE_ASSEMBLY_PUBLIC", "Make assembly public"
-        MAKE_MAPPING_PUBLIC = "MAKE_MAPPING_TABLE_PUBLIC", "Make mapping table public"
+        MAKE_MAPPING_TABLE_PUBLIC = "MAKE_MAPPING_TABLE_PUBLIC", "Make mapping table public"
 
     class Status(models.TextChoices):
         PENDING = "PENDING", "Pending"
