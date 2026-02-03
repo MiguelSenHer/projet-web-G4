@@ -82,6 +82,8 @@ class Collection(models.Model):
 
 class MappingTable(models.Model):
     collection = models.ForeignKey(Collection, on_delete=models.CASCADE, related_name="mapping_tables")
+    is_public = models.BooleanField(default=False)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     mapping_path = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
