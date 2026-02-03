@@ -39,7 +39,7 @@
                 <span class="badge bg-secondary ms-1" style="font-size: 0.6rem;">
                   PRIVATE
                 </span>
-              { % else %}
+              {% else %}
                 <span class="badge bg-primary ms-1" style="font-size: 0.6rem;">
                   PUBLIC
                 </span>
@@ -91,34 +91,29 @@
             {% else %}
               <span class="text-muted small fst-italic">No file</span>
             {% endif %}
-
-            {% if not assembly.is_public %}
-              <div class="dropdown">
-                <button
-                  class="btn btn-sm btn-outline-primary"
-                  type="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  <i class="bi bi-gear"></i>
-                </button>
-
-                <ul class="dropdown-menu dropdown-menu-end">
-                  <li>
-                    <form
-                      method="post"
-                      action="{% url 'request_make_assembly_public' assembly.id %}"
-                      class="px-3 py-1"
-                    >
-                      {% csrf_token %}
-                      <button type="submit" class="dropdown-item">
-                        Request to make public
-                      </button>
-                    </form>
-                  </li>
-                </ul>
-              </div>
-            {% endif %}
+{% if not assembly.is_public %}
+<div class="dropdown">
+   <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="dropdown">
+   <i class="bi bi-gear"></i>
+   </button>
+   <ul class="dropdown-menu dropdown-menu-end">
+      <li>
+         <a class="dropdown-item" href="{% url 'designer:designer_properties_edit' assembly.id %}">
+         <i class="bi bi-pencil me-2"></i>Edit Assembly
+         </a>
+      </li>
+      <li>
+         <hr class="dropdown-divider">
+      </li>
+      <li>
+         <form method="post" action="{% url 'request_make_assembly_public' assembly.id %}" class="px-3 py-1">
+            {% csrf_token %}
+            <button type="submit" class="dropdown-item">Request to make public</button>
+         </form>
+      </li>
+   </ul>
+</div>
+{% endif %}
 
           </div>
         </div>

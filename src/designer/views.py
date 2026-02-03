@@ -51,19 +51,20 @@ def design_home(request):
         )
 
 @login_required
-def designer_properties(request):
-    assembly = None
+def designer_properties(request, pk=None):
+    assembly = get_object_or_404(Assembly, pk=pk, owner=request.user) if pk else None
     if request.method == "POST":
         form = AssemblyForm(request.POST, instance=assembly)
         if form.is_valid():
             assembly = form.save(commit=False)
-            assembly.creation_date = timezone.now()
-            assembly.owner = request.user
+            if not pk:
+                assembly.creation_date = timezone.now()
+                assembly.owner = request.user
             assembly.save()
             return redirect("designer:designer_input_parts", pk=assembly.pk)
     else:
-        form = AssemblyForm()
-    return render(request, "designer/designer_properties.html", {"form": form, "assembly":assembly})
+        form = AssemblyForm(instance=assembly)   
+    return render(request, "designer/designer_properties.html", {"form": form, "assembly": assembly})
 
 @login_required
 def designer_input_parts(request, pk):
@@ -71,24 +72,18 @@ def designer_input_parts(request, pk):
     if request.method == "POST":
         formset = InputPartsFormSet(request.POST, instance=assembly)
         if formset.is_valid():
-            instances = formset.save(commit=False)
-            for obj in instances:
-                obj.assembly = assembly
-                obj.save()
-            formset.save_m2m()
-            if not assembly.file:
-                xlsx_content = generate_assembly_xlsx(assembly)
-                assembly.file.save(
-                    f"assembly_{assembly.pk}.xlsx",
-                    xlsx_content,
-                    save=True
-                )   
+            formset.save() 
+            xlsx_content = generate_assembly_xlsx(assembly)
+            assembly.file.save(
+                f"assembly_{assembly.pk}.xlsx",
+                xlsx_content,
+                save=True
+            )   
             return redirect("designer:designer_summary", pk=assembly.pk)
     else:
         formset = InputPartsFormSet(instance=assembly)
     return render(
-        request,
-        "designer/designer_input_parts.html",
+        request, "designer/designer_input_parts.html", 
         {"assembly": assembly, "formset": formset}
     )
 
