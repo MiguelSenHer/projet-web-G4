@@ -42,7 +42,7 @@ def design_home(request):
         },
         {
             "label": "BROWSE EXISTING",
-            "url": ""},
+            "url": "/browse/"},
     ]
     return render(
         request,
