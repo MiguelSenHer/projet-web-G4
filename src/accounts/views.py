@@ -571,7 +571,7 @@ def admin_requests_view(request):
     pending_requests = (
         AdminRequest.objects
         .filter(status=AdminRequest.Status.PENDING)
-        .select_related("user", "collection", "assembly")
+        .select_related("user", "collection", "assembly", "mapping")
         .prefetch_related("collection__plasmids")
         .order_by("-created_at")
     )
@@ -579,7 +579,7 @@ def admin_requests_view(request):
     completed_requests = (
         AdminRequest.objects
         .exclude(status=AdminRequest.Status.PENDING)
-        .select_related("user", "collection", "assembly")
+        .select_related("user", "collection", "assembly", "mapping")
         .order_by("-processed_at")
     )
 
@@ -598,6 +598,11 @@ def admin_requests_view(request):
                 if req.assembly:
                     req.assembly.is_public = True
                     req.assembly.save()
+
+            elif req.request_type == AdminRequest.RequestType.MAKE_MAPPING_TABLE_PUBLIC:
+                if req.mapping:
+                    req.mapping.is_public = True
+                    req.mapping.save()
 
             req.status = AdminRequest.Status.APPROVED
             req.processed_at = timezone.now()
@@ -703,3 +708,29 @@ def request_make_assembly_public(request, assembly_id):
     messages.info(request, "Your request has been sent.")
 
     return redirect("browse:browse_templates")
+
+# ------------------------------------------------
+# user sends request to make mapping table public
+# ------------------------------------------------
+
+@login_required
+def request_make_mapping_table_public(request, mapping_id):
+    mapping = get_object_or_404(
+        MappingTable,
+        id=mapping_id,
+        owner=request.user,
+        is_public=False,
+    )
+
+    AdminRequest.objects.filter(mapping=mapping).delete()
+
+    AdminRequest.objects.create(
+        user=request.user,
+        request_type=AdminRequest.RequestType.MAKE_MAPPING_TABLE_PUBLIC,
+        mapping=mapping,
+        message="Please make this mapping table public.",
+    )
+
+    messages.info(request, "Your request has been sent.")
+
+    return redirect(request.META.get("HTTP_REFERER", "/"))
