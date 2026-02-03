@@ -48,6 +48,11 @@
             <small class="text-secondary">
               Updated At: {{ assembly.creation_date|date:"M d, Y" }}
             </small>
+            <div class="text-muted small">
+              {% if assembly.is_public %}
+                Owner: {{ assembly.owner.username }}
+              {% endif %}
+            </div>
           </a>
 
           <div class="col border-start border-primary border-4 ps-md-4">
