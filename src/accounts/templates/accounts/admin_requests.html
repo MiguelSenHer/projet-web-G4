@@ -55,17 +55,26 @@
             </div>
           {% endif %}
 
+
+
+          
           {# ---------------- MAPPING TABLE REQUEST ---------------- #}
           {% if r.request_type == "MAKE_MAPPING_TABLE_PUBLIC" %}
             <div class="mt-2 small">
-              <strong>Mapping table:</strong> {{ r.mapping.name }}
-              {% if r.mapping.collection %}
-                <div class="text-muted">
-                  Collection: {{ r.mapping.collection.name }}
-                </div>
-              {% endif %}
+              <strong>Mapping table: </strong> {{ r.mapping.collection.name }}
+
+              <div class="d-flex flex-wrap gap-2 mt-2">
+                <a
+                  href="{{ MEDIA_URL }}{{ r.mapping.mapping_path }}"
+                  target="_blank"
+                  class="badge rounded-pill bg-light text-primary border text-decoration-none"
+                >
+                  {{ r.mapping.name }}
+                </a>
+              </div>
             </div>
           {% endif %}
+
 
           {# ---------------- ASSEMBLY REQUEST ---------------- #}
           {% if r.request_type == "MAKE_ASSEMBLY_PUBLIC" %}
