@@ -13,6 +13,7 @@ from .views import (
     ResumeSimulationView,
     DeleteSimulationView,
     PlasmidView,
+    DownloadMappingByJobView
 )
 app_name = "simulator"
 
@@ -27,4 +28,6 @@ urlpatterns = [
     path("resume/<str:job_id>/", ResumeSimulationView.as_view(), name="resume_job"),
     path("delete/<str:job_id>/", DeleteSimulationView.as_view(), name="delete_job"),
     path("plasmid/<str:job_id>/<str:mode>/<str:filename>/", PlasmidView.as_view(), name="plasmid_view"),
+    path("jobs/<str:job_id>/mapping/<str:filename>/", DownloadMappingByJobView.as_view(), name="download_mapping_by_job"),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

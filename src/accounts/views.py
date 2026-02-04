@@ -13,7 +13,7 @@ from django.db.models import Q, Case, When, IntegerField
 from django.db import transaction
 from django.core.exceptions import PermissionDenied
 from plasmids.models import Collection
-from plasmids.models import MappingTable
+from plasmids.models import MappingCollection
 from browse.models import Assembly
 
 User = get_user_model()
@@ -628,7 +628,7 @@ def admin_requests_view(request):
     pending_requests = (
         AdminRequest.objects
         .filter(status=AdminRequest.Status.PENDING)
-        .select_related("user", "collection", "assembly", "mapping")
+        .select_related("user", "collection", "assembly", "mapping_collection")
         .prefetch_related("collection__plasmids")
         .order_by("-created_at")
     )
@@ -636,7 +636,7 @@ def admin_requests_view(request):
     completed_requests = (
         AdminRequest.objects
         .exclude(status=AdminRequest.Status.PENDING)
-        .select_related("user", "collection", "assembly", "mapping")
+        .select_related("user", "collection", "assembly", "mapping_collection")
         .order_by("-processed_at")
     )
 
@@ -648,18 +648,16 @@ def admin_requests_view(request):
 
             if req.request_type == AdminRequest.RequestType.MAKE_COLLECTION_PUBLIC:
                 if req.collection:
-                    req.collection.is_public = True
-                    req.collection.save()
+                    req.collection.make_public()
 
             elif req.request_type == AdminRequest.RequestType.MAKE_ASSEMBLY_PUBLIC:
                 if req.assembly:
                     req.assembly.is_public = True
                     req.assembly.save()
 
-            elif req.request_type == AdminRequest.RequestType.MAKE_MAPPING_TABLE_PUBLIC:
-                if req.mapping:
-                    req.mapping.is_public = True
-                    req.mapping.save()
+            elif req.request_type == AdminRequest.RequestType.MAKE_MAPPING_COLLECTION_PUBLIC:
+                if req.mapping_collection:
+                    req.mapping_collection.make_public()
 
             req.status = AdminRequest.Status.APPROVED
             req.processed_at = timezone.now()
@@ -771,23 +769,23 @@ def request_make_assembly_public(request, assembly_id):
 # ------------------------------------------------
 
 @login_required
-def request_make_mapping_table_public(request, mapping_id):
-    mapping = get_object_or_404(
-        MappingTable,
-        id=mapping_id,
+def request_make_mapping_collection_public(request, collection_id):
+    # Fetch the collection instead of a single table
+    collection = get_object_or_404(
+        MappingCollection,
+        id=collection_id,
         owner=request.user,
         is_public=False,
     )
 
-    AdminRequest.objects.filter(mapping=mapping).delete()
+    AdminRequest.objects.filter(mapping_collection=collection).delete()
 
     AdminRequest.objects.create(
         user=request.user,
-        request_type=AdminRequest.RequestType.MAKE_MAPPING_TABLE_PUBLIC,
-        mapping=mapping,
-        message="Please make this mapping table public.",
+        request_type=AdminRequest.RequestType.MAKE_MAPPING_COLLECTION_PUBLIC, 
+        mapping_collection=collection, 
+        message=f"Please make the mapping collection '{collection.name}' public.",
     )
 
-    messages.info(request, "Your request has been sent.")
-
+    messages.info(request, "Your request for the collection has been sent.")
     return redirect(request.META.get("HTTP_REFERER", "/"))

@@ -57,7 +57,7 @@ class AdminRequest(models.Model):
     class RequestType(models.TextChoices):
         MAKE_COLLECTION_PUBLIC = "MAKE_COLLECTION_PUBLIC", "Make collection public"
         MAKE_ASSEMBLY_PUBLIC = "MAKE_ASSEMBLY_PUBLIC", "Make assembly public"
-        MAKE_MAPPING_TABLE_PUBLIC = "MAKE_MAPPING_TABLE_PUBLIC", "Make mapping table public"
+        MAKE_MAPPING_COLLECTION_PUBLIC = "MAKE_MAPPING_COLLECTION_PUBLIC", "Make mapping collection public"
 
     class Status(models.TextChoices):
         PENDING = "PENDING", "Pending"
@@ -82,8 +82,8 @@ class AdminRequest(models.Model):
         on_delete=models.CASCADE
     )
 
-    mapping = models.ForeignKey(
-        "plasmids.MappingTable",
+    mapping_collection = models.ForeignKey(
+        "plasmids.MappingCollection",
         null=True,
         blank=True,
         on_delete=models.CASCADE,

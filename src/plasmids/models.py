@@ -4,7 +4,6 @@ from pathlib import Path
 from io import StringIO
 from django.http import Http404
 import shutil
-from django.apps import apps
 
 from Bio.SeqFeature import SeqFeature, SimpleLocation
 from pycirclize import Circos
@@ -27,6 +26,15 @@ class Collection(models.Model):
         blank=True,
         related_name="collections",
     )
+
+    # Link to simulation job if applicable to delete private collections when job is deleted
+    simulation_job = models.ForeignKey(
+        "simulator.SimulationJob", 
+        on_delete=models.CASCADE,
+        null=True, 
+        blank=True
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -37,56 +45,88 @@ class Collection(models.Model):
             ),
         ]
 
-    def save(self, *args, **kwargs):
-        was_public = None
-        if self.pk:
-            was_public = Collection.objects.get(pk=self.pk).is_public
+    def make_public(self):
+        public_dir = Path(settings.BASE_DIR) / "plasmids" / "public_data" / "collections" / str(self.id)
+        public_dir.mkdir(parents=True, exist_ok=True)
 
-        super().save(*args, **kwargs)
-
-        if was_public is False and self.is_public is True:
-            public_dir = (
-                Path(settings.BASE_DIR) / "plasmids" / "public_data" / "collections" / str(self.id)
-            )
-
-            public_dir.mkdir(parents=True, exist_ok=True)
-
-            for plasmid in self.plasmids.all():
-                src = Path(plasmid.gb_path)
+        for plasmid in self.plasmids.all():
+            src = plasmid.gb_abspath()
+            if src.exists():
                 dst = public_dir / src.name
                 shutil.copy2(src, dst)
 
-                plasmid.gb_path = str(dst)
+                plasmid.gb_path = f"public_data/collections/{self.id}/{src.name}"
                 plasmid.save(update_fields=["gb_path"])
+        
+        self.is_public = True
+        # Remove link to simulation job when made public
+        self.simulation_job = None
+        self.save(update_fields=["is_public", "simulation_job"])
+
+
+class MappingCollection(models.Model):
+    name = models.CharField(max_length=255)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    is_public = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    team = models.ForeignKey(
+        "accounts.Team",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="mapping_collections",
+    )
+
+    # Link to simulation job if applicable to delete private collections when job is deleted
+    simulation_job = models.ForeignKey(
+        "simulator.SimulationJob", 
+        on_delete=models.CASCADE,
+        null=True, 
+        blank=True
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["owner", "name"],
+                name="uniq_mapping_collection_name_per_owner",
+            ),
+        ]
+
+    def make_public(self):
+        public_dir = (Path(settings.BASE_DIR) / "plasmids" / "public_data" / "mapping_collections" / str(self.id))
+        public_dir.mkdir(parents=True, exist_ok=True)
+
+        for table in self.tables.all():
+            src = table.mapping_abspath() 
             
-            # Copy plasmids
-            for plasmid in self.plasmids.all():
-                src = Path(plasmid.gb_path)
+            if src.exists():
                 dst = public_dir / src.name
                 shutil.copy2(src, dst)
+                
+                table.mapping_path = f"public_data/mapping_collections/{self.id}/{src.name}"
+                table.is_public = True
+                table.save(update_fields=["mapping_path", "is_public"])
 
-                plasmid.gb_path = str(dst)
-                plasmid.save(update_fields=["gb_path"])
-
-            # Copy mapping tables
-            for mapping in self.mapping_tables.all():
-                src = Path(mapping.mapping_path)
-                if not src.exists():
-                    continue
-                dst = public_dir / src.name
-                shutil.copy2(src, dst)
-
-                mapping.mapping_path = str(dst)
-                mapping.save(update_fields=["mapping_path"])
+        self.is_public = True
+        # Remove link to simulation job when made public
+        self.simulation_job = None
+        self.save(update_fields=["is_public", "simulation_job"])
 
 
 class MappingTable(models.Model):
-    collection = models.ForeignKey(Collection, on_delete=models.CASCADE, related_name="mapping_tables")
-    is_public = models.BooleanField(default=False)
+    collection = models.ForeignKey(MappingCollection, related_name="tables", on_delete=models.CASCADE)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     mapping_path = models.TextField()
+    is_public = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def mapping_abspath(self):
+        if self.mapping_path.startswith("public_data"):
+            return settings.BASE_DIR / "plasmids" / self.mapping_path
+        return Path(settings.MEDIA_ROOT) / self.mapping_path
 
 
 class Plasmid(models.Model):
@@ -95,12 +135,14 @@ class Plasmid(models.Model):
     gb_path = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def gb_abspath(self):   
-        return Path(apps.get_app_config("plasmids").path) / self.gb_path
+    def gb_abspath(self):
+        if self.gb_path.startswith("public_data"):
+            return settings.BASE_DIR / "plasmids" / self.gb_path
+        return Path(settings.MEDIA_ROOT) / self.gb_path
 
     # Visualize plasmid using pycirclize
     def visualize(self, selected_types=None, action=None):
-        gb_path = Path(self.gb_path)    
+        gb_path = self.gb_abspath()    
         if not gb_path.exists():
             raise Http404
         

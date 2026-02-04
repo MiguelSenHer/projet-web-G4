@@ -14,7 +14,6 @@ InsillyClo - Run Simulation
   <div class="container py-4">
 
     {% if status == "SUCCESS" %}
-      <!-- SUCCESS -->
       <div class="alert alert-success">
         <div class="fw-bold">Simulation completed successfully.</div>
 
@@ -30,7 +29,6 @@ InsillyClo - Run Simulation
         </div>
       </div>
 
-      <!-- DOWNLOAD RESULTS -->
       <div class="card mb-4">
         <div class="card-body">
           <div class="hero-subtitle mb-3">
@@ -58,7 +56,6 @@ InsillyClo - Run Simulation
         </div>
       </div>
 
-      <!-- COMPUTE DILUTION -->
       <div class="card mb-4">
         <div class="card-body">
           <div class="hero-subtitle mb-3">
@@ -69,7 +66,6 @@ InsillyClo - Run Simulation
           <form method="post" enctype="multipart/form-data" class="mt-3">
             {% csrf_token %}
 
-            <!-- Default mass concentration -->
             <div class="mb-4">
               <label class="form-label fw-bold">
                 Default mass concentration of input plasmids
@@ -83,10 +79,10 @@ InsillyClo - Run Simulation
                 name="default_mass_concentration"
                 step="any"
                 inputmode="decimal"
+                value = "{{ params.default_mass_concentration }}"
               >
             </div>
 
-            <!-- Final volume -->
             <div class="mb-4">
               <label class="form-label fw-bold">
                 Final volume of the reaction
@@ -100,11 +96,10 @@ InsillyClo - Run Simulation
                 name="final_volume"
                 step="any"
                 inputmode="decimal"
-                value="10.0"
+                value="{{ params.final_volume }}"
               >
             </div>
 
-            <!-- Enzyme and buffer volume -->
             <div class="mb-4">
               <label class="form-label fw-bold">
                 Enzyme and buffer volume
@@ -118,11 +113,10 @@ InsillyClo - Run Simulation
                 name="enzyme_buffer_volume"
                 step="any"
                 inputmode="decimal"
-                value="2.0"
+                value="{{ params.enzyme_buffer_volume }}"
               >
             </div>
 
-            <!-- Minimal tip volume -->
             <div class="mb-4">
               <label class="form-label fw-bold">
                 Minimal tip volume
@@ -136,11 +130,10 @@ InsillyClo - Run Simulation
                 name="minimal_tip_volume"
                 step="any"
                 inputmode="decimal"
-                value="0.0"
+                value="{{ params.minimal_tip_volume }}"
               >
             </div>
 
-            <!-- Tip volume from intermediate -->
             <div class="mb-4">
               <label class="form-label fw-bold">
                 Tip volume from intermediate dilution
@@ -154,11 +147,10 @@ InsillyClo - Run Simulation
                 name="tip_volume_from_intermediate"
                 step="any"
                 inputmode="decimal"
-                value="1.0"
+                value="{{ params.tip_volume_from_intermediate }}"
               >
             </div>
 
-            <!-- Remaining volume -->
             <div class="mb-4">
               <label class="form-label fw-bold">
                 Minimum remaining volume in intermediate dilution
@@ -172,11 +164,10 @@ InsillyClo - Run Simulation
                 name="min_remaining_volume_intermediate"
                 step="any"
                 inputmode="decimal"
-                value="2.0"
+                value="{{ params.min_remaining_volume_intermediate }}"
               >
             </div>
 
-            <!-- Final concentration -->
             <div class="mb-4">
               <label class="form-label fw-bold">
                 Concentration of an input plasmid in final reaction
@@ -190,11 +181,10 @@ InsillyClo - Run Simulation
                 name="input_plasmid_concentration_final"
                 step="any"
                 inputmode="decimal"
-                value="2.0"
+                value="{{ params.input_plasmid_concentration_final }}"
               >
             </div>
 
-            <!-- UPDATED CONCENTRATION FILE -->
             <div class="mb-4">
               <label class="form-label fw-bold">
                 Updated plasmid concentration file
@@ -236,14 +226,33 @@ InsillyClo - Run Simulation
         </div>
       </div>
 
-      <div class="d-flex gap-2 flex-wrap">
+      {% if csv_files %}
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="hero-subtitle mb-3">
+            Download dilution results
+          </div>
+          <hr>
+
+          <div class="text-center">
+           {% for file in csv_files %}
+                  <a href="{{ file.url }}" class="btn btn-assembly" download>
+                      <i class="bi bi-download"></i> {{ file.label }}
+                  </a>
+              {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+            
+
+      <div class="d-flex gap-2 flex-wrap mb-5">
         <a href="{% url 'simulator:preview' %}" class="btn btn-outline-secondary">
           Back
         </a>
       </div>
 
     {% elif status == "FAIL" %}
-      <!-- ERROR -->
       <div class="alert alert-danger">
         <div class="fw-bold">Simulation failed</div>
 

@@ -179,67 +179,106 @@ InsillyClo - Simulation Preview
 
     
     <!-- RECEIVED FILES -->
-    <div class="row g-3 mt-4">
+     <div class="row g-3 mt-4">
+        <div class="col-12 col-lg-6">
+          <div class="card h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="fw-bold mb-0">Mapping tables</h5>
+                
+                <div class="dropdown">
+                  <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                    Add from collections
+                  </button>
+                  <form method="post" class="dropdown-menu p-3" style="min-width: 250px;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add_from_collections">
+                    <input type="hidden" name="type" value="mappings">
+                    <div class="mb-2 fw-bold small">Select Collections:</div>
+                    <div class="overflow-auto" style="max-height: 200px;">
+                      {% for col in available_mappings %}
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" name="collection_ids" value="{{ col.id }}" id="m{{ col.id }}">
+                          <label class="form-check-label small" for="m{{ col.id }}">{{ col.name }}</label>
+                        </div>
+                      {% empty %}
+                        <div class="text-muted small italic">No collections available</div>
+                      {% endfor %}
+                    </div>
+                    {% if available_mappings %}
+                      <button type="submit" class="btn btn-sm btn-primary w-100 mt-2">Add selected</button>
+                    {% endif %}
+                  </form>
+                </div>
+              </div>
 
-      <!-- Mapping -->
-      <div class="col-12 col-lg-6">
-        <div class="card h-100">
-          <div class="card-body">
+              <div class="text-muted mb-2">Received files: <strong>{{ mapping_files|length }}</strong></div>
 
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <h5 class="fw-bold mb-0">Mapping tables</h5>
+              <div class="border rounded-3 p-2 overflow-auto" style="height: 260px;">
+                {% if mapping_files %}
+                  <ul class="list-unstyled mb-0">
+                    {% for f in mapping_files %}
+                      <li class="py-1 border-bottom small">{{ f }}</li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <div class="text-muted small">No mapping file provided.</div>
+                {% endif %}
+              </div>
             </div>
-
-            <div class="text-muted mb-2">
-              Received files: <strong>{{ mapping_files|length }}</strong>
-            </div>
-
-            <div class="border rounded-3 p-2 overflow-auto" style="height: 260px;">
-              {% if mapping_files %}
-                <ul class="list-unstyled mb-0">
-                  {% for f in mapping_files %}
-                    <li class="py-1 border-bottom">{{ f }}</li>
-                  {% endfor %}
-                </ul>
-              {% else %}
-                <div class="text-muted">No mapping file provided.</div>
-              {% endif %}
-            </div>
-
           </div>
         </div>
-      </div>
 
-      <!-- GenBank -->
-      <div class="col-12 col-lg-6">
-        <div class="card h-100">
-          <div class="card-body">
+        <div class="col-12 col-lg-6">
+          <div class="card h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="fw-bold mb-0">Plasmid sequences</h5>
 
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <h5 class="fw-bold mb-0">Plasmid sequences</h5>
+                <div class="dropdown">
+                  <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                    Add from collections
+                  </button>
+                  <form method="post" class="dropdown-menu p-3" style="min-width: 250px;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add_from_collections">
+                    <input type="hidden" name="type" value="plasmids">
+                    <div class="mb-2 fw-bold small">Select Collections:</div>
+                    <div class="overflow-auto" style="max-height: 200px;">
+                      {% for col in available_collections %}
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" name="collection_ids" value="{{ col.id }}" id="p{{ col.id }}">
+                          <label class="form-check-label small" for="p{{ col.id }}">{{ col.name }}</label>
+                        </div>
+                      {% empty %}
+                        <div class="text-muted small italic">No collections available</div>
+                      {% endfor %}
+                    </div>
+                    {% if available_collections %}
+                      <button type="submit" class="btn btn-sm btn-primary w-100 mt-2">Add selected</button>
+                    {% endif %}
+                  </form>
+                </div>
+              </div>
+
+              <div class="text-muted mb-2">Received files: <strong>{{ genbank_files|length }}</strong></div>
+
+              <div class="border rounded-3 p-2 overflow-auto" style="height: 260px;">
+                {% if genbank_files %}
+                  <ul class="list-unstyled mb-0">
+                    {% for f in genbank_files %}
+                      <li class="py-1 border-bottom small">{{ f }}</li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <div class="text-muted small">No GenBank file provided.</div>
+                {% endif %}
+              </div>
             </div>
-
-            <div class="text-muted mb-2">
-              Received files: <strong>{{ genbank_files|length }}</strong>
-            </div>
-
-            <div class="border rounded-3 p-2 overflow-auto" style="height: 260px;">
-              {% if genbank_files %}
-                <ul class="list-unstyled mb-0">
-                  {% for f in genbank_files %}
-                    <li class="py-1 border-bottom">{{ f }}</li>
-                  {% endfor %}
-                </ul>
-              {% else %}
-                <div class="text-muted">No GenBank file provided.</div>
-              {% endif %}
-            </div>
-
           </div>
         </div>
-      </div>
 
-    </div>
+      </div>
 
     <!-- ACTIONS -->
     <div class="d-flex justify-content-center gap-3 mt-4 flex-wrap">

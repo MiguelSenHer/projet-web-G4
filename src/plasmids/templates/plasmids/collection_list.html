@@ -21,177 +21,175 @@
 <main class="flex-grow-1">
   <div class="container py-4">
 
-    <div class="d-flex justify-content-center mb-4">
-      <div class="btn-group shadow-sm" role="group">
-        <a href="?view=all"
+    <!--- FILTER BUTTONS --- -->
+    <div class="d-flex flex-wrap justify-content-center gap-3 mb-4">
+      <div class="btn-group shadow-sm">
+        <a href="?view=all{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}"
            class="btn btn-outline-primary {% if current_filter == 'all' %}active{% endif %}">
           All
         </a>
-        <a href="?view=public"
+        <a href="?view=public{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}"
            class="btn btn-outline-primary {% if current_filter == 'public' %}active{% endif %}">
           Public
         </a>
         {% if user.is_authenticated %}
-          <a href="?view=private"
+          <a href="?view=private{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}"
              class="btn btn-outline-primary {% if current_filter == 'private' %}active{% endif %}">
             Private
           </a>
         {% endif %}
       </div>
+
+      <div class="btn-group shadow-sm">
+        <a href="?type=all&view={{ current_filter }}" 
+           class="btn btn-outline-secondary {% if not request.GET.type or request.GET.type == 'all' %}active{% endif %}">
+          Everything
+        </a>
+        <a href="?type=plasmids&view={{ current_filter }}" 
+           class="btn btn-outline-secondary {% if request.GET.type == 'plasmids' %}active{% endif %}">
+          Plasmids
+        </a>
+        <a href="?type=mappings&view={{ current_filter }}" 
+           class="btn btn-outline-secondary {% if request.GET.type == 'mappings' %}active{% endif %}">
+          Mappings
+        </a>
+      </div>
     </div>
 
-    {% for c in collections %}
-      <div class="card mb-3 p-3">
-
-        {% with ps=c.plasmids.all ms=c.mapping_tables.all %}
-        <div class="d-flex justify-content-between align-items-start">
-          <div>
-            <div class="fw-bold text-dark">
-              {{ c.name }}
-
-              {% if c.is_public %}
-                <span class="badge bg-secondary ms-1" style="font-size: 0.6rem;">PUBLIC</span>
-              {% else %}
-                <span class="badge bg-secondary ms-1" style="font-size: 0.6rem;">PRIVATE</span>
-              {% endif %}
+    <!--- PLASMID COLLECTIONS --- -->
+    {% if not request.GET.type or request.GET.type == 'all' or request.GET.type == 'plasmids' %}
+      {% for c in collections %}
+        {% with plasmids=c.plasmids.all %}
+        <div class="card mb-3 p-3 shadow-sm">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <div class="fw-bold">
+                {{ c.name }}
+                <span class="badge bg-secondary ms-1">{{ c.is_public|yesno:"PUBLIC,PRIVATE" }}</span>
+              </div>
+              <div class="text-muted small">
+                {% if c.is_public %}Owner: {{ c.owner.username }} | {% endif %}
+                Created {{ c.created_at|date:"Y-m-d H:i" }}
+              </div>
             </div>
 
-            <div class="text-muted small">
-              {% if c.is_public %}
-                Owner: {{ c.owner.username }} |
-              {% endif %}
-              Created {{ c.created_at|date:"Y-m-d H:i" }}
-            </div>
-          </div>
-
-          {% if not c.is_public %}
             <div class="dropdown">
-              <button
-                class="btn btn-sm btn-outline-primary"
-                type="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
+              <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="bi bi-gear"></i>
               </button>
-
               <ul class="dropdown-menu dropdown-menu-end">
+                <!-- Download is available for public collections OR if the user is the owner -->
+                {% if c.is_public or user == c.owner %}
+                <li>
+                  <a class="dropdown-item" href="{% url 'plasmids:download_collection' c.id %}">
+                    <i class="bi bi-download me-2"></i>Download associated files (.zip)
+                  </a>
+                </li>
+                {% endif %}
 
-                {# CASE 1: plasmid collection -> request collection public #}
-                {% if ps|length %}
+                <!-- "Make Public" request only for logged-in owner of private collection -->
+                {% if user.is_authenticated and not c.is_public and c.owner == user %}
+                  <li><hr class="dropdown-divider"></li>
                   <li>
-                    <form
-                      method="post"
-                      action="{% url 'request_make_collection_public' c.id %}"
-                      class="px-3 py-1"
-                    >
+                    <form method="post" action="{% url 'request_make_collection_public' c.id %}">
                       {% csrf_token %}
-                      <button type="submit" class="dropdown-item">
-                        Request to make public
-                      </button>
+                      <button type="submit" class="dropdown-item text-primary">Request make collection public</button>
                     </form>
                   </li>
-
-                {# CASE 2: mapping tables -> request mapping public (one entry per mapping table) #}
-                {% elif ms|length %}
-                  <li class="px-3 pt-2 pb-1 text-muted small">
-                    Request to make public
-                  </li>
-
-                  {% for m in ms %}
-                    {% if not m.is_public %}
-                      <li>
-                        <form
-                          method="post"
-                          action="{% url 'request_make_mapping_table_public' m.id %}"
-                          class="px-3 py-1"
-                        >
-                          {% csrf_token %}
-                          <button type="submit" class="dropdown-item">
-                            {{ m.name }}
-                          </button>
-                        </form>
-                      </li>
-                    {% endif %}
-                  {% endfor %}
-
-                {% else %}
-                  <li><span class="dropdown-item text-muted">Nothing to publish</span></li>
                 {% endif %}
               </ul>
             </div>
+          </div>
+
+          {% if plasmids %}
+            <div class="mt-3">
+              <button class="btn btn-link p-0 text-muted small" type="button" data-bs-toggle="collapse" data-bs-target="#plasmids-{{ c.id }}" aria-expanded="false">
+                Plasmids ({{ plasmids|length }})
+              </button>
+              <div class="collapse mt-2" id="plasmids-{{ c.id }}">
+                <div class="d-flex flex-wrap gap-2">
+                  {% for p in plasmids %}
+                    <a class="border rounded-pill px-3 py-1 small text-decoration-none" href="{% url 'plasmids:plasmid_view' p.id %}">
+                      {{ p.name }}
+                    </a>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
           {% endif %}
         </div>
-
-        <!-- PLASMIDS -->
-        {% if ps|length %}
-          <div class="mt-3">
-            <button
-              class="btn btn-link p-0 text-muted small"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#plasmids-{{ c.id }}"
-              aria-expanded="false"
-              aria-controls="plasmids-{{ c.id }}"
-            >
-              Plasmids ({{ ps|length }})
-            </button>
-
-            <div class="collapse mt-2" id="plasmids-{{ c.id }}">
-              <div class="d-flex flex-wrap gap-2">
-                {% for plasmid in ps %}
-                  <a
-                    class="border rounded-pill px-3 py-1 small text-decoration-none"
-                    href="{% url 'plasmids:plasmid_view' plasmid.id %}"
-                  >
-                    {{ plasmid.name }}
-                  </a>
-                {% endfor %}
-              </div>
-            </div>
-          </div>
-        {% endif %}
-
-        <!-- MAPPING TABLES -->
-        {% if ms|length %}
-          <div class="mt-2">
-            <button
-              class="btn btn-link p-0 text-muted small"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#mappings-{{ c.id }}"
-              aria-expanded="false"
-              aria-controls="mappings-{{ c.id }}"
-            >
-              Mapping tables ({{ ms|length }})
-            </button>
-
-            <div class="collapse mt-2" id="mappings-{{ c.id }}">
-              <div class="d-flex flex-wrap gap-2">
-                {% for m in ms %}
-                  <a
-                    class="border rounded-pill px-3 py-1 small text-decoration-none"
-                    href="{% url 'plasmids:mapping_view' m.id %}"
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    {{ m.name }}
-                  </a>
-                {% endfor %}
-              </div>
-            </div>
-          </div>
-        {% endif %}
         {% endwith %}
+      {% endfor %}
+    {% endif %}
 
-      </div>
-    {% empty %}
-      <div class="text-center py-5">
-        <p class="text-muted mt-3">
-          No collections found for this filter.
-        </p>
-      </div>
-    {% endfor %}
+    <!--- MAPPING COLLECTIONS --- -->
+    {% if not request.GET.type or request.GET.type == 'all' or request.GET.type == 'mappings' %}
+      {% for mc in mapping_collections %}
+        {% with tables=mc.tables.all %}
+        <div class="card mb-3 p-3 shadow-sm">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <div class="fw-bold">
+                {{ mc.name }}
+                <span class="badge bg-secondary ms-1">{{ mc.is_public|yesno:"PUBLIC,PRIVATE" }}</span>
+              </div>
+              <div class="text-muted small">
+                {% if mc.is_public %}Owner: {{ mc.owner.username }} | {% endif %}
+                Created {{ mc.created_at|date:"Y-m-d H:i" }}
+              </div>
+            </div>
+
+            <div class="dropdown">
+              <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-gear"></i>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <!-- Download mappings -->  
+                {% if mc.is_public or user == mc.owner %}
+                  {% if tables %}
+                    <li>
+                      <a class="dropdown-item" href="{% url 'plasmids:download_mapping_collection' mc.id %}">
+                        <i class="bi bi-download me-2"></i>Download associated files (.zip)
+                      </a>
+                    </li>
+                  {% else %}
+                    <li><span class="dropdown-item text-muted small ms-3">No files available</span></li>
+                  {% endif %}
+                {% endif %}
+
+                {% if user.is_authenticated and not mc.is_public and mc.owner == user %}
+                  <li><hr class="dropdown-divider"></li>
+                  <li>
+                    <form method="post" action="{% url 'request_make_mapping_collection_public' mc.id %}">
+                      {% csrf_token %}
+                      <button type="submit" class="dropdown-item text-primary">Request make mapping collection public</button>
+                    </form>
+                  </li>
+                {% endif %}
+              </ul>
+            </div>
+          </div>
+
+          {% if tables %}
+            <div class="mt-3">
+              <button class="btn btn-link p-0 text-muted small" type="button" data-bs-toggle="collapse" data-bs-target="#mapping-{{ mc.id }}" aria-expanded="false">
+                Tables ({{ tables|length }})
+              </button>
+              <div class="collapse mt-2" id="mapping-{{ mc.id }}">
+                <div class="d-flex flex-wrap gap-2">
+                  {% for t in tables %}
+                    <a class="border rounded-pill px-3 py-1 small text-decoration-none" href="{% url 'plasmids:mapping_view' t.id %}" target="_blank">
+                      {{ t.name }}
+                    </a>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+        {% endwith %}
+      {% endfor %}
+    {% endif %}
 
   </div>
 </main>

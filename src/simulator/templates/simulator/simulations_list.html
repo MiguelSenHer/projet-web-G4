@@ -102,54 +102,43 @@ InSillyClo – My simulations
 
                     <!-- SAVE INPUT PLASMIDS -->
                     <li>
-                      {% if input_gb_files %}
-                        <form method="post"
-                              action="{% url 'plasmids:save_collection' 'inputs' job.job_id %}">
-                          {% csrf_token %}
-                          <button type="submit" class="dropdown-item">
-                            Save input plasmids
-                          </button>
-                        </form>
-                      {% else %}
-                        <span class="dropdown-item text-muted">
+                    {% if input_gb_files %}
+                      <form method="post" action="{% url 'plasmids:save_collection' mode='inputs' job_id=job.job_id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="dropdown-item">
                           Save input plasmids
-                        </span>
-                      {% endif %}
-                    </li>
-
-                    <!-- SAVE OUTPUT PLASMIDS -->
-                    <li>
-                      {% if job.status == "SUCCESS" and output_gb_files %}
-                        <form method="post"
-                              action="{% url 'plasmids:save_collection' 'outputs' job.job_id %}">
-                          {% csrf_token %}
-                          <button type="submit" class="dropdown-item">
-                            Save output plasmids
-                          </button>
-                        </form>
-                      {% else %}
-                        <span class="dropdown-item text-muted">
+                        </button>
+                      </form>
+                    {% else %}
+                      <span class="dropdown-item text-muted">Save input plasmids</span>
+                    {% endif %}
+                  </li>
+                  <!-- SAVE OUTPUT PLASMIDS -->
+                  <li>
+                    {% if job.status == "SUCCESS" and output_gb_files %}
+                      <form method="post" action="{% url 'plasmids:save_collection' mode='outputs' job_id=job.job_id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="dropdown-item">
                           Save output plasmids
-                        </span>
-                      {% endif %}
-                    </li>
-
-                    <!-- SAVE MAPPING TABLES -->
-                    <li>
-                      {% if mapping_files %}
-                        <form method="post"
-                              action="{% url 'plasmids:save_collection' 'mapping' job.job_id %}">
-                          {% csrf_token %}
-                          <button type="submit" class="dropdown-item">
-                            Save mapping tables
-                          </button>
-                        </form>
-                      {% else %}
-                        <span class="dropdown-item text-muted">
+                        </button>
+                      </form>
+                    {% else %}
+                      <span class="dropdown-item text-muted">Save output plasmids</span>
+                    {% endif %}
+                  </li>
+                  <!-- SAVE MAPPING TABLES -->
+                  <li>
+                    {% if mapping_files %}
+                      <form method="post" action="{% url 'plasmids:save_mapping' job_id=job.job_id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="dropdown-item">
                           Save mapping tables
-                        </span>
-                      {% endif %}
-                    </li>
+                        </button>
+                      </form>
+                    {% else %}
+                      <span class="dropdown-item text-muted">Save mapping tables</span>
+                    {% endif %}
+                  </li>
 
                     <li><hr class="dropdown-divider"></li>
 

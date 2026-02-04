@@ -32,6 +32,6 @@ urlpatterns = [
     path("admin/requests/", views.admin_requests_view, name="admin_requests"),
     path("requests/make-public/<int:collection_id>/", views.request_make_collection_public, name="request_make_collection_public"),
     path("requests/make-assembly-public/<int:assembly_id>/", views.request_make_assembly_public, name="request_make_assembly_public"),
-    path("requests/make-mapping-public/<int:mapping_id>/", views.request_make_mapping_table_public, name="request_make_mapping_table_public"),
+    path("requests/make-mapping-public/<int:collection_id>/", views.request_make_mapping_collection_public, name="request_make_mapping_collection_public"),
     path("profile/user_requests/", views.user_requests_view, name="user_requests"),
 ]

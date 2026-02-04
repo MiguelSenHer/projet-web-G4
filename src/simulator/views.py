@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse
-from plasmids.models import Collection
+from plasmids.models import Collection, MappingCollection
 import json
 from pathlib import Path
 from django.http import Http404, FileResponse
@@ -13,7 +13,7 @@ import shutil
 from django.conf import settings
 from zipfile import ZipFile
 from django.contrib import messages
-
+from django.db.models import Q
 from plasmids.models import Plasmid
 
 
@@ -61,13 +61,66 @@ class TemplatePreviewView(FormView):
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        if request.POST.get("action") == "clear_inputs":
-            base = Path(self.job.template.path).parent
+        action = request.POST.get("action")
+        base_path = Path(settings.MEDIA_ROOT) / "simulator" / "jobs" / self.job.job_id / "inputs"
 
-            shutil.rmtree(base / "inputs" / "genbank", ignore_errors=True)
-            shutil.rmtree(base / "inputs" / "mapping", ignore_errors=True)
-
+        # Clear all inputs
+        if action == "clear_inputs":
+            shutil.rmtree(base_path / "genbank", ignore_errors=True)
+            shutil.rmtree(base_path / "mapping", ignore_errors=True)
             messages.success(request, "All inputs were cleared successfully.")
+            return redirect("simulator:preview")
+
+        # Add from collections
+        elif action == "add_from_collections":
+            col_ids = request.POST.getlist("collection_ids")
+            col_type = request.POST.get("type")
+            results = {"added": [], "skipped": []}
+            
+            if col_type == "plasmids":
+                target_dir = base_path / "genbank"
+                target_dir.mkdir(parents=True, exist_ok=True)
+                
+                collections = Collection.objects.filter(id__in=col_ids)
+                for col in collections:
+                    # Ensure user has access to the collection (mine or public)
+                    if col.owner != request.user and not col.is_public:
+                        continue
+
+                    for plasmid in col.plasmids.all():
+                        src = plasmid.gb_abspath()
+                        print(src)
+                        dst = target_dir / src.name
+                        if not dst.exists():
+                            shutil.copy2(src, dst)
+                            results["added"].append(src.name)
+                        else:
+                            results["skipped"].append(src.name)
+                            
+            elif col_type == "mappings":
+                target_dir = base_path / "mapping"
+                target_dir.mkdir(parents=True, exist_ok=True)
+                
+                collections = MappingCollection.objects.filter(id__in=col_ids)
+                for col in collections:
+                    # Ensure user has access to the collection (mine or public)
+                    if col.owner != request.user and not col.is_public:
+                        continue
+                    
+                    for table in col.tables.all():
+                        src = table.mapping_abspath()
+                        dst = target_dir / src.name
+                        if not dst.exists():
+                            shutil.copy2(src, dst)
+                            results["added"].append(src.name)
+                        else:
+                            results["skipped"].append(src.name)
+
+            if results["added"] or results["skipped"]:
+                messages.success(
+                    request,
+                    f"Collection(s) imported succesfully ({len(results['added'])} added, {len(results['skipped'])} skipped)."
+                )
             return redirect("simulator:preview")
 
         return super().post(request, *args, **kwargs)
@@ -105,7 +158,7 @@ class TemplatePreviewView(FormView):
         context["parts"] = data.get("parts", [])
         context["plasmids"] = data.get("plasmids", [])
 
-        base = Path(self.job.template.path).parent
+        base = Path(settings.MEDIA_ROOT) / "simulator" / "jobs" / self.job.job_id
         genbank_dir = base / "inputs" / "genbank"
         mapping_dir = base / "inputs" / "mapping"
 
@@ -118,6 +171,14 @@ class TemplatePreviewView(FormView):
             if mapping_dir.exists() else []
         )
 
+        if self.request.user.is_authenticated:
+            # Fetch user's accessible plasmid collections and mapping collections (private and owned or public) 
+            accessible = Q(is_public=True) | Q(owner=self.request.user)
+            context["available_collections"] = Collection.objects.filter(accessible).distinct().order_by('-created_at')
+            context["available_mappings"] = MappingCollection.objects.filter(accessible).distinct().order_by('-created_at')
+        
+        return context
+
         return context
 
 
@@ -129,12 +190,9 @@ class RunSimulationView(TemplateView):
         job_id = request.session.get("current_job_id")
         if not job_id:
             return redirect("simulator:upload")
-
         self.job = get_object_or_404(SimulationJob, job_id=job_id)
-
         if self.job.user_id is not None and self.job.user_id != request.user.id:
             raise Http404("Job not found")
-
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -145,45 +203,68 @@ class RunSimulationView(TemplateView):
             self.job.enzyme_name = enzyme
             self.job.save(update_fields=["enzyme_name"])
             self.job.run_simulation(enzyme_name=enzyme)
-            return redirect("simulator:run")
+            return self.get(request, *args, **kwargs)
 
         if action == "compute_dilution":
-            enzyme = self.job.enzyme_name
-
-            self.job.compute_dilution(
-                enzyme_name=enzyme,
-                default_output_plasmid_volume=request.POST.get("final_volume", "10.0"),
-                enzyme_and_buffer_volume=request.POST.get("enzyme_buffer_volume", "2.0"),
-                minimal_puncture_volume=request.POST.get("minimal_tip_volume", "0.0"),
-                puncture_volume_10x=request.POST.get("tip_volume_from_intermediate", "1.0"),
-                minimal_remaining_well_volume=request.POST.get("min_remaining_volume_intermediate", "2.0"),
-                expected_concentration_in_output=request.POST.get("input_plasmid_concentration_final", "2.0"),
+            self.job.run_simulation(
+                dilution_params=request.POST,
+                uploaded_concentration_file=request.FILES.get('concentration_file')
             )
-            return redirect("simulator:run")
-
-        return redirect("simulator:run")
+            return self.get(request, *args, **kwargs)
+            
+        return self.get(request, *args, **kwargs)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        base = Path(self.job.template.path).parent
-
-        updated = base / "inputs" / "input-plasmid-concentrations_updated.csv"
-        starter = base / "inputs" / "input-plasmid-concentrations.csv"
-
-        current = updated if updated.exists() else starter
-
-        context["concentration_file_name"] = current.name
-        context["concentration_file_url"] = (
-            self.job.template.storage.url(str(current.relative_to(self.job.template.storage.location)))
-        )
         job = self.job
+        post_data = self.request.POST
+        storage = job.template.storage
+        job_folder = Path(job.template.name).parent 
+        
+        # Handle concentration file URL
+        conc_rel_path = str(job_folder / "inputs" / "input-plasmid-concentrations.csv")
+        if storage.exists(conc_rel_path):
+            context["concentration_file_url"] = storage.url(conc_rel_path)
+        else:
+            context["concentration_file_url"] = None
+
+        # Memorize form parameters
+        context["params"] = {
+            "final_volume": post_data.get("final_volume", "10.0"),
+            "enzyme_buffer_volume": post_data.get("enzyme_buffer_volume", "2.0"),
+            "minimal_tip_volume": post_data.get("minimal_tip_volume", "0.0"),
+            "tip_volume_from_intermediate": post_data.get("tip_volume_from_intermediate", "1.0"),
+            "min_remaining_volume_intermediate": post_data.get("min_remaining_volume_intermediate", "2.0"),
+            "input_plasmid_concentration_final": post_data.get("input_plasmid_concentration_final", "2.0"),
+            "default_mass_concentration": post_data.get("default_mass_concentration", ""),
+        }
+        
+        outputs_folder = job_folder / "outputs"
+
+        # List available CSV files
+        csv_files = []
+        filenames = [
+            ("Direct", "dilution-direct.csv"),
+            ("Direct Mastermix", "dilution-direct_mastermix.csv"),
+            ("10x", "dilution-10x.csv"),
+            ("10x Mastermix", "dilution-10x_mastermix.csv")
+        ]
+
+        for label, name in filenames:
+            file_path = str(outputs_folder / name)
+            if storage.exists(file_path):
+                csv_files.append({
+                    "label": label,
+                    "url": storage.url(file_path)
+                })
+
+        context["csv_files"] = csv_files
         context["job_id"] = job.job_id
-        context["enzyme"] = self.request.POST.get("enzyme", "")
         context["status"] = job.status
         context["error"] = job.error_message
-        context["outputs_zip_url"] = reverse("simulator:download_results") if job.status == "SUCCESS" else None
-        return context  
-
+        context["outputs_zip_url"] = job.outputs_zip.url if job.outputs_zip else None
+        return context
+    
 
 # View to download first results of a simulation
 class DownloadResultsView(View):
@@ -265,17 +346,27 @@ class SimulationsListView(LoginRequiredMixin, ListView):
             # MAPPING tables
             mapping_files = []
             mapping_dir = base / "inputs" / "mapping"
-            mapping_files = []
+
             if mapping_dir.exists():
-                mapping_files = [
-                    (p.name, f"{settings.MEDIA_URL}simulator/jobs/{job.job_id}/inputs/mapping/{p.name}")
-                    for p in mapping_dir.rglob("*") if p.is_file()
-                ]
+                for p in mapping_dir.rglob("*"):
+                    if not p.is_file():
+                        continue
+
+                    mapping_files.append(
+                        (
+                            p.name,
+                            reverse(
+                                "simulator:download_mapping_by_job",
+                                args=[job.job_id, p.name],
+                            ),
+                        )
+                    )
 
             jobs_with_io.append((job, input_gb_files, output_gb_files, mapping_files))
 
         context["jobs_with_io"] = jobs_with_io
         context["active_page"] = "simulations"
+        
         return context
 
 
@@ -320,32 +411,24 @@ class DeleteSimulationView(LoginRequiredMixin, View):
         return redirect("simulator:simulations_list")
 
         
-# View to display plasmid diagram with visualize method from Plasmid model
+# View to display plasmid from a simulation job
 class PlasmidView(TemplateView):
     template_name = "plasmids/plasmid_view.html"
-
+    
     def dispatch(self, request, *args, **kwargs):
-        job_id = self.kwargs["job_id"]
-        filename = self.kwargs["filename"]
-        mode = self.kwargs["mode"]  # "inputs" or "outputs"
-
-        self.job = get_object_or_404(SimulationJob, job_id=job_id)
-        if self.job.user_id is not None and self.job.user_id != request.user.id:
-            raise Http404
-
+        self.job = get_object_or_404(SimulationJob, job_id=self.kwargs["job_id"])
+        
         base = Path(self.job.template.path).parent
-
-        if mode == "outputs":
-            gb_path = base / "outputs" / f"{filename}.gb"
-        elif mode == "inputs":
-            gb_path = base / "inputs" / "genbank" / f"{filename}.gb"
+        if self.kwargs["mode"] == "outputs":
+            full_path = base / "outputs" / f"{self.kwargs['filename']}.gb"
         else:
-            raise Http404
+            full_path = base / "inputs" / "genbank" / f"{self.kwargs['filename']}.gb"
 
-        if not gb_path.exists():
+        self.plasmid = Plasmid(name=self.kwargs["filename"], gb_path=str(full_path))
+        
+        if not Path(self.plasmid.gb_path).exists():
             raise Http404
-
-        self.plasmid = Plasmid(name=filename, gb_path=str(gb_path))
+            
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -364,5 +447,17 @@ class PlasmidView(TemplateView):
         context.update(self.plasmid.visualize(selected_types=selected_types, action=action))
         context["job_id"] = self.job.job_id
         context["plasmid_name"] = self.plasmid.name
-        context["mode"] = self.kwargs["mode"]  # optional, if you want to display it
         return context
+
+
+# View to visualize mapping table by job_id + filename
+class DownloadMappingByJobView(LoginRequiredMixin, View):
+    def get(self, request, job_id, filename, *args, **kwargs):
+        job = get_object_or_404(SimulationJob, job_id=job_id, user=request.user)
+
+        base = Path(job.template.path).parent
+        file_path = base / "inputs" / "mapping" / filename
+        if not file_path.exists() or not file_path.is_file():
+            raise Http404
+
+        return FileResponse(file_path.open("rb"), as_attachment=False, filename=filename)
