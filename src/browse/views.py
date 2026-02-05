@@ -5,6 +5,11 @@ from django.conf import settings
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, render
 from django.db.models import Q
+from django.db import transaction
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from django.shortcuts import redirect
+
 
 from browse.models import Assembly
 import os
@@ -62,3 +67,25 @@ def assembly_details(request, pk):
             "active_page": "browse"
         }
     )
+
+@login_required
+def copy_assembly(request, pk):
+    source = get_object_or_404(Assembly, Q(pk=pk) & (Q(is_public=True) | Q(owner=request.user)))
+    with transaction.atomic():
+        new_assembly = Assembly.objects.get(pk=source.pk)
+        new_assembly.pk = None  
+        new_assembly.id = None
+        new_assembly.name = f"Copy of {source.name}"
+        new_assembly.owner = request.user
+        new_assembly.is_public = False 
+        new_assembly.creation_date = timezone.now()
+        new_assembly.file = None 
+        new_assembly.save()
+        for part in source.inputparts_set.all():
+            allowed_types = part.allowed_types.all() 
+            part.pk = None
+            part.id = None
+            part.assembly = new_assembly
+            part.save()
+            part.allowed_types.set(allowed_types) 
+    return redirect("designer:designer_properties_edit", pk=new_assembly.pk)

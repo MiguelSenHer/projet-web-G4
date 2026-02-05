@@ -91,6 +91,15 @@
             {% else %}
               <span class="text-muted small fst-italic">No file</span>
             {% endif %}
+            
+{% if user.is_authenticated and user != assembly.owner %}
+        <a href="{% url 'browse:copy_assembly' assembly.pk %}" 
+           class="btn btn-sm btn-outline-info" 
+           title="Copy to my designer">
+            <i class="bi bi-files"></i>
+        </a>
+    {% endif %}
+
 {% if not assembly.is_public %}
 <div class="dropdown">
    <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="dropdown">
