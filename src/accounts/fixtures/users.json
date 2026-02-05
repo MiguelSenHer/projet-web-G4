@@ -112,7 +112,7 @@
   "pk": 8,
   "fields": {
     "password": "pbkdf2_sha256$870000$Q01mNF0joLP5VROrPtg8rE$ezRv9ZScD2kMlGyxFEgaW3eqGkgFsA42dfVkb1jm87E=",
-    "last_login": "2026-02-05T18:53:05.945Z",
+    "last_login": "2026-02-05T22:27:01.651Z",
     "is_superuser": true,
     "username": "justine.roger@gmail.com",
     "first_name": "Justine",
@@ -130,7 +130,7 @@
   "pk": 9,
   "fields": {
     "password": "pbkdf2_sha256$870000$huR8W8LalsvqBPj60PmXsP$sTsMT283oZhyVB8jgccupeQCEN6q8/ZXWGNMW4ZYqKk=",
-    "last_login": "2026-02-05T18:53:23.790Z",
+    "last_login": "2026-02-05T21:31:34.991Z",
     "is_superuser": false,
     "username": "mimu.mumu@gmail.com",
     "first_name": "Mimi",
@@ -157,6 +157,24 @@
     "is_staff": true,
     "is_active": true,
     "date_joined": "2026-02-05T18:46:03.620Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 11,
+  "fields": {
+    "password": "pbkdf2_sha256$870000$gIoz4U2b9WGO2a5xoaZI4F$RjiOIFJZ22ic3I01AfGT7zJo7tNo+ve+UUqZFToa4Y4=",
+    "last_login": "2026-02-05T22:27:18.565Z",
+    "is_superuser": false,
+    "username": "paul.dupont@gmail.com",
+    "first_name": "Paul",
+    "last_name": "Dupont",
+    "email": "paul.dupont@gmail.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-02-05T22:21:53.401Z",
     "groups": [],
     "user_permissions": []
   }
