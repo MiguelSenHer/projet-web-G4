@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import login, logout, authenticate, get_user_model, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.forms import PasswordChangeForm, SetPasswordForm
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.urls import reverse
@@ -15,6 +15,7 @@ from django.core.exceptions import PermissionDenied
 from plasmids.models import Collection
 from plasmids.models import MappingCollection
 from browse.models import Assembly
+
 
 User = get_user_model()
 
@@ -41,9 +42,10 @@ def signup_view(request):
             messages.success(request, "Account created successfully!")
             return redirect("profile")
 
-        return render(request, "accounts/signup.html", {"form": form})
+    else:
+        form = SignUpForm()
 
-    return render(request, "accounts/signup.html", {"form": SignUpForm()})
+    return render(request, "accounts/signup.html", {"form": form})
 
 # -----------------------
 # LOGIN
@@ -58,7 +60,7 @@ def login_view(request):
 
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            login(request, user)
+            login(request, user, backend=settings.AUTHENTICATION_BACKENDS[0])
             next_url = request.POST.get("next")
             return redirect(next_url) if next_url else redirect("profile")
 
@@ -94,19 +96,25 @@ def forgot_password_view(request):
             messages.error(request, f"No account found with email '{email}'.")
             return redirect("forgot_password")
 
+        PasswordReset.objects.filter(user=user).delete()
         reset = PasswordReset.objects.create(user=user)
 
         reset_url = request.build_absolute_uri(
             reverse("reset_password", kwargs={"reset_id": reset.reset_id})
         )
 
-        EmailMessage(
-            "Reset your password",
-            f"Reset your password using the link below:\n\n{reset_url}\n\n"
-            "This link expires in 10 minutes.",
-            settings.EMAIL_HOST_USER,
-            [email],
-        ).send(fail_silently=False)
+        try:
+            EmailMessage(
+                "Reset your password",
+                f"Reset your password using the link below:\n\n{reset_url}\n\n"
+                "This link expires in 10 minutes.",
+                settings.EMAIL_HOST_USER,
+                [email],
+            ).send(fail_silently=False)
+
+        except Exception:
+            messages.error(request, "An error occurred while sending the email. Please try again later.")
+            return redirect("forgot_password")
 
         return redirect("password_reset_sent")
 
@@ -125,6 +133,7 @@ def password_reset_sent_view(request):
 # -----------------------
 def reset_password_view(request, reset_id):
     reset = PasswordReset.objects.filter(reset_id=reset_id).first()
+
     if not reset:
         messages.error(request, "Invalid reset link.")
         return redirect("forgot_password")
@@ -134,29 +143,26 @@ def reset_password_view(request, reset_id):
         messages.error(request, "Reset link has expired. Please request a new one.")
         return redirect("forgot_password")
 
+    user = reset.user
+
     if request.method == "POST":
-        password = request.POST.get("password", "")
-        confirm = request.POST.get("confirm_password", "")
+        form = SetPasswordForm(user, request.POST)
 
-        if password != confirm:
-            messages.error(request, "Passwords do not match.")
-            return redirect("reset_password", reset_id=reset_id)
+        if form.is_valid():
+            form.save()
+            reset.delete()
+            messages.success(request, "Password reset. Proceed to login.")
+            return redirect("login")
 
-        if len(password) < 5:
-            messages.error(request,
-                           "Password must be at least 5 characters long.")
-            return redirect("reset_password", reset_id=reset_id)
+        # display validation errors nicely
+        for field, errs in form.errors.items():
+            for err in errs:
+                messages.error(request, err)
 
-        user = reset.user
-        user.set_password(password)
-        user.save()
-        reset.delete()
+    else:
+        form = SetPasswordForm(user)
 
-        messages.success(request, "Password reset. Proceed to login.")
-        return redirect("login")
-
-    return render(request, "accounts/reset_password.html")
-
+    return render(request, "accounts/reset_password.html", {"form": form})
 
 # -----------------------
 # PROFILE (template has TWO raw forms with form_type)
