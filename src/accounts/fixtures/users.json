@@ -22,7 +22,7 @@
   "pk": 2,
   "fields": {
     "password": "pbkdf2_sha256$870000$1bGnmc90OY9vLj6c76bdjs$N9fM/3S2BX4UBYngleFYsqB7jKukB2kz7G9Gxi4b/wc=",
-    "last_login": "2026-01-27T20:43:45.388Z",
+    "last_login": "2026-02-05T15:07:42.896Z",
     "is_superuser": false,
     "username": "julie.fares23@gmail.com",
     "first_name": "Julie",
@@ -85,6 +85,78 @@
     "is_staff": false,
     "is_active": true,
     "date_joined": "2026-01-27T20:46:12.617Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 7,
+  "fields": {
+    "password": "pbkdf2_sha256$870000$0r1GFX8SqxM4UGjl65wIWQ$HiM0vj5d6ZM8ICgp9/FUoEor7M985zObyvrzndvCqZw=",
+    "last_login": "2026-02-05T15:23:55.541Z",
+    "is_superuser": false,
+    "username": "lola.lavoisier@gmail.com",
+    "first_name": "lola",
+    "last_name": "lavoisier",
+    "email": "lola.lavoisier@gmail.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-02-05T15:23:53.539Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 8,
+  "fields": {
+    "password": "pbkdf2_sha256$870000$Q01mNF0joLP5VROrPtg8rE$ezRv9ZScD2kMlGyxFEgaW3eqGkgFsA42dfVkb1jm87E=",
+    "last_login": "2026-02-05T18:53:05.945Z",
+    "is_superuser": true,
+    "username": "justine.roger@gmail.com",
+    "first_name": "Justine",
+    "last_name": "Roger",
+    "email": "justine.roger@gmail.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-02-05T15:53:26.051Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 9,
+  "fields": {
+    "password": "pbkdf2_sha256$870000$huR8W8LalsvqBPj60PmXsP$sTsMT283oZhyVB8jgccupeQCEN6q8/ZXWGNMW4ZYqKk=",
+    "last_login": "2026-02-05T18:53:23.790Z",
+    "is_superuser": false,
+    "username": "mimu.mumu@gmail.com",
+    "first_name": "Mimi",
+    "last_name": "mumu",
+    "email": "mimu.mumu@gmail.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-02-05T18:44:40.501Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 10,
+  "fields": {
+    "password": "pbkdf2_sha256$870000$vbrAoZkIe2akQXvOXVwBB7$zvZxkVEfSvnPi48nhLW+uGmxZbfUtcNzRn5VZaMWKS0=",
+    "last_login": "2026-02-05T18:54:52.738Z",
+    "is_superuser": true,
+    "username": "julie.fares25@gmail.com",
+    "first_name": "Julie",
+    "last_name": "ADMIN",
+    "email": "julie.fares25@gmail.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-02-05T18:46:03.620Z",
     "groups": [],
     "user_permissions": []
   }

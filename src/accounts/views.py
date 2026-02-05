@@ -363,8 +363,6 @@ def teams_create_view(request):
         },
     )
 
-## Still issue here for  mapping tables management 
-## to be fixed when mapping models are stabilized
 @login_required
 def team_detail_view(request, team_id):
     team = get_object_or_404(Team, id=team_id)
@@ -391,6 +389,13 @@ def team_detail_view(request, team_id):
         .order_by("-created_at")
     )
 
+    mapping_collections = (
+        MappingCollection.objects
+        .filter(team=team)
+        .select_related("owner")
+        .order_by("-created_at")
+    )
+
     assemblies = (
         Assembly.objects
         .filter(team=team)
@@ -400,19 +405,9 @@ def team_detail_view(request, team_id):
     if request.method == "POST":
         action = request.POST.get("action")
 
-        # ADMIN here can make collection public
-        if action == "make_public":
-            if not request.user.is_superuser:
-                raise PermissionDenied
-
-            collection_id = request.POST.get("collection_id")
-            collection = get_object_or_404(Collection, id=collection_id, team=team)
-
-            collection.is_public = True
-            collection.save()
-            messages.success(request, f"Collection '{collection.name}' is now public.")
-            return redirect("team_details", team_id=team.id)
-        
+        # ----------------------------
+        # Attach plasmid collection
+        # ----------------------------
         if action == "attach_collection":
             if membership.role != TeamMembership.Role.LEADER:
                 raise PermissionDenied
@@ -428,12 +423,12 @@ def team_detail_view(request, team_id):
             collection.team = team
             collection.save()
 
-            messages.success(
-                request,
-                f"Collection '{collection.name}' added to the team."
-            )
+            messages.success(request, f"Collection '{collection.name}' added to the team.")
             return redirect("team_details", team_id=team.id)
 
+        # ----------------------------
+        # Detach plasmid collection
+        # ----------------------------
         if action == "detach_collection":
             if membership.role != TeamMembership.Role.LEADER:
                 raise PermissionDenied
@@ -448,58 +443,60 @@ def team_detail_view(request, team_id):
             collection.team = None
             collection.save()
 
-            messages.success(
-                request,
-                f"Collection '{collection.name}' removed from the team."
-            )
+            messages.success(request, f"Collection '{collection.name}' removed from the team.")
             return redirect("team_details", team_id=team.id)
 
-        if action == "attach_assembly":
+        # ----------------------------
+        # Attach mapping collection
+        # ----------------------------
+        if action == "attach_mapping_collection":
             if membership.role != TeamMembership.Role.LEADER:
                 raise PermissionDenied
 
-            assembly_id = request.POST.get("assembly_id")
-            assembly = get_object_or_404(
-                Assembly,
-                id=assembly_id,
+            mapping_collection_id = request.POST.get("mapping_collection_id")
+            mapping_collection = get_object_or_404(
+                MappingCollection,
+                id=mapping_collection_id,
                 owner=request.user,
                 team__isnull=True
             )
 
-            assembly.team = team
-            assembly.save()
+            mapping_collection.team = team
+            mapping_collection.save()
 
-            messages.success(
-                request,
-                f"Assembly '{assembly.name}' added to the team."
-            )
+            messages.success(request, f"Mapping Collection '{mapping_collection.name}' added to the team.")
             return redirect("team_details", team_id=team.id)
 
-        if action == "detach_assembly":
+        # ----------------------------
+        # Detach mapping collection
+        # ----------------------------
+        if action == "detach_mapping_collection":
             if membership.role != TeamMembership.Role.LEADER:
                 raise PermissionDenied
 
-            assembly_id = request.POST.get("assembly_id")
-            assembly = get_object_or_404(
-                Assembly,
-                id=assembly_id,
+            mapping_collection_id = request.POST.get("mapping_collection_id")
+            mapping_collection = get_object_or_404(
+                MappingCollection,
+                id=mapping_collection_id,
                 team=team
             )
 
-            assembly.team = None
-            assembly.save()
+            mapping_collection.team = None
+            mapping_collection.save()
 
-            messages.success(
-                request,
-                f"Assembly '{assembly.name}' removed from the team."
-            )
+            messages.success(request, f"Mapping Collection '{mapping_collection.name}' removed from the team.")
             return redirect("team_details", team_id=team.id)
-        
 
     available_collections = Collection.objects.filter(
         owner=request.user,
         team__isnull=True
-    )
+    ).order_by("-created_at")
+
+    available_mapping_collections = MappingCollection.objects.filter(
+        owner=request.user,
+        team__isnull=True
+    ).order_by("-created_at")
+
     available_assemblies = Assembly.objects.filter(
         owner=request.user,
         team__isnull=True
@@ -510,13 +507,15 @@ def team_detail_view(request, team_id):
         "members": members,
         "membership": membership,
         "collections": collections,
-        "assemblies": assemblies,
         "available_collections": available_collections,
+
+        "mapping_collections": mapping_collections,
+        "available_mapping_collections": available_mapping_collections,
+
+        "assemblies": assemblies,
         "available_assemblies": available_assemblies,
         "is_admin": request.user.is_superuser,
     })
-
-
 
 # -----------------------
 # Team Management
@@ -630,12 +629,12 @@ def admin_users_view(request):
 def admin_requests_view(request):
     if not request.user.is_superuser:
         raise PermissionDenied
-
+    
     pending_requests = (
         AdminRequest.objects
         .filter(status=AdminRequest.Status.PENDING)
         .select_related("user", "collection", "assembly", "mapping_collection")
-        .prefetch_related("collection__plasmids")
+        .prefetch_related("collection__plasmids", "mapping_collection__tables")
         .order_by("-created_at")
     )
 
