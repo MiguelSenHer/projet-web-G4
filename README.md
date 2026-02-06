@@ -86,3 +86,20 @@ http://127.0.0.1:8000/
 - **designer**: template designer
 - **accounts**: user authentication and permissions
 
+
+## Simulate SMTP server - Mailpit (Local Email Testing)
+This project uses Mailpit to capture emails locally (password reset, etc.) without sending real emails.
+
+## 1. Installation (Ex. Windows)
+- Go to the official Mailpit GitHub: https://github.com/axllent/mailpit
+- Click Releases and download mailpit-windows-amd64.zip
+- Extract it and get mailpit.exe
+
+## 2. Run Mailpit
+- Open CMD in the folder and run:.\mailpit.exe
+- Open your browser at:
+http://localhost:8025
+
+Mailpit SMTP server runs on 127.0.0.1:1025.
+---
+
