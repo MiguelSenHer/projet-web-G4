@@ -1,104 +1,102 @@
 {% load static %}
 
-<div class="card mb-3 shadow-sm inputpart-form-card">
+<div class="formset-row mb-4">
 
-  <div class="card-body">
+  <div class="card shadow-sm inputpart-form-card">
 
-    <!-- HEADER -->
-    <div class="d-flex justify-content-between align-items-start mb-3">
-      <div>
-        <h6 class="fw-bold mb-0">
-          {{ form.part_name.value|default:"New input part" }}
-        </h6>
-        <p class="text-muted small mb-0">
-          Configure the properties of this input part.
-        </p>
-      </div>
+    <div class="card-body p-4">
 
-      <button type="button" class="btn btn-sm btn-outline-danger delete-form">
-        <i class="bi bi-trash"></i>
-      </button>
-    </div>
-
-    <hr class="mt-0 mb-3">
-
-    <!-- BODY -->
-    <div class="row g-3">
-
-      <!-- Name -->
-      <div class="col-12">
-        <label class="form-label fw-semibold">Name</label>
-        {{ form.part_name }}
-        {% if form.part_name.errors %}
-          <div class="text-danger small mt-1">
-            {% for error in form.part_name.errors %}
-              {{ error }}<br>
-            {% endfor %}
-          </div>
-        {% endif %}
-      </div>
-
-      <!-- Separator -->
-      <div class="col-12 col-md-6">
-        <label class="form-label fw-semibold">Subpart separator</label>
-        {{ form.separator }}
-        {% if form.separator.errors %}
-          <div class="text-danger small mt-1">
-            {% for error in form.separator.errors %}
-              {{ error }}<br>
-            {% endfor %}
-          </div>
-        {% endif %}
-      </div>
-
-      <!-- Allowed types -->
-      <div class="col-12 col-md-6">
-        <label class="form-label fw-semibold">Allowed types</label>
-        {{ form.allowed_types }}
-        {% if form.allowed_types.errors %}
-          <div class="text-danger small mt-1">
-            {% for error in form.allowed_types.errors %}
-              {{ error }}<br>
-            {% endfor %}
-          </div>
-        {% endif %}
-      </div>
-
-      <!-- Options (checkboxes) -->
-      <div class="col-12">
-        <div class="d-flex flex-wrap gap-4">
-
-          <div class="form-check">
-            {{ form.mandatory }}
-            <label class="form-check-label">
-              Mandatory part
-            </label>
-          </div>
-
-          <div class="form-check">
-            {{ form.typed }}
-            <label class="form-check-label">
-              Typed part
-            </label>
-          </div>
-
-          <div class="form-check">
-            {{ form.include_in_output_name }}
-            <label class="form-check-label">
-              Include in output name
-            </label>
-          </div>
-
+      <!-- HEADER -->
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+          <h6 class="fw-bold mb-0">
+            {{ form.part_name.value|default:"New input part" }}
+          </h6>
+          <p class="text-muted small mb-0">
+            Configure the properties of this input part.
+          </p>
         </div>
+
+        <button type="button" class="btn btn-sm btn-outline-danger delete-form">
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>
+
+      <hr class="mt-0 mb-3">
+
+      <!-- BODY -->
+      <div class="row g-3">
+
+        <!-- Name -->
+        <div class="col-12">
+          <label class="form-label fw-semibold">Name</label>
+          {{ form.part_name }}
+          {% if form.part_name.errors %}
+            <div class="text-danger small mt-1">
+              {% for error in form.part_name.errors %}
+                {{ error }}<br>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Separator -->
+        <div class="col-12 col-md-6">
+          <label class="form-label fw-semibold">Subpart separator</label>
+          {{ form.separator }}
+          {% if form.separator.errors %}
+            <div class="text-danger small mt-1">
+              {% for error in form.separator.errors %}
+                {{ error }}<br>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Allowed types -->
+        <div class="col-12 col-md-6">
+          <label class="form-label fw-semibold">Allowed types</label>
+          {{ form.allowed_types }}
+          {% if form.allowed_types.errors %}
+            <div class="text-danger small mt-1">
+              {% for error in form.allowed_types.errors %}
+                {{ error }}<br>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Options -->
+        <div class="col-12">
+          <div class="d-flex flex-wrap gap-4">
+
+            <div class="form-check">
+              {{ form.mandatory }}
+              <label class="form-check-label">Mandatory part</label>
+            </div>
+
+            <div class="form-check">
+              {{ form.typed }}
+              <label class="form-check-label">Typed part</label>
+            </div>
+
+            <div class="form-check">
+              {{ form.include_in_output_name }}
+              <label class="form-check-label">Include in output name</label>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- REQUIRED hidden fields -->
+      {{ form.id }}
+      <div class="d-none">
+        {{ form.DELETE }}
       </div>
 
     </div>
-
-    <!-- REQUIRED hidden fields -->
-    {{ form.id }}
-    <div class="d-none">
-      {{ form.DELETE }}
-    </div>
-
   </div>
+
 </div>

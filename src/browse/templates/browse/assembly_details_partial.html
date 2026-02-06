@@ -1,134 +1,135 @@
+      <div class="container text-center mt-4 mb-4">
+  <h1 class="hero-title">Assembly Properties</h1>
+      </div>
 
-<section class="login-section">
-  <div class="container py-2">
+<div class="mb-3">
 
-    <h2 class="fw-bold mb-2">Assembly details</h2>
+  <!-- Assembly Properties -->
+  <div class="card shadow-sm border-1 mb-3">
+    <div class="card-body p-4">
 
-    <!-- Assembly Properties -->
-    <div class="card mb-2">
-      <div class="card-body">
 
-        <h5 class="fw-bold mb-3">Assembly properties</h5>
+      <div class="row g-3">
 
-        <div class="row g-3">
+        <div class="col-12 col-md-4 fw-semibold text-muted">
+          Name
+        </div>
+        <div class="col-12 col-md-8">
+          {{ assembly.name }}
+        </div>
 
-          <div class="col-12 col-md-4 fw-semibold">
-            Name:
-          </div>
-          <div class="col-12 col-md-8">
-            {{ assembly.name }}
-          </div>
+        <div class="col-12 col-md-4 fw-semibold text-muted">
+          Comment
+        </div>
+        <div class="col-12 col-md-8">
+          {{ assembly.comment|default:"—" }}
+        </div>
 
-          <div class="col-12 col-md-4 fw-semibold">
-            Comment:
-          </div>
-          <div class="col-12 col-md-8 text-muted">
-            {{ assembly.comment|default:"—" }}
-          </div>
+        <div class="col-12 col-md-4 fw-semibold text-muted">
+          Created at
+        </div>
+        <div class="col-12 col-md-8">
+          {{ assembly.creation_date }}
+        </div>
 
-          <div class="col-12 col-md-4 fw-semibold">
-            Created at:
-          </div>
-          <div class="col-12 col-md-8 text-muted">
-            {{ assembly.creation_date }}
-          </div>
+        <div class="col-12 col-md-4 fw-semibold text-muted">
+          Output separator
+        </div>
+        <div class="col-12 col-md-8">
+          {{ assembly.separator|default:"—" }}
+        </div>
 
-          <div class="col-12 col-md-4 fw-semibold">
-            Output separator:
-          </div>
-          <div class="col-12 col-md-8">
-            {{ assembly.separator|default:"—" }}
-          </div>
-
-          <div class="col-12 col-md-4 fw-semibold">
-            Restriction enzyme:
-          </div>
-          <div class="col-12 col-md-8">
-            {{ assembly.restriction_enzyme|default:"—" }}
-          </div>
-
+        <div class="col-12 col-md-4 fw-semibold text-muted">
+          Restriction enzyme
+        </div>
+        <div class="col-12 col-md-8">
+          {{ assembly.restriction_enzyme|default:"—" }}
         </div>
 
       </div>
+
     </div>
+  </div>
 
-    <!-- Input Parts -->
-    <div class="card">
-      <div class="card-body">
+  <!-- Input Parts -->
+  <div class="card shadow-sm border-1">
+    <div class="card-body p-4">
 
-        <h5 class="fw-bold mb-3">Input parts</h5>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0">Input parts</h5>
 
         {% if input_parts %}
-          <div class="row g-3">
-
-            {% for part in input_parts %}
-              <div class="col-12">
-                <div class="card border">
-                  <div class="card-body">
-
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                      <h6 class="fw-bold mb-0">
-                        {{ part.part_name }}
-                        {% if part.mandatory %}
-                          <span class="text-danger">*</span>
-                        {% endif %}
-                      </h6>
-
-                      {% if part.mandatory %}
-                        <span class="badge bg-danger">Mandatory</span>
-                      {% else %}
-                        <span class="badge bg-secondary">Optional</span>
-                      {% endif %}
-                    </div>
-
-                    <div class="text-muted small">
-
-                      {% if part.typed %}
-                        <div class="mb-1">
-                          <strong>Typed:</strong> Yes
-                        </div>
-                      {% else %}
-                        <div class="mb-1">
-                          <strong>Typed:</strong> No
-                        </div>
-                      {% endif %}
-
-                      {% if part.separator %}
-                        <div class="mb-1">
-                          <strong>Subpart separator:</strong> {{ part.separator }}
-                        </div>
-                      {% endif %}
-
-                      {% if part.allowed_types.exists %}
-                        <div class="mt-2">
-                          <strong>Allowed types:</strong>
-                          <div class="mt-1">
-                            {% for t in part.allowed_types.all %}
-                              <span class="badge bg-light text-dark border me-1 mb-1">
-                                {{ t.type_name }}
-                              </span>
-                            {% endfor %}
-                          </div>
-                        </div>
-                      {% endif %}
-
-                    </div>
-
-                  </div>
-                </div>
-              </div>
-            {% endfor %}
-
-          </div>
-
-        {% else %}
-          <div class="text-muted">
-            No input parts defined for this assembly.
-          </div>
+          <span class="badge bg-secondary">
+            {{ input_parts|length }} part{{ input_parts|length|pluralize }}
+          </span>
         {% endif %}
-
       </div>
-    </div>
 
+      {% if input_parts %}
+        <div class="row g-3">
+
+          {% for part in input_parts %}
+            <div class="col-12">
+
+              <div class="border rounded-3 p-3">
+
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <h6 class="fw-bold mb-0">
+                    {{ part.part_name }}
+                    {% if part.mandatory %}
+                      <span class="text-danger">*</span>
+                    {% endif %}
+                  </h6>
+
+                  {% if part.mandatory %}
+                    <span class="badge bg-danger">Mandatory</span>
+                  {% else %}
+                    <span class="badge bg-light text-dark border">Optional</span>
+                  {% endif %}
+                </div>
+
+                <div class="text-muted small">
+
+                  <div class="mb-1">
+                    <strong>Typed:</strong>
+                    {% if part.typed %}Yes{% else %}No{% endif %}
+                  </div>
+
+                  {% if part.separator %}
+                    <div class="mb-1">
+                      <strong>Subpart separator:</strong> {{ part.separator }}
+                    </div>
+                  {% endif %}
+
+                  {% if part.allowed_types.exists %}
+                    <div class="mt-2">
+                      <strong>Allowed types:</strong>
+                      <div class="mt-1">
+                        {% for t in part.allowed_types.all %}
+                          <span class="badge bg-light text-dark border me-1 mb-1">
+                            {{ t.type_name }}
+                          </span>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+
+                </div>
+
+              </div>
+
+            </div>
+          {% endfor %}
+
+        </div>
+
+      {% else %}
+        <p class="text-muted mb-0">
+          No input parts defined for this assembly.
+        </p>
+      {% endif %}
+
+    </div>
   </div>
-</section>
+
+</div>
