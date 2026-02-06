@@ -89,3 +89,11 @@ def copy_assembly(request, pk):
             part.save()
             part.allowed_types.set(allowed_types) 
     return redirect("designer:designer_properties_edit", pk=new_assembly.pk)
+
+@login_required
+def delete_assembly(request, pk):
+    assembly = get_object_or_404(Assembly, pk=pk, owner=request.user, is_public=False)
+    if request.method == "POST":
+        assembly.delete()
+        return redirect('browse:browse_templates')
+    return redirect('browse:browse_templates')

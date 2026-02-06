@@ -91,7 +91,7 @@
             {% else %}
               <span class="text-muted small fst-italic">No file</span>
             {% endif %}
-            
+
 {% if user.is_authenticated and user != assembly.owner %}
         <a href="{% url 'browse:copy_assembly' assembly.pk %}" 
            class="btn btn-sm btn-outline-info" 
@@ -118,6 +118,15 @@
          <form method="post" action="{% url 'request_make_assembly_public' assembly.id %}" class="px-3 py-1">
             {% csrf_token %}
             <button type="submit" class="dropdown-item">Request to make public</button>
+         </form>
+      </li>
+      <li>
+         <form method="post" action="{% url 'browse:delete_assembly' assembly.id %}" 
+               onsubmit="return confirm('Are you sure you want to permanently delete this assembly?');">
+            {% csrf_token %}
+            <button type="submit" class="dropdown-item text-danger">
+                <i class="bi bi-trash me-2"></i>Delete Permanently
+            </button>
          </form>
       </li>
    </ul>
