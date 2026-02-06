@@ -221,23 +221,22 @@ class RunSimulationView(TemplateView):
 
         if action == "compute_dilution":
             clear_requested = "clear_file" in request.POST
-
-            try:
-                self.job.run_simulation(
-                    dilution_params=request.POST,
-                    uploaded_concentration_file=request.FILES.get("concentration_file"),
-                    clear_concentration=clear_requested,
-                )
-            except Exception as e:
-                messages.error(request, str(e))
+            self.job.run_simulation(
+                dilution_params=request.POST,
+                uploaded_concentration_file=request.FILES.get("concentration_file"),
+                clear_concentration=clear_requested,
+            )
 
             return self.get(request, *args, **kwargs)
 
         if action == "run_pcr":
+            clear_requested = "clear_primers" in request.POST
             self.job.run_simulation(
                 pcr_params=request.POST,
-                uploaded_primers_file=request.FILES.get("primers_file")
+                uploaded_primers_file=request.FILES.get("primers_file"),
+                clear_primers=clear_requested,
             )
+                
             return self.get(request, *args, **kwargs)
         
         if action == "run_digestion":
@@ -296,49 +295,17 @@ class RunSimulationView(TemplateView):
         context["error"] = job.error_message
         context["concentration_file_name"] = job.concentration_file.name.split("/")[-1] if job.concentration_file else None
         context["concentration_file_url"] = job.concentration_file.url if job.concentration_file else None
+        context["primers_file_name"] = job.primers_file.name.split("/")[-1] if job.primers_file else None
+        context["primers_file_url"] = job.primers_file.url if job.primers_file else None
         context["outputs_zip_url"] = job.outputs_zip.url if job.outputs_zip else None
+        pcr_path = str(outputs_dir / "pcr.svg")
+        if storage.exists(pcr_path):
+            context["pcr_svg_url"] = storage.url(pcr_path)
+        digestion_path = str(outputs_dir / "digestion.svg")
+        if storage.exists(digestion_path):
+            context["digestion_svg_url"] = storage.url(digestion_path)
+
         return context
-    
-
-# View to download results of a simulation
-class DownloadResultsView(View):
-    def dispatch(self, request, *args, **kwargs):
-        job_id = request.session.get("current_job_id")
-        if not job_id:
-            return redirect("simulator:upload")
-
-        self.job = get_object_or_404(SimulationJob, job_id=job_id)
-
-        if self.job.user_id is not None and self.job.user_id != request.user.id:
-            raise Http404
-
-        return super().dispatch(request, *args, **kwargs)
-
-    def get(self, request, *args, **kwargs):
-        job = self.job
-
-        base = Path(job.template.path).parent
-        output_dir = base / "outputs"
-        if not output_dir.exists():
-            raise Http404
-
-        gb_files = [p for p in output_dir.rglob("*.gb") if p.is_file()]
-
-        csv_db = output_dir / "DB_produced_plasmid.csv"
-        csv_autogg = output_dir / "auto-gg-combination-to-make.csv"
-
-        zip_path = base / f"{job.job_id}_results.zip"
-        if zip_path.exists():
-            zip_path.unlink()
-
-        with ZipFile(zip_path, "w") as z:
-            for p in gb_files:
-                z.write(p, p.relative_to(output_dir))
-
-            z.write(csv_db, "DB_produced_plasmid.csv")
-            z.write(csv_autogg, "auto-gg-combination-to-make.csv")
-
-        return FileResponse(zip_path.open("rb"), as_attachment=True, filename=zip_path.name)
 
 
 # View to list user's simulation jobs and retrieve inputs/outputs

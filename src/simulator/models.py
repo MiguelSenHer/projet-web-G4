@@ -24,6 +24,7 @@ class SimulationJob(models.Model):
     preview = models.FileField(upload_to=job_upload_to)
     outputs_zip = models.FileField(upload_to=job_upload_to, blank=True, null=True)
     concentration_file = models.FileField(upload_to=job_upload_to, blank=True, null=True)
+    primers_file = models.FileField(upload_to=job_upload_to, blank=True, null=True)
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -47,7 +48,8 @@ class SimulationJob(models.Model):
         clear_concentration=False,
         pcr_params=None,
         digestion_params=None,
-        uploaded_primers_file=None
+        uploaded_primers_file=None,
+        clear_primers=False
     ):
         base = Path(self.template.path).parent
         inputs_dir = base / "inputs"
@@ -71,6 +73,20 @@ class SimulationJob(models.Model):
         elif not self.concentration_file:
             content = ContentFile("pID;Mass Concentration\n")
             self.concentration_file.save("input-plasmid-concentrations.csv", content, save=False)
+
+
+        # Handle primers file input
+        if clear_primers:
+            if self.primers_file:
+                self.primers_file.delete(save=False)
+            # On ne recrée pas de fichier, on laisse à None
+        elif uploaded_primers_file:
+            if self.primers_file:
+                self.primers_file.delete(save=False)
+            self.primers_file.save(uploaded_primers_file.name, uploaded_primers_file, save=False)
+
+        self.save()
+
         self.save()
 
         # Prepare arguments for insillyclo
@@ -103,28 +119,21 @@ class SimulationJob(models.Model):
         
         # PCR parameters
         if pcr_params:
-            primers_path = None
-            # Handle uploaded primers file
-            if uploaded_primers_file:
-                target_path = base / uploaded_primers_file.name
-                with open(target_path, 'wb+') as f:
-                    for chunk in uploaded_primers_file.chunks():
-                        f.write(chunk)
-                primers_path = target_path
+            primers_path = Path(self.primers_file.path) if self.primers_file else Path("/dev/null")
 
-            # Parse primer pairs from text input
-            pairs_text = pcr_params.get('pcr_pairs', '')
+            pairs_text = pcr_params.get("pcr_pairs", "")
             primer_id_pairs = []
-            for line in pairs_text.strip().split('\n'):
-                line = line.replace('\r', '').strip()
-                if ',' in line:
-                    parts = [p.strip() for p in line.split(',')]
-                    if len(parts) >= 2:
-                        primer_id_pairs.append((parts[0], parts[1]))
-            
+            for line in pairs_text.splitlines():
+                line = line.strip()
+                if not line:
+                    continue
+                parts = [p.strip() for p in line.split(",")]
+                if len(parts) >= 2:
+                    primer_id_pairs.append((parts[0], parts[1]))
+
             kwargs.update({
                 "primers_file": primers_path,
-                "primer_id_pairs": primer_id_pairs
+                "primer_id_pairs": primer_id_pairs,
             })
 
         # Digestion parameters
@@ -162,16 +171,20 @@ class SimulationJob(models.Model):
             self.save(update_fields=["outputs_zip", "status", "error_message", "updated_at", "concentration_file"])
 
         except Exception as e:
-            print(f"Error during simulation: {e}")
             handler.flush()
-            logs = log_stream.getvalue().strip()
-            msg = logs if logs else (str(e) or repr(e))
-            # If error comes from uploaded concentration file, display error then reset to default
-            if dilution_params:
-                self.run_simulation(clear_concentration=True)
-            else:
-                self.status = "FAIL"
+            msg = log_stream.getvalue().strip() or str(e)
+            
+            # Clear the exact inputs that caused error
+            if any([dilution_params, pcr_params, digestion_params]):
+                self.status = "SUCCESS"
+                if dilution_params:
+                    self.run_simulation(clear_concentration=True)
+                if pcr_params and uploaded_primers_file:
+                    self.run_simulation(clear_primers=True)
+            else: # Only marks as failed if main simulation failed (not intermediate)
+                self.status = "FAIL"            
             self.error_message = msg
-            self.save(update_fields=["status", "error_message", "updated_at", "concentration_file"])
+        
         finally:
+            self.save()
             logger.removeHandler(handler)
