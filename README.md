@@ -99,7 +99,6 @@ This project uses Mailpit to capture emails locally (password reset, etc.) witho
 - Open CMD in the folder and run:.\mailpit.exe
 - Open your browser at:
 http://localhost:8025
-
 Mailpit SMTP server runs on 127.0.0.1:1025.
 ---
 
