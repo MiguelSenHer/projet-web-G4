@@ -113,20 +113,16 @@ Assembly Designer - InSillyClo
 
       </div>
 
-      <!-- Actions -->
-      <div class="d-flex justify-content-between align-items-center">
-    <a href="{% url 'designer:designer_properties' %}"
-       class="text-decoration-none text-muted">
-        <i class="bi bi-arrow-counterclockwise me-1"></i>
-        Clear form
-    </a>
-    <button class="btn btn-auto px-4" type="submit">
-        Next
-        <i class="bi bi-arrow-right ms-2"></i>
-    </button>
-</div>
-
-
+    <!-- Actions -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <a href="{% url 'designer:designer_properties' %}?reset"
+           class="btn btn-outline-secondary px-4">
+          Discard Changes
+        </a>
+        <button type="submit" class="btn btn-primary px-5">
+          NEXT
+        </button>
+    </div>
     </form>
 
   </div>
