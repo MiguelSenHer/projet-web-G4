@@ -65,7 +65,9 @@
             <div>
               <div class="fw-bold">
                 {{ c.name }}
-                <span class="badge bg-secondary ms-1">{{ c.is_public|yesno:"PUBLIC,PRIVATE" }}</span>
+                <span class="badge {% if c.is_public %}bg-primary{% else %}bg-secondary{% endif %} ms-1">
+                  {{ c.is_public|yesno:"PUBLIC,PRIVATE" }}
+              </span>
               </div>
               <div class="text-muted small">
                 {% if c.is_public %}Owner: {{ c.owner.username }} | {% endif %}
@@ -131,7 +133,9 @@
             <div>
               <div class="fw-bold">
                 {{ mc.name }}
-                <span class="badge bg-secondary ms-1">{{ mc.is_public|yesno:"PUBLIC,PRIVATE" }}</span>
+                <span class="badge {% if mc.is_public %}bg-primary{% else %}bg-secondary{% endif %} ms-1">
+                  {{ mc.is_public|yesno:"PUBLIC,PRIVATE" }}
+              </span>
               </div>
               <div class="text-muted small">
                 {% if mc.is_public %}Owner: {{ mc.owner.username }} | {% endif %}

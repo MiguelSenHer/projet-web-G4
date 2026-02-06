@@ -15,6 +15,7 @@ from zipfile import ZipFile
 from django.contrib import messages
 from django.db.models import Q
 from plasmids.models import Plasmid
+import pandas as pd
 
 
 # View to start a new simulation
@@ -171,16 +172,21 @@ class TemplatePreviewView(FormView):
             if mapping_dir.exists() else []
         )
 
+        # Fetch user's accessible plasmid collections and mapping collections (private and owned or public) 
         if self.request.user.is_authenticated:
-            # Fetch user's accessible plasmid collections and mapping collections (private and owned or public) 
             accessible = Q(is_public=True) | Q(owner=self.request.user)
-            context["available_collections"] = Collection.objects.filter(accessible).distinct().order_by('-created_at')
-            context["available_mappings"] = MappingCollection.objects.filter(accessible).distinct().order_by('-created_at')
-        
+            context["available_collections"] = Collection.objects.filter(accessible)\
+                .select_related("owner")\
+                .prefetch_related("plasmids")\
+                .distinct().order_by('-created_at')
+                
+            context["available_mappings"] = MappingCollection.objects.filter(accessible)\
+                .select_related("owner")\
+                .prefetch_related("tables")\
+                .distinct().order_by('-created_at')
+            
         return context
-
-        return context
-
+    
 
 # View to run the simulation
 class RunSimulationView(TemplateView):
@@ -190,59 +196,63 @@ class RunSimulationView(TemplateView):
         job_id = request.session.get("current_job_id")
         if not job_id:
             return redirect("simulator:upload")
+        
         self.job = get_object_or_404(SimulationJob, job_id=job_id)
         if self.job.user_id is not None and self.job.user_id != request.user.id:
-            raise Http404("Job not found")
+            raise Http404
+        
+        if request.method == "GET":
+            self.job.refresh_from_db(fields=["status"])
+            if self.job.status == "FAIL":
+                return redirect("simulator:preview")
+        
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         action = request.POST.get("action", "")
-
         if action == "run_simulation":
             enzyme = request.POST.get("enzyme", "")
             self.job.enzyme_name = enzyme
             self.job.save(update_fields=["enzyme_name"])
             self.job.run_simulation(enzyme_name=enzyme)
-            return self.get(request, *args, **kwargs)
+
+            if self.job.status == "FAIL":
+                if self.job.error_message:
+                    messages.error(request, self.job.error_message)
+                else:
+                    messages.error(request, "Simulation failed.")
+                return redirect("simulator:preview")
+
+            return redirect("simulator:run")
 
         if action == "compute_dilution":
-            self.job.run_simulation(
-                dilution_params=request.POST,
-                uploaded_concentration_file=request.FILES.get('concentration_file')
-            )
+            clear_requested = "clear_file" in request.POST
+
+            try:
+                self.job.run_simulation(
+                    dilution_params=request.POST,
+                    uploaded_concentration_file=request.FILES.get("concentration_file"),
+                    clear_concentration=clear_requested,
+                )
+            except Exception as e:
+                messages.error(request, str(e))
+
             return self.get(request, *args, **kwargs)
-            
+
         return self.get(request, *args, **kwargs)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         job = self.job
-        post_data = self.request.POST
         storage = job.template.storage
-        job_folder = Path(job.template.name).parent 
-        
-        # Handle concentration file URL
-        conc_rel_path = str(job_folder / "inputs" / "input-plasmid-concentrations.csv")
-        if storage.exists(conc_rel_path):
-            context["concentration_file_url"] = storage.url(conc_rel_path)
-        else:
-            context["concentration_file_url"] = None
+        job_folder = Path(job.template.name).parent
+        outputs_dir = job_folder / "outputs"
 
-        # Memorize form parameters
-        context["params"] = {
-            "final_volume": post_data.get("final_volume", "10.0"),
-            "enzyme_buffer_volume": post_data.get("enzyme_buffer_volume", "2.0"),
-            "minimal_tip_volume": post_data.get("minimal_tip_volume", "0.0"),
-            "tip_volume_from_intermediate": post_data.get("tip_volume_from_intermediate", "1.0"),
-            "min_remaining_volume_intermediate": post_data.get("min_remaining_volume_intermediate", "2.0"),
-            "input_plasmid_concentration_final": post_data.get("input_plasmid_concentration_final", "2.0"),
-            "default_mass_concentration": post_data.get("default_mass_concentration", ""),
-        }
+        # Retrieve previous POST data for dilution parameters
+        post_data = self.request.POST
+        context["params"] = post_data
         
-        outputs_folder = job_folder / "outputs"
-
-        # List available CSV files
-        csv_files = []
+        # Retrieve dilution CSV files, append URLs and tables
         filenames = [
             ("Direct", "dilution-direct.csv"),
             ("Direct Mastermix", "dilution-direct_mastermix.csv"),
@@ -250,18 +260,35 @@ class RunSimulationView(TemplateView):
             ("10x Mastermix", "dilution-10x_mastermix.csv")
         ]
 
+        dilution_tabs = []
+        csv_files = []
+
         for label, name in filenames:
-            file_path = str(outputs_folder / name)
-            if storage.exists(file_path):
-                csv_files.append({
-                    "label": label,
-                    "url": storage.url(file_path)
-                })
+            file_path = str(outputs_dir / name)
+            if not storage.exists(file_path):
+                continue
+            csv_files.append({"label": label, "url": storage.url(file_path)})
+
+            try:
+                with storage.open(file_path, "r") as f:
+                    df = pd.read_csv(f, sep=",", dtype=str).fillna("")
+                    html_table = df.to_html(classes="table table-striped-columns table-bordered table-sm", index=False) 
+            except Exception:
+                html_table = "<p class='text-danger'>Could not load table.</p>"
+            
+            dilution_tabs.append({
+                "name": name,
+                "label": label,
+                "html": html_table
+            })
 
         context["csv_files"] = csv_files
+        context["dilution_tabs"] = dilution_tabs
         context["job_id"] = job.job_id
         context["status"] = job.status
         context["error"] = job.error_message
+        context["concentration_file_name"] = job.concentration_file.name.split("/")[-1] if job.concentration_file else None
+        context["concentration_file_url"] = job.concentration_file.url if job.concentration_file else None
         context["outputs_zip_url"] = job.outputs_zip.url if job.outputs_zip else None
         return context
     

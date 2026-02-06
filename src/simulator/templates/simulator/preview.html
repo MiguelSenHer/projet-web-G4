@@ -114,69 +114,159 @@ InsillyClo - Simulation Preview
     <!-- INPUTS CARD -->
     <div class="card mt-4" id="inputsCard" style="scroll-margin-top: 90px;">
       <div class="card-body">
-        <h5 class="fw-bold mb-2">Simulation inputs</h5>
+        <h5 class="fw-bold mb-4">Simulation inputs</h5>
+        <!--- MAPPING TABLES --- -->
+        <div class="mb-5">
+          <div class="fw-semibold mb-2">
+            Mapping tables <span class="text-muted">(optional input plasmid ID to Name conversion) can be a .csv, .tsv, .txt, or a .zip of those.</span>
+          </div>
+          <!--- UPLOAD --->
+          <div class="row g-3 align-items-center mb-3">
+            <div class="col-12 col-lg-5">
+              <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="file" name="{{ form.mapping.name }}" class="form-control" onchange="this.form.submit()">
+              </form>
+            </div>
 
-        {% if form.non_field_errors %}
-          <div class="alert alert-danger mb-3">
-            <ul class="mb-0 ps-3">
-              {% for err in form.non_field_errors %}
-                <li>{{ err }}</li>
+            <!-- OR ADD FROM COLLECTIONS -->
+            <div class="col-12 col-lg-2 text-center"><span class="fw-bold text-muted">OR</span></div>
+            <div class="col-12 col-lg-5">
+              <button class="btn btn-outline-primary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMappings">
+                Select and add from collections
+              </button>
+            </div>
+          </div>
+
+          <div class="collapse" id="collapseMappings">
+            <form method="post" class="bg-light p-3 rounded border">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="add_from_collections">
+              <input type="hidden" name="type" value="mappings">
+              
+              {% for mc in available_mappings %}
+                {% with tables=mc.tables.all %}
+                <div class="card mb-3 p-3 shadow-sm">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" name="collection_ids" value="{{ mc.id }}" id="m{{ mc.id }}">
+                      <label class="form-check-label" for="m{{ mc.id }}">
+                        <div class="fw-bold">
+                          {{ mc.name }}
+                          <span class="badge {% if mc.is_public %}bg-primary{% else %}bg-secondary{% endif %} ms-1">
+                            {{ mc.is_public|yesno:"PUBLIC,PRIVATE" }}
+                        </span>
+                        </div>
+                        <div class="text-muted small">
+                          {% if mc.is_public %}Owner: {{ mc.owner.username }} | {% endif %}
+                          Created {{ mc.created_at|date:"Y-m-d H:i" }}
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+
+                  {% if tables %}
+                    <div class="mt-3 ps-4">
+                      <button class="btn btn-link p-0 text-muted small" type="button" data-bs-toggle="collapse" data-bs-target="#mapping-preview-{{ mc.id }}">
+                        Tables ({{ tables|length }})
+                      </button>
+                      <div class="collapse mt-2" id="mapping-preview-{{ mc.id }}">
+                        <div class="d-flex flex-wrap gap-2">
+                          {% for t in tables %}
+                            <a class="border rounded-pill px-3 py-1 small text-decoration-none" href="{% url 'plasmids:mapping_view' t.id %}" target="_blank">
+                              {{ t.name }}
+                            </a>
+                          {% endfor %}
+                        </div>
+                      </div>
+                    </div>
+                  {% endif %}
+                </div>
+                {% endwith %}
               {% endfor %}
-            </ul>
+              <button type="submit" class="btn btn-primary w-100 mt-2">Add selected mapping collections</button>
+            </form>
           </div>
-        {% endif %}
+        </div>
 
-        <form method="post" enctype="multipart/form-data" class="d-flex flex-column gap-4">
-          {% csrf_token %}
+        <hr class="my-4">
 
-          <!-- GenBank -->
-          <div>
-            <div class="fw-semibold mb-2">
-              GenBank archive <span class="text-muted">(output plasmid sequences) should be a .zip of .gb files</span>
+        <!-- GENBANK FILES --->
+        <div class="mb-4">
+          <div class="fw-semibold mb-2">
+            GenBank archive <span class="text-muted">(output plasmid sequences) should be a .zip of .gb files</span>
+          </div>
+
+          <!-- UPLOAD --->
+          <div class="row g-3 align-items-center mb-3">
+            <div class="col-12 col-lg-5">
+              <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="file" name="{{ form.genbank.name }}" class="form-control" onchange="this.form.submit()">
+              </form>
             </div>
-            <input
-              type="file"
-              name="{{ form.genbank.name }}"
-              class="form-control"
-              onchange="this.form.submit()"
-            >
-            {% if form.genbank.errors %}
-              <div class="alert alert-danger mt-3 mb-0">
-                <ul class="mb-0 ps-3">
-                  {% for err in form.genbank.errors %}
-                    <li>{{ err }}</li>
-                  {% endfor %}
-                </ul>
-              </div>
-            {% endif %}
-          </div>
-
-          <!-- Mapping -->
-          <div>
-            <div class="fw-semibold mb-2">
-              Mapping tables <span class="text-muted">(optional input plasmid ID to Name conversion) can be a .csv, .tsv, .txt, or a .zip of those.</span>
+            <!-- OR ADD FROM COLLECTIONS -->
+            <div class="col-12 col-lg-2 text-center"><span class="fw-bold text-muted">OR</span></div>
+            <div class="col-12 col-lg-5">
+              <button class="btn btn-outline-primary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePlasmids">
+                Select and add from collections
+              </button>
             </div>
-            <input
-              type="file"
-              name="{{ form.mapping.name }}"
-              class="form-control"
-              onchange="this.form.submit()"
-            >
-            {% if form.mapping.errors %}
-              <div class="alert alert-danger mt-3 mb-0">
-                <ul class="mb-0 ps-3">
-                  {% for err in form.mapping.errors %}
-                    <li>{{ err }}</li>
-                  {% endfor %}
-                </ul>
-              </div>
-            {% endif %}
           </div>
 
-        </form>
+          <div class="collapse" id="collapsePlasmids">
+            <form method="post" class="bg-light p-3 rounded border">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="add_from_collections">
+              <input type="hidden" name="type" value="plasmids">
+              
+              {% for c in available_collections %}
+                {% with plasmids=c.plasmids.all %}
+                <div class="card mb-3 p-3 shadow-sm">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" name="collection_ids" value="{{ c.id }}" id="p{{ c.id }}">
+                      <label class="form-check-label" for="p{{ c.id }}">
+                        <div class="fw-bold">
+                          {{ c.name }}
+                          <span class="badge {% if c.is_public %}bg-primary{% else %}bg-secondary{% endif %} ms-1">
+                            {{ c.is_public|yesno:"PUBLIC,PRIVATE" }}
+                        </span>
+                        </div>
+                        <div class="text-muted small">
+                          {% if c.is_public %}Owner: {{ c.owner.username }} | {% endif %}
+                          Created {{ c.created_at|date:"Y-m-d H:i" }}
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+
+                  {% if plasmids %}
+                    <div class="mt-3 ps-4">
+                      <button class="btn btn-link p-0 text-muted small" type="button" data-bs-toggle="collapse" data-bs-target="#plasmids-preview-{{ c.id }}">
+                        Plasmids ({{ plasmids|length }})
+                      </button>
+                      <div class="collapse mt-2" id="plasmids-preview-{{ c.id }}">
+                        <div class="d-flex flex-wrap gap-2">
+                          {% for p in plasmids %}
+                            <a class="border rounded-pill px-3 py-1 small text-decoration-none" href="{% url 'plasmids:plasmid_view' p.id %}" target="_blank">
+                              {{ p.name }}
+                            </a>
+                          {% endfor %}
+                        </div>
+                      </div>
+                    </div>
+                  {% endif %}
+                </div>
+                {% endwith %}
+              {% endfor %}
+              <button type="submit" class="btn btn-primary w-100 mt-2">Add selected plasmid collections</button>
+            </form>
+          </div>
+        </div>
+
       </div>
     </div>
-
     
     <!-- RECEIVED FILES -->
      <div class="row g-3 mt-4">
@@ -185,31 +275,6 @@ InsillyClo - Simulation Preview
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5 class="fw-bold mb-0">Mapping tables</h5>
-                
-                <div class="dropdown">
-                  <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
-                    Add from collections
-                  </button>
-                  <form method="post" class="dropdown-menu p-3" style="min-width: 250px;">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="add_from_collections">
-                    <input type="hidden" name="type" value="mappings">
-                    <div class="mb-2 fw-bold small">Select Collections:</div>
-                    <div class="overflow-auto" style="max-height: 200px;">
-                      {% for col in available_mappings %}
-                        <div class="form-check">
-                          <input class="form-check-input" type="checkbox" name="collection_ids" value="{{ col.id }}" id="m{{ col.id }}">
-                          <label class="form-check-label small" for="m{{ col.id }}">{{ col.name }}</label>
-                        </div>
-                      {% empty %}
-                        <div class="text-muted small italic">No collections available</div>
-                      {% endfor %}
-                    </div>
-                    {% if available_mappings %}
-                      <button type="submit" class="btn btn-sm btn-primary w-100 mt-2">Add selected</button>
-                    {% endif %}
-                  </form>
-                </div>
               </div>
 
               <div class="text-muted mb-2">Received files: <strong>{{ mapping_files|length }}</strong></div>
@@ -234,31 +299,6 @@ InsillyClo - Simulation Preview
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5 class="fw-bold mb-0">Plasmid sequences</h5>
-
-                <div class="dropdown">
-                  <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
-                    Add from collections
-                  </button>
-                  <form method="post" class="dropdown-menu p-3" style="min-width: 250px;">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="add_from_collections">
-                    <input type="hidden" name="type" value="plasmids">
-                    <div class="mb-2 fw-bold small">Select Collections:</div>
-                    <div class="overflow-auto" style="max-height: 200px;">
-                      {% for col in available_collections %}
-                        <div class="form-check">
-                          <input class="form-check-input" type="checkbox" name="collection_ids" value="{{ col.id }}" id="p{{ col.id }}">
-                          <label class="form-check-label small" for="p{{ col.id }}">{{ col.name }}</label>
-                        </div>
-                      {% empty %}
-                        <div class="text-muted small italic">No collections available</div>
-                      {% endfor %}
-                    </div>
-                    {% if available_collections %}
-                      <button type="submit" class="btn btn-sm btn-primary w-100 mt-2">Add selected</button>
-                    {% endif %}
-                  </form>
-                </div>
               </div>
 
               <div class="text-muted mb-2">Received files: <strong>{{ genbank_files|length }}</strong></div>

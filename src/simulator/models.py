@@ -2,14 +2,17 @@ from django.conf import settings
 from django.db import models
 from zipfile import ZipFile
 from pathlib import Path
+from django.core.files.base import ContentFile
 from django.core.files import File
 import shutil
 import insillyclo.simulator
 import insillyclo.observer
 import insillyclo.data_source
+import logging
+from io import StringIO
 
 
-# Dynamic function to upload File when creating a job (relative to MEDIA_ROOT/Simulator)
+# Dynamic function to upload File when creating a job (relative to MEDIA_ROOT)
 def job_upload_to(instance, filename):
     return f"simulator/jobs/{instance.job_id}/{filename}"
 
@@ -21,6 +24,7 @@ class SimulationJob(models.Model):
     template = models.FileField(upload_to=job_upload_to)
     preview = models.FileField(upload_to=job_upload_to)
     outputs_zip = models.FileField(upload_to=job_upload_to, blank=True, null=True)
+    concentration_file = models.FileField(upload_to=job_upload_to, blank=True, null=True)
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -37,27 +41,30 @@ class SimulationJob(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     # Run simulation using insillyclo 
-    def run_simulation(self, *, enzyme_name=None, dilution_params=None, uploaded_concentration_file=None):
+    def run_simulation(self, *, enzyme_name=None, dilution_params=None, uploaded_concentration_file=None, clear_concentration=False):
         base = Path(self.template.path).parent
         inputs_dir = base / "inputs"
         output_dir = base / "outputs"
+        if output_dir.exists():
+            shutil.rmtree(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
-
-        # Concentration file path
-        concentration_file = inputs_dir / "input-plasmid-concentrations.csv"
+        inputs_dir.mkdir(parents=True, exist_ok=True)
 
         # Handle concentration file input
-        if uploaded_concentration_file:
-            # If the user uploads their filled file, we save it
-            inputs_dir.mkdir(parents=True, exist_ok=True)
-            with open(concentration_file, 'wb+') as destination:
-                for chunk in uploaded_concentration_file.chunks():
-                    destination.write(chunk)
-        # If no file is provided, create an empty one with header 
-        elif not concentration_file.exists():
-            inputs_dir.mkdir(parents=True, exist_ok=True)
-            with open(concentration_file, 'w', encoding='utf-8') as f:
-                f.write("pID;Mass Concentration\n")
+        if clear_concentration:
+            if self.concentration_file:
+                self.concentration_file.delete(save=False)
+            content = ContentFile("pID;Mass Concentration\n")
+
+            self.concentration_file.save("input-plasmid-concentrations.csv", content, save=False)
+        elif uploaded_concentration_file:
+            if self.concentration_file:
+                self.concentration_file.delete(save=False)
+            self.concentration_file.save(uploaded_concentration_file.name, uploaded_concentration_file, save=False)
+        elif not self.concentration_file:
+            content = ContentFile("pID;Mass Concentration\n")
+            self.concentration_file.save("input-plasmid-concentrations.csv", content, save=False)
+        self.save()
 
         # Prepare arguments for insillyclo
         kwargs = {
@@ -69,52 +76,57 @@ class SimulationJob(models.Model):
             "output_dir": output_dir,
             "data_source": insillyclo.data_source.DataSourceHardCodedImplementation(),
             "enzyme_names": [enzyme_name or self.enzyme_name],
-            "concentration_file": concentration_file,
+            "concentration_file": Path(self.concentration_file.path),
             "sbol_export": False,
         }
 
         # Dilution parameters
         if dilution_params:
+            d = dilution_params
             kwargs.update({
-                "default_output_plasmid_volume": float(dilution_params.get('final_volume', 10.0)),
-                "enzyme_and_buffer_volume": float(dilution_params.get('enzyme_buffer_volume', 2.0)),
-                "minimal_puncture_volume": float(dilution_params.get('minimal_tip_volume', 0.0)),
-                "puncture_volume_10x": float(dilution_params.get('tip_volume_from_intermediate', 1.0)),
-                "minimal_remaining_well_volume": float(dilution_params.get('min_remaining_volume_intermediate', 2.0)),
-                "expected_concentration_in_output": float(dilution_params.get('input_plasmid_concentration_final', 2.0)),
+                "default_output_plasmid_volume": float(d.get('final_volume') or 10.0),
+                "enzyme_and_buffer_volume": float(d.get('enzyme_buffer_volume') or 2.0),
+                "minimal_puncture_volume": float(d.get('minimal_tip_volume') or 0.0),
+                "puncture_volume_10x": float(d.get('tip_volume_from_intermediate') or 1.0),
+                "minimal_remaining_well_volume": float(d.get('min_remaining_volume_intermediate') or 2.0),
+                "expected_concentration_in_output": float(d.get('input_plasmid_concentration_final') or 2.0),
+                "default_mass_concentration": float(d.get('default_mass_concentration')) if d.get('default_mass_concentration') else None
             })
+            if clear_concentration:
+                kwargs["default_mass_concentration"] = None
+
+        # Setup logging to capture insillyclo output messages
+        log_stream = StringIO()
+        handler = logging.StreamHandler(log_stream)
+        logger = logging.getLogger()
+        logger.addHandler(handler)
 
         try:
             # Run the simulator
             insillyclo.simulator.compute_all(**kwargs)
 
-            # Overwrite concentration file if it was auto-generated
-            generated_csv = output_dir / "input-plasmid-concentrations.csv"
-            if generated_csv.exists() and not uploaded_concentration_file:
-                shutil.copy2(generated_csv, concentration_file)
-
-            # Save outputs as zip file
-            zip_path = base / "outputs.zip"
-            if zip_path.exists():
-                zip_path.unlink()
-
+            # Create ZIP of outputs
+            zip_path = base / "temp_outputs.zip"
             with ZipFile(zip_path, "w") as z:
                 for p in output_dir.rglob("*"):
-                    if p.is_file():
-                        z.write(p, p.relative_to(output_dir))
+                    if p.is_file(): z.write(p, p.relative_to(output_dir))
 
+            if self.outputs_zip:
+                self.outputs_zip.delete(save=False)
             with zip_path.open("rb") as fh:
-                if self.outputs_zip:
-                    self.outputs_zip.delete(save=False)
                 self.outputs_zip.save("outputs.zip", File(fh), save=False)
 
-            zip_path.unlink()   
+            zip_path.unlink()
 
             self.status = "SUCCESS"
             self.error_message = ""
-            self.save(update_fields=["outputs_zip", "status", "error_message", "updated_at"])
+            self.save(update_fields=["outputs_zip", "status", "error_message", "updated_at", "concentration_file"])
 
         except Exception as e:
+            handler.flush()
+            logs = log_stream.getvalue().strip()
             self.status = "FAIL"
-            self.error_message = str(e) or repr(e)
-            self.save(update_fields=["status", "error_message", "updated_at"])
+            self.error_message = logs if logs else (str(e) or repr(e))
+            self.save(update_fields=["status", "error_message", "updated_at", "concentration_file"])
+        finally:
+            logger.removeHandler(handler)
