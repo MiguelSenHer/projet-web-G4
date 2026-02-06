@@ -22,7 +22,7 @@
   "pk": 2,
   "fields": {
     "password": "pbkdf2_sha256$870000$1bGnmc90OY9vLj6c76bdjs$N9fM/3S2BX4UBYngleFYsqB7jKukB2kz7G9Gxi4b/wc=",
-    "last_login": "2026-02-05T15:07:42.896Z",
+    "last_login": "2026-02-06T23:22:49.537Z",
     "is_superuser": false,
     "username": "julie.fares23@gmail.com",
     "first_name": "Julie",
@@ -148,7 +148,7 @@
   "pk": 10,
   "fields": {
     "password": "pbkdf2_sha256$870000$vbrAoZkIe2akQXvOXVwBB7$zvZxkVEfSvnPi48nhLW+uGmxZbfUtcNzRn5VZaMWKS0=",
-    "last_login": "2026-02-05T18:54:52.738Z",
+    "last_login": "2026-02-06T23:22:56.297Z",
     "is_superuser": true,
     "username": "julie.fares25@gmail.com",
     "first_name": "Julie",
@@ -165,8 +165,8 @@
   "model": "auth.user",
   "pk": 11,
   "fields": {
-    "password": "pbkdf2_sha256$870000$gIoz4U2b9WGO2a5xoaZI4F$RjiOIFJZ22ic3I01AfGT7zJo7tNo+ve+UUqZFToa4Y4=",
-    "last_login": "2026-02-05T22:27:18.565Z",
+    "password": "pbkdf2_sha256$870000$74WbcmhIEpUYMqL82K3TbF$Co8vGx9XDbSSZNw6FpBbIuyynYfW/IBrrRNmWDHRWlU=",
+    "last_login": "2026-02-06T23:22:08.674Z",
     "is_superuser": false,
     "username": "paul.dupont@gmail.com",
     "first_name": "Paul",
