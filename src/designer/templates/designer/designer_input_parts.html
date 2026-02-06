@@ -1,27 +1,36 @@
 {% extends 'frontend/base.html' %}
 
-{% block title %}InsillyClo-Browse Assemblies{% endblock %}
+{% block title %}InsillyClo - Browse Assemblies
+
+{% endblock %}
 
 {% block content %}
 
+<section class="container text-center mt-4">
+  <h1 class="hero-title">Assembly Designer</h1>
+  <p class="text-muted mb-0">Define input parts</p>
+</section>
+
 <div class="container my-5">
 
-    <!-- TITLES -->
-    <div class="text-center mb-5">
-        <h1 class="text-uppercase fw-bold">Assembly Designer</h1>
-        <h2 class="text-uppercase text-muted fs-5">Define Input Parts</h2>
-    </div>
 
     <form method="post">
         {% csrf_token %}
         {{ formset.management_form }}
 
-        <div class="card shadow-sm border-0">
-            <h3 class="card-header bg-light text-primary fw-semibold">
-                Assembly input parts
-            </h3>
+<div class="card shadow-sm border-2">
 
-            <div class="card-body" id="formset-container">
+<div class="card-header bg-white d-flex justify-content-between align-items-center">
+    
+    <h3 class="mb-0">Assembly input parts</h3>
+
+    <span class="badge bg-secondary">
+        Step 2 / 2
+    </span>
+
+</div>
+
+    <div class="card-body" id="formset-container">
 
                 {% for form in formset %}
                     {% include "designer/input_parts_form.html" with form=form %}
@@ -61,7 +70,7 @@
 
         </div>
 
-        <!-- EMPTY FORM (SAME STRUCTURE) -->
+        <!-- EMPTY FORM -->
         <div id="empty-form" class="d-none">
             {% include "designer/input_parts_form.html" with form=formset.empty_form %}
         </div>
