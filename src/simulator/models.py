@@ -20,7 +20,6 @@ def job_upload_to(instance, filename):
 # Model to store simulation job
 class SimulationJob(models.Model):
     job_id = models.CharField(max_length=32, unique=True)
-    enzyme_name = models.CharField(max_length=50)
     template = models.FileField(upload_to=job_upload_to)
     preview = models.FileField(upload_to=job_upload_to)
     outputs_zip = models.FileField(upload_to=job_upload_to, blank=True, null=True)
@@ -41,7 +40,15 @@ class SimulationJob(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     # Run simulation using insillyclo 
-    def run_simulation(self, *, enzyme_name=None, dilution_params=None, uploaded_concentration_file=None, clear_concentration=False):
+    def run_simulation(
+        self,
+        dilution_params=None,
+        uploaded_concentration_file=None,
+        clear_concentration=False,
+        pcr_params=None,
+        digestion_params=None,
+        uploaded_primers_file=None
+    ):
         base = Path(self.template.path).parent
         inputs_dir = base / "inputs"
         output_dir = base / "outputs"
@@ -75,7 +82,6 @@ class SimulationJob(models.Model):
             "gb_plasmids": [p for p in (inputs_dir / "genbank").rglob("*") if p.is_file()] if (inputs_dir / "genbank").exists() else [],
             "output_dir": output_dir,
             "data_source": insillyclo.data_source.DataSourceHardCodedImplementation(),
-            "enzyme_names": [enzyme_name or self.enzyme_name],
             "concentration_file": Path(self.concentration_file.path),
             "sbol_export": False,
         }
@@ -94,6 +100,39 @@ class SimulationJob(models.Model):
             })
             if clear_concentration:
                 kwargs["default_mass_concentration"] = None
+        
+        # PCR parameters
+        if pcr_params:
+            primers_path = None
+            # Handle uploaded primers file
+            if uploaded_primers_file:
+                target_path = base / uploaded_primers_file.name
+                with open(target_path, 'wb+') as f:
+                    for chunk in uploaded_primers_file.chunks():
+                        f.write(chunk)
+                primers_path = target_path
+
+            # Parse primer pairs from text input
+            pairs_text = pcr_params.get('pcr_pairs', '')
+            primer_id_pairs = []
+            for line in pairs_text.strip().split('\n'):
+                line = line.replace('\r', '').strip()
+                if ',' in line:
+                    parts = [p.strip() for p in line.split(',')]
+                    if len(parts) >= 2:
+                        primer_id_pairs.append((parts[0], parts[1]))
+            
+            kwargs.update({
+                "primers_file": primers_path,
+                "primer_id_pairs": primer_id_pairs
+            })
+
+        # Digestion parameters
+        if digestion_params:
+            # Parse enzyme names from text input
+            enz_text = digestion_params.get('enzymes', '')
+            enzymes = [e.strip() for e in enz_text.replace('\r', '').split('\n') if e.strip()]
+            kwargs.update({"enzyme_names": enzymes})
 
         # Setup logging to capture insillyclo output messages
         log_stream = StringIO()
@@ -123,10 +162,16 @@ class SimulationJob(models.Model):
             self.save(update_fields=["outputs_zip", "status", "error_message", "updated_at", "concentration_file"])
 
         except Exception as e:
+            print(f"Error during simulation: {e}")
             handler.flush()
             logs = log_stream.getvalue().strip()
-            self.status = "FAIL"
-            self.error_message = logs if logs else (str(e) or repr(e))
+            msg = logs if logs else (str(e) or repr(e))
+            # If error comes from uploaded concentration file, display error then reset to default
+            if dilution_params:
+                self.run_simulation(clear_concentration=True)
+            else:
+                self.status = "FAIL"
+            self.error_message = msg
             self.save(update_fields=["status", "error_message", "updated_at", "concentration_file"])
         finally:
             logger.removeHandler(handler)

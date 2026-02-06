@@ -88,13 +88,13 @@ InSillyClo – My simulations
                     </li>
 
                     <li>
-                      {% if job.status == "SUCCESS" and job.outputs_zip %}
+                      {% if job.outputs_zip %}
                         <a class="dropdown-item"
                            href="{% url 'simulator:download_by_job' job.job_id %}">
-                          Download
+                          Download results
                         </a>
                       {% else %}
-                        <span class="dropdown-item text-muted">Download</span>
+                        <span class="dropdown-item text-muted">Download results</span>
                       {% endif %}
                     </li>
 
@@ -115,7 +115,7 @@ InSillyClo – My simulations
                   </li>
                   <!-- SAVE OUTPUT PLASMIDS -->
                   <li>
-                    {% if job.status == "SUCCESS" and output_gb_files %}
+                    {% if output_gb_files %}
                       <form method="post" action="{% url 'plasmids:save_collection' mode='outputs' job_id=job.job_id %}">
                         {% csrf_token %}
                         <button type="submit" class="dropdown-item">

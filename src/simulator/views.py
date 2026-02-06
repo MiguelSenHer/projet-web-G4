@@ -154,8 +154,8 @@ class TemplatePreviewView(FormView):
 
         context["filename"] = data.get("filename", "")
         context["name"] = data.get("name", "")
-        context["enzyme"] = data.get("enzyme", "")
         context["separator"] = data.get("separator", "")
+        context["enzyme"] = data.get("enzyme", "")
         context["parts"] = data.get("parts", [])
         context["plasmids"] = data.get("plasmids", [])
 
@@ -211,16 +211,10 @@ class RunSimulationView(TemplateView):
     def post(self, request, *args, **kwargs):
         action = request.POST.get("action", "")
         if action == "run_simulation":
-            enzyme = request.POST.get("enzyme", "")
-            self.job.enzyme_name = enzyme
-            self.job.save(update_fields=["enzyme_name"])
-            self.job.run_simulation(enzyme_name=enzyme)
+            self.job.run_simulation()
 
             if self.job.status == "FAIL":
-                if self.job.error_message:
-                    messages.error(request, self.job.error_message)
-                else:
-                    messages.error(request, "Simulation failed.")
+                messages.error(request, self.job.error_message)
                 return redirect("simulator:preview")
 
             return redirect("simulator:run")
@@ -237,6 +231,19 @@ class RunSimulationView(TemplateView):
             except Exception as e:
                 messages.error(request, str(e))
 
+            return self.get(request, *args, **kwargs)
+
+        if action == "run_pcr":
+            self.job.run_simulation(
+                pcr_params=request.POST,
+                uploaded_primers_file=request.FILES.get("primers_file")
+            )
+            return self.get(request, *args, **kwargs)
+        
+        if action == "run_digestion":
+            self.job.run_simulation(
+                digestion_params=request.POST
+            )
             return self.get(request, *args, **kwargs)
 
         return self.get(request, *args, **kwargs)
@@ -293,7 +300,7 @@ class RunSimulationView(TemplateView):
         return context
     
 
-# View to download first results of a simulation
+# View to download results of a simulation
 class DownloadResultsView(View):
     def dispatch(self, request, *args, **kwargs):
         job_id = request.session.get("current_job_id")
@@ -309,8 +316,6 @@ class DownloadResultsView(View):
 
     def get(self, request, *args, **kwargs):
         job = self.job
-        if job.status != "SUCCESS":
-            raise Http404
 
         base = Path(job.template.path).parent
         output_dir = base / "outputs"
