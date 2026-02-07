@@ -4,7 +4,6 @@ from zipfile import ZipFile
 from pathlib import Path
 from django.core.files.base import ContentFile
 from django.core.files import File
-import shutil
 import insillyclo.simulator
 import insillyclo.observer
 import insillyclo.data_source
@@ -25,6 +24,9 @@ class SimulationJob(models.Model):
     outputs_zip = models.FileField(upload_to=job_upload_to, blank=True, null=True)
     concentration_file = models.FileField(upload_to=job_upload_to, blank=True, null=True)
     primers_file = models.FileField(upload_to=job_upload_to, blank=True, null=True)
+    has_dilution_results = models.BooleanField(default=False)
+    has_pcr_results = models.BooleanField(default=False)
+    has_digestion_results = models.BooleanField(default=False)
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -54,8 +56,6 @@ class SimulationJob(models.Model):
         base = Path(self.template.path).parent
         inputs_dir = base / "inputs"
         output_dir = base / "outputs"
-        if output_dir.exists():
-            shutil.rmtree(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
         inputs_dir.mkdir(parents=True, exist_ok=True)
 

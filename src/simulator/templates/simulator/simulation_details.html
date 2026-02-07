@@ -6,7 +6,7 @@ InSillyClo - Run Simulation
 
 {% block content %}
 
-<section class="container text-center mt-5">
+<section class="container text-center mt-5" id="pageTop">
   <h1 class="hero-title">Simulation details</h1>
 </section>
 
@@ -19,8 +19,6 @@ InSillyClo - Run Simulation
             <pre class="mt-2 p-3 border rounded bg-light" style="white-space: pre-wrap;">{{ error }}</pre>
           </div>
       </div>
-
-
     {% elif status == "SUCCESS" %}
       <div class="alert alert-success">
         <div class="fw-bold">Simulation completed successfully.</div>
@@ -41,400 +39,473 @@ InSillyClo - Run Simulation
     <!-- WELCOME MESSAGE -->
     <div class="text-center mb-4">
       <div class="fw-bold">Welcome to your simulation results</div>
-      <p class="mb-0 mt-2">Explore the sections below to download reporting results (<code>.zip</code> archive), compute dilution parameters, or verify your simulation.</p>
-      <p class="mb-0 mt-2">Additional results are included in the download archive once the corresponding sections are completed</p>
+      <p class="mb-0 mt-2">Explore the sections below to download results (<code>.zip</code> archive), compute dilution tables, and simulate agarose gel after PCR or enzyme digestion.</p>
     </div>
 
     <!-- NAVIGATION-->
-      <div class="d-flex justify-content-center gap-3 my-4">
-        <a href="#cardDownload" class="btn btn-assembly shadow-sm">
-            Download results
-        </a>
-        <a href="#cardCompute" class="btn btn-assembly shadow-sm">
-            Compute dilution
-        </a>
-        <a href="#cardVerification" class="btn btn-assembly shadow-sm">
-            Simulate verification
-        </a>
+    <div class="d-flex justify-content-center gap-3 my-4">
+      <a
+        href="#cardDownload"
+        class="btn btn-assembly shadow-sm"
+        data-bs-toggle="collapse"
+        data-bs-target="#collapseDownload"
+        role="button"
+        aria-controls="collapseDownload"
+      >
+        Download results
+      </a>
+      <a
+        href="#cardCompute"
+        class="btn btn-assembly shadow-sm"
+        data-bs-toggle="collapse"
+        data-bs-target="#collapseCompute"
+        role="button"
+        aria-controls="collapseCompute"
+      >
+        Compute dilution
+      </a>
+      <a
+        href="#cardVerification"
+        class="btn btn-assembly shadow-sm"
+        data-bs-toggle="collapse"
+        data-bs-target="#collapseVerification"
+        role="button"
+        aria-controls="collapseVerification"
+      >
+        Simulate verification
+      </a>
+    </div>
+
+    <!-- DOWNLOAD RESULTS-->
+    <div class="card mb-4" id="cardDownload">
+      <div
+        class="card-header bg-white border-bottom-0 py-3"
+        data-bs-toggle="collapse"
+        data-bs-target="#collapseDownload"
+        role="button"
+        aria-expanded="false"
+        aria-controls="collapseDownload"
+      >
+        <div class="hero-subtitle mb-0 d-flex align-items-center justify-content-between">
+          Download results
+          <i class="bi bi-chevron-down"></i>
+        </div>
+        <div class="text-muted small mt-2">
+          Download your simulation results as a <code>.zip</code> archive containing output plasmids, CSV files, and additional results as they become available.
+        </div>
       </div>
 
-      <!-- DOWNLOAD RESULTS-->
-      <div class="card mb-4" id="cardDownload">
-        <div
-          class="card-header bg-white border-bottom-0 py-3"
-          data-bs-toggle="collapse"
-          data-bs-target="#collapseDownload"
-          role="button"
-        >
-          <div class="hero-subtitle mb-0 d-flex align-items-center justify-content-between">
-            Download results
-            <i class="bi bi-chevron-down"></i>
+      <div id="collapseDownload" class="collapse">
+        <div class="card-body pt-0">
+          <hr>
+          <div class="text-muted small mb-3">
+            <p class="mb-2">Your results are available as a <code>.zip</code> archive containing at least the following files for reporting:</p>
+            <ul class="mb-0">
+              <li>Output plasmids in <code>.gb</code> format</li>
+              <li><code>DB_produced_plasmid.csv</code> (generic names and plasmid types)</li>
+              <li><code>auto-gg-combination-to-make.csv</code> (for Auto-GG application)</li>
+              <li>Additional results are included in the download archive once the corresponding section is completed</li>
+            </ul>
           </div>
-        </div>
-
-        <div id="collapseDownload" class="collapse show">
-          <div class="card-body pt-0">
-            <hr>
-            <div class="text-muted small mb-3">
-              <ul class="mb-0">
-                <li>Output plasmids in <code>.gb</code> format</li>
-                <li><code>DB_produced_plasmid.csv</code> (generic names and plasmid types)</li>
-                <li><code>auto-gg-combination-to-make.csv</code> (for Auto-GG application)</li>
-              </ul>
-            </div>
-            <div class="text-center">
-              <a href="{% url 'simulator:download_by_job' job_id=job_id %}" class="btn btn-assembly">
-                <i class="bi bi-download"></i> Download results
-              </a>
-            </div>
+          <div class="text-center">
+            <a href="{% url 'simulator:download_by_job' job_id=job_id %}" class="btn btn-assembly">
+              <i class="bi bi-download"></i> Download results
+            </a>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- COMPUTE DILUTION -->
-      <div class="card mb-4" id="cardCompute">
-        <div
-          class="card-header bg-white border-bottom-0 py-3"
-          data-bs-toggle="collapse"
-          data-bs-target="#collapseCompute"
-          role="button"
-        >
-          <div class="hero-subtitle mb-0 d-flex align-items-center justify-content-between">
-            Compute dilution
-            <i class="bi bi-chevron-down"></i>
-          </div>
+    <!-- COMPUTE DILUTION -->
+    <div class="card mb-4" id="cardCompute">
+      <div
+        class="card-header bg-white border-bottom-0 py-3"
+        data-bs-toggle="collapse"
+        data-bs-target="#collapseCompute"
+        role="button"
+        aria-expanded="false"
+        aria-controls="collapseCompute"
+      >
+        <div class="hero-subtitle mb-0 d-flex align-items-center justify-content-between">
+          Compute dilution
+          <i class="bi bi-chevron-down"></i>
         </div>
+        <div class="text-muted small mt-2">
+          Provide parameters to compute the dilution of your input plasmids to a target concentration in the output mix.<br>
+          You can either set a common mass concentration for your input plasmids, or download the default concentration file, modify it, and re-upload it.
+        </div>
+      </div>
 
-        <div id="collapseCompute" class="collapse show">
-          <div class="card-body pt-0">
-            <hr>
-            <form method="post" enctype="multipart/form-data" class="mt-3">
-              {% csrf_token %}
+      <div id="collapseCompute" class="collapse{% if request.POST.action == 'compute_dilution' %} show{% elif dilution_tabs %} show{% endif %}">
+        <div class="card-body pt-0">
+          <hr>
 
-              <div class="mb-4">
-                <label class="form-label fw-bold">
-                  Default mass concentration of input plasmids
-                </label>
-                <div class="text-muted small mb-2">
-                  Default concentration to consider (ng/µL). No default value.
-                </div>
-                <input
-                  type="number"
-                  class="form-control"
-                  name="default_mass_concentration"
-                  step="any"
-                  inputmode="decimal"
-                  value = "{{ params.default_mass_concentration|default:'' }}"
-                >
+          <form
+            method="post"
+            enctype="multipart/form-data"
+            class="mt-3"
+          >
+            {% csrf_token %}
+
+            <div class="mb-4">
+              <label class="form-label fw-bold small text-uppercase">
+                Default mass concentration of input plasmids
+              </label>
+              <div class="text-muted small mb-2">
+                Default concentration to consider (ng/µL). No default value.
               </div>
+              <input
+                type="number"
+                class="form-control"
+                name="default_mass_concentration"
+                step="any"
+                inputmode="decimal"
+                value="{{ params.default_mass_concentration|default:'' }}"
+              >
+            </div>
 
-              <div class="mb-4">
-                <label class="form-label fw-bold">
-                  Final volume of the reaction
-                </label>
-                <div class="text-muted small mb-2">
-                  Default volume (µL) of the output plasmid to produce. Default value: 10.0
-                </div>
-                <input
-                  type="number"
-                  class="form-control"
-                  name="final_volume"
-                  step="any"
-                  inputmode="decimal"
-                  value="{{ params.final_volume|default:'10.0' }}"
-                >
+            <div class="mb-4">
+              <label class="form-label fw-bold small text-uppercase">
+                Final volume of the reaction
+              </label>
+              <div class="text-muted small mb-2">
+                Default volume (µL) of the output plasmid to produce. Default value: 10.0
               </div>
+              <input
+                type="number"
+                class="form-control"
+                name="final_volume"
+                step="any"
+                inputmode="decimal"
+                value="{{ params.final_volume|default:'10.0' }}"
+              >
+            </div>
 
-              <div class="mb-4">
-                <label class="form-label fw-bold">
-                  Enzyme and buffer volume
-                </label>
-                <div class="text-muted small mb-2">
-                  Volume (µL) of enzyme and buffer required per output well. Default value: 2.0
-                </div>
-                <input
-                  type="number"
-                  class="form-control"
-                  name="enzyme_buffer_volume"
-                  step="any"
-                  inputmode="decimal"
-                  value="{{ params.enzyme_buffer_volume|default:'2.0' }}"
-                >
+            <div class="mb-4">
+              <label class="form-label fw-bold small text-uppercase">
+                Enzyme and buffer volume
+              </label>
+              <div class="text-muted small mb-2">
+                Volume (µL) of enzyme and buffer required per output well. Default value: 2.0
               </div>
+              <input
+                type="number"
+                class="form-control"
+                name="enzyme_buffer_volume"
+                step="any"
+                inputmode="decimal"
+                value="{{ params.enzyme_buffer_volume|default:'2.0' }}"
+              >
+            </div>
 
-              <div class="mb-4">
-                <label class="form-label fw-bold">
-                  Minimal tip volume
-                </label>
-                <div class="text-muted small mb-2">
-                  Minimal volume (µL) allowed to pipet. Default value: 0.0
-                </div>
-                <input
-                  type="number"
-                  class="form-control"
-                  name="minimal_tip_volume"
-                  step="any"
-                  inputmode="decimal"
-                  value="{{ params.minimal_tip_volume|default:'0.0' }}"
-                >
+            <div class="mb-4">
+              <label class="form-label fw-bold small text-uppercase">
+                Minimal tip volume
+              </label>
+              <div class="text-muted small mb-2">
+                Minimal volume (µL) allowed to pipet. Default value: 0.0
               </div>
+              <input
+                type="number"
+                class="form-control"
+                name="minimal_tip_volume"
+                step="any"
+                inputmode="decimal"
+                value="{{ params.minimal_tip_volume|default:'0.0' }}"
+              >
+            </div>
 
-              <div class="mb-4">
-                <label class="form-label fw-bold">
-                  Tip volume from intermediate dilution
-                </label>
-                <div class="text-muted small mb-2">
-                  Volume (µL) taken from intermediate dilutions. Default value: 1.0
-                </div>
-                <input
-                  type="number"
-                  class="form-control"
-                  name="tip_volume_from_intermediate"
-                  step="any"
-                  inputmode="decimal"
-                  value="{{ params.tip_volume_from_intermediate|default:'1.0' }}"
-                >
+            <div class="mb-4">
+              <label class="form-label fw-bold small text-uppercase">
+                Tip volume from intermediate dilution
+              </label>
+              <div class="text-muted small mb-2">
+                Volume (µL) taken from intermediate dilutions. Default value: 1.0
               </div>
+              <input
+                type="number"
+                class="form-control"
+                name="tip_volume_from_intermediate"
+                step="any"
+                inputmode="decimal"
+                value="{{ params.tip_volume_from_intermediate|default:'1.0' }}"
+              >
+            </div>
 
-              <div class="mb-4">
-                <label class="form-label fw-bold">
-                  Minimum remaining volume in intermediate dilution
-                </label>
-                <div class="text-muted small mb-2">
-                  Minimal volume (µL) left in a well. Default value: 2.0
-                </div>
-                <input
-                  type="number"
-                  class="form-control"
-                  name="min_remaining_volume_intermediate"
-                  step="any"
-                  inputmode="decimal"
-                  value="{{ params.min_remaining_volume_intermediate|default:'2.0' }}"
-                >
+            <div class="mb-4">
+              <label class="form-label fw-bold small text-uppercase">
+                Minimum remaining volume in intermediate dilution
+              </label>
+              <div class="text-muted small mb-2">
+                Minimal volume (µL) left in a well. Default value: 2.0
               </div>
+              <input
+                type="number"
+                class="form-control"
+                name="min_remaining_volume_intermediate"
+                step="any"
+                inputmode="decimal"
+                value="{{ params.min_remaining_volume_intermediate|default:'2.0' }}"
+              >
+            </div>
 
-              <div class="mb-4">
-                <label class="form-label fw-bold">
-                  Concentration of an input plasmid in final reaction
-                </label>
-                <div class="text-muted small mb-2">
-                  Concentration (fmol/µL) in output mix. Default value: 2.0
-                </div>
-                <input
-                  type="number"
-                  class="form-control"
-                  name="input_plasmid_concentration_final"
-                  step="any"
-                  inputmode="decimal"
-                  value="{{ params.input_plasmid_concentration_final|default:'2.0' }}"
-                >
+            <div class="mb-4">
+              <label class="form-label fw-bold small text-uppercase">
+                Concentration of an input plasmid in final reaction
+              </label>
+              <div class="text-muted small mb-2">
+                Concentration (fmol/µL) in output mix. Default value: 2.0
               </div>
+              <input
+                type="number"
+                class="form-control"
+                name="input_plasmid_concentration_final"
+                step="any"
+                inputmode="decimal"
+                value="{{ params.input_plasmid_concentration_final|default:'2.0' }}"
+              >
+            </div>
 
-              <div class="mb-4">
-                <label class="form-label fw-bold">
-                  Updated plasmid concentration file
-                </label>
+            <div class="mb-4">
+              <label class="form-label fw-bold small text-uppercase">
+                Updated plasmid concentration file
+              </label>
 
-                <div class="text-muted small mb-2">
-                  Current value:
-                  <a href="{{ concentration_file_url }}" target="_blank">
-                    {{ concentration_file_name }}
-                  </a>
-                  <button type="submit" name="clear_file" value="1" class="btn btn-sm btn-danger ms-3">
-                      <i class="bi bi-x-circle"></i> Reset to default
-                  </button>
-                </div>
-
-                <div class="text-muted small mt-1">
-                  CSV format: first column <code>pID</code>, second column
-                  <code>Mass Concentration</code>, separator <code>;</code>.
-                  <br>
-                  This file is generated automatically after the simulation.
-                  You can download it, modify the values, and re-upload it here to override
-                  the concentrations used for dilution computation.
-                </div>
-
-                <input
-                  type="file"
-                  class="form-control mt-2"
-                  name="concentration_file"
-                  accept=".csv"
-                >
-              </div>
-
-              <div class="text-center mt-4">
-                <button type="submit" class="btn btn-assembly">
-                  <i class="bi bi-calculator"></i> Compute dilution
+              <div class="text-muted small mb-2">
+                Current value:
+                <a href="{{ concentration_file_url }}" target="_blank">
+                  {{ concentration_file_name }}
+                </a>
+                <button type="submit" name="clear_file" value="1" class="btn btn-sm btn-danger ms-3">
+                    <i class="bi bi-x-circle"></i> Reset to default
                 </button>
               </div>
-              <input type="hidden" name="action" value="compute_dilution">
-            </form>
 
-            {% if dilution_tabs %}
-            <div class="mt-5 border-top pt-4">
-              <div class="hero-subtitle mb-4">Dilution results</div>
+              <div class="text-muted small mt-1">
+                CSV format: first column <code>pID</code>, second column
+                <code>Mass Concentration</code>, separator <code>;</code>.
+                <br>
+                This file is generated automatically after the simulation.
+                You can download it, modify the values, and re-upload it here to override
+                the concentrations used for dilution computation.
+              </div>
 
-              <div class="d-flex flex-column gap-2">
-                {% for t in dilution_tabs %}
-                  {% with t.name as id %}
-                    <div class="border rounded">
-                      <a
-                        class="d-flex align-items-center justify-content-between text-decoration-none px-3 py-2"
-                        data-bs-toggle="collapse"
-                        href="#collapse-{{ id }}"
-                        role="button"
-                      >
-                        <span class="fw-semibold">{{ t.label }}</span>
-                        <i class="bi bi-chevron-down"></i>
-                      </a>
+              <input
+                type="file"
+                class="form-control mt-2"
+                name="concentration_file"
+                accept=".csv"
+              >
+            </div>
 
-                      <div id="collapse-{{ id }}" class="collapse">
-                        <div class="p-3">
-                          <div class="table-responsive">
-                            {{ t.html|safe }}
-                          </div>
+            <div class="text-center mt-4">
+              <button type="submit" class="btn btn-assembly">
+                Compute dilution
+              </button>
+            </div>
+            <input type="hidden" name="action" value="compute_dilution">
+          </form>
+
+          {% if dilution_tabs %}
+          <div class="mt-5 border-top pt-4" id="dilutionResults">
+            <div class="hero-subtitle mb-4">Dilution tables</div>
+
+            <div class="d-flex flex-column gap-2">
+              {% for t in dilution_tabs %}
+                {% with t.name|cut:"."|cut:"_" as dom_id %}
+                  <div class="border rounded">
+                    <a
+                      class="d-flex align-items-center justify-content-between text-decoration-none px-3 py-2"
+                      data-bs-toggle="collapse"
+                      href="#collapse-{{ dom_id }}"
+                      role="button"
+                      aria-expanded="false"
+                      aria-controls="collapse-{{ dom_id }}"
+                      style="color: inherit;"
+                    >
+                      <span class="fw-semibold">{{ t.label }}</span>
+                      <i class="bi bi-chevron-down"></i>
+                    </a>
+
+                    <div id="collapse-{{ dom_id }}" class="collapse">
+                      <div class="p-3">
+                        <div class="table-responsive">
+                          {{ t.html|safe }}
                         </div>
                       </div>
                     </div>
-                  {% endwith %}
-                {% endfor %}
-              </div>
+                  </div>
+                {% endwith %}
+              {% endfor %}
+            </div>
 
-              <div class="text-center mt-3">
-                {% for file in csv_files %}
-                  <a href="{{ file.url }}" class="btn btn-assembly" download>
-                    <i class="bi bi-download"></i> {{ file.label }}
+            <div class="text-center mt-3">
+              {% for file in csv_files %}
+                <a href="{{ file.url }}" class="btn btn-assembly" download>
+                  <i class="bi bi-download"></i> {{ file.label }}
+                </a>
+              {% endfor %}
+            </div>
+
+          </div>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+
+    <!-- SIMULATE VERIFICATION -->
+    <div class="card mb-4" id="cardVerification">
+      <div
+        class="card-header bg-white border-bottom-0 py-3"
+        data-bs-toggle="collapse"
+        data-bs-target="#collapseVerification"
+        role="button"
+        aria-expanded="false"
+        aria-controls="collapseVerification"
+      >
+        <div class="hero-subtitle mb-0 d-flex align-items-center justify-content-between">
+          Simulate verification
+          <i class="bi bi-chevron-down"></i>
+        </div>
+        <div class="text-muted small mt-2">
+          Simulate the agarose gel obtained from PCR or enzyme digestion verification of your output plasmids.<br>
+          Provide a primers database and list of primers to use for PCR simulation or a liste of restriction enzymes for digestion simulation.
+        </div>
+      </div>
+
+      <div id="collapseVerification" class="collapse{% if request.POST.action == 'run_pcr' %} show{% elif request.POST.action == 'run_digestion' %} show{% elif pcr_svg_url %} show{% elif digestion_svg_url %} show{% endif %}">
+        <div class="card-body pt-0">
+          <hr>
+          
+          <form
+            method="post"
+            enctype="multipart/form-data"
+            class="mt-3"
+          >
+            {% csrf_token %}
+            <div class="mb-4">
+              <label class="form-label fw-bold small text-uppercase">PCR PAIRS TO USE</label>
+              <div class="text-muted small mb-2">
+                Specify one pair per line from your primer database, the first being the forward primer and the second the reverse primer, separated by a comma. For example: <code>Primer_F,Primer_R</code>.
+              </div>
+              <textarea class="form-control" name="pcr_pairs" rows="3" placeholder="Primer_F,Primer_R">{{ pcr_pairs|default:'' }}</textarea>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-bold small text-uppercase">PRIMERS DATABASE</label>
+              
+              <div class="text-muted small mb-2">
+                Current value:
+                {% if primers_file_url %}
+                  <a href="{{ primers_file_url }}" target="_blank">
+                    {{ primers_file_name }}
                   </a>
-                {% endfor %}
+                  <button type="submit" name="clear_primers" value="1" class="btn btn-sm btn-danger ms-3">
+                      <i class="bi bi-trash"></i> Clear file
+                  </button>
+                {% else %}
+                  <span class="text-muted italic">No file uploaded</span>
+                {% endif %}
               </div>
 
-            </div>
-            {% endif %}
+              <div class="text-muted small mt-1">
+                CSV format: first column <code>primerId</code>, second column <code>sequence</code>, separator <code>;</code>.
+                <br>
+                Upload a CSV file containing your primer database to be used for PCR simulation.
+              </div>
 
+              <input type="file" class="form-control mt-2" name="primers_file" accept=".csv">
+            </div>
+
+            <div class="text-center mt-4">
+              <button type="submit" class="btn btn-assembly">
+                Simulate PCR verification
+              </button>
+            </div>
+            <input type="hidden" name="action" value="run_pcr">
+          </form>
+
+          {% if pcr_svg_url %}
+          <div class="mt-4 mb-4 text-center" id="pcrResults">
+              <div class="hero-subtitle mb-4">PCR agarose gel</div>
+              <div class="border rounded bg-white p-3 shadow-sm">
+                  <img src="{{ pcr_svg_url }}" class="img-fluid" alt="PCR Amplicon Map">
+              </div>
+              <div class="text-muted small mt-2">
+                  Note : PCR amplicons on the output plasmids are in black, while amplicons on the input plasmids are in grey.
+              </div>
           </div>
+          {% endif %}
+
+          <hr class="my-5">
+
+          <form method="post">
+
+            {% csrf_token %}
+            <div class="mb-4">
+              <label class="form-label fw-bold small text-uppercase">Restriction enzyme(s)</label>
+              <div class="text-muted small mb-2">
+                Enzyme(s) used to produce digestion gel, one per line.
+              </div>
+              <textarea 
+                class="form-control" 
+                name="enzymes" 
+                rows="4" 
+                placeholder="BsaI&#10;NotI"
+              >{{ enzymes|default:'' }}</textarea>
+            </div>
+
+            <div class="text-center mb-3">
+              <button type="submit" class="btn btn-assembly">
+                Simulate digestion verification
+              </button>
+            </div>
+            <input type="hidden" name="action" value="run_digestion">
+          </form>
+
+          {% if digestion_svg_url %}
+          <div class="mt-4 mb-4 text-center" id="digestionResults">
+              <div class="hero-subtitle mb-4">Digestion agarose gel</div>
+              <div class="border rounded bg-white p-3 shadow-sm">
+                  <img src="{{ digestion_svg_url }}" class="img-fluid" alt="Digestion Gel">
+              </div>
+          </div>
+          {% endif %}
+
         </div>
       </div>
-
-      <!-- SIMULATE VERIFICATION -->
-      <div class="card mb-4" id="cardVerification">
-        <div
-          class="card-header bg-white border-bottom-0 py-3"
-          data-bs-toggle="collapse"
-          data-bs-target="#collapseVerification"
-          role="button"
-        >
-          <div class="hero-subtitle mb-0 d-flex align-items-center justify-content-between">
-            Simulate verification
-            <i class="bi bi-chevron-down"></i>
-          </div>
-        </div>
-
-        <div id="collapseVerification" class="collapse show">
-          <div class="card-body pt-0">
-            <hr>
-            
-            <form method="post" enctype="multipart/form-data" class="mt-3">
-              {% csrf_token %}
-              <div class="mb-4">
-                <label class="form-label fw-bold small text-uppercase">PCR PAIRS TO USE</label>
-                <div class="text-muted small mb-2">
-                  In a CSV-like format where you have one pair per line, the forward primer first, then the reverse primer.
-                </div>
-                <textarea class="form-control" name="pcr_pairs" rows="3" placeholder="Primer_F,Primer_R">{{ pcr_pairs|default:'' }}</textarea>
-              </div>
-
-              <div class="mb-4">
-                <label class="form-label fw-bold small text-uppercase">PRIMERS FILE</label>
-                
-                <div class="text-muted small mb-2">
-                  Current value:
-                  {% if primers_file_url %}
-                    <a href="{{ primers_file_url }}" target="_blank">
-                      {{ primers_file_name }}
-                    </a>
-                    <button type="submit" name="clear_primers" value="1" class="btn btn-sm btn-danger ms-3">
-                        <i class="bi bi-trash"></i> Clear file
-                    </button>
-                  {% else %}
-                    <span class="text-muted italic">No file uploaded</span>
-                  {% endif %}
-                </div>
-
-                <div class="text-muted small mt-1">
-                  CSV header: <code>primerId;sequence</code>, separator <code>;</code>.
-                  <br>
-                  Upload a CSV file containing your primer database to be used for PCR simulation.
-                </div>
-
-                <input type="file" class="form-control mt-2" name="primers_file" accept=".csv">
-              </div>
-
-              <div class="text-center mt-4">
-                <button type="submit" class="btn btn-assembly">
-                  <i class="bi bi-play-circle"></i> RUN PCR VERIFICATION
-                </button>
-              </div>
-              <input type="hidden" name="action" value="run_pcr">
-            </form>
-
-            {% if pcr_svg_url %}
-            <div class="mt-4 mb-4 text-center">
-                <div class="hero-subtitle mb-2 small text-uppercase">PCR Visualization</div>
-                <div class="border rounded bg-white p-3 shadow-sm">
-                    <img src="{{ pcr_svg_url }}" class="img-fluid" alt="PCR Amplicon Map">
-                </div>
-                <div class="text-muted small mt-2">
-                    Note : PCR amplicons on the output plasmids are in black, while amplicons on the input plasmids are in grey.
-                </div>
-            </div>
-            {% endif %}
-
-            <hr class="my-5">
-
-            <form method="post">
-              {% csrf_token %}
-              <div class="mb-4">
-                <label class="form-label fw-bold small text-uppercase">RESTRICTION ENZYME</label>
-                <div class="text-muted small mb-2">
-                  Enzyme(s) used to produce digestion gel, one per line.
-                </div>
-                <textarea 
-                  class="form-control" 
-                  name="enzymes" 
-                  rows="4" 
-                  placeholder="BsaI&#10;NotI"
-                >{{ enzymes|default:'' }}</textarea>
-              </div>
-
-              <div class="text-center mb-3">
-                <button type="submit" class="btn btn-assembly">
-                  <i class="bi bi-play-circle"></i> RUN DIGESTION VERIFICATION
-                </button>
-              </div>
-              <input type="hidden" name="action" value="run_digestion">
-            </form>
-
-            {% if digestion_svg_url %}
-            <div class="mt-4 mb-4 text-center">
-                <div class="hero-subtitle mb-2 small text-uppercase">Digestion Visualization</div>
-                <div class="border rounded bg-white p-3 shadow-sm">
-                    <img src="{{ digestion_svg_url }}" class="img-fluid" alt="Digestion Gel">
-                </div>
-            </div>
-            {% endif %}
-
-          </div>
-        </div>
-      </div>
-      
-
-      <div class="d-flex gap-2 flex-wrap mb-5">
-        <a href="{% url 'simulator:preview' %}" class="btn btn-outline-secondary">
-          Back
-        </a>
-      </div>
+    </div>
+    
+    <div class="d-flex gap-2 flex-wrap mb-5">
+      <a href="{% url 'simulator:preview' %}" class="btn btn-outline-secondary">
+        Back
+      </a>
+    </div>
 
   </div>
 </main>
 
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    {% if error %}
+      location.hash = "#pageTop";
+    {% elif request.POST.action == "compute_dilution" %}
+      {% if dilution_tabs %} location.hash = "#dilutionResults";
+      {% else %} location.hash = "#cardCompute";
+      {% endif %}
+    {% elif request.POST.action == "run_pcr" %}
+      {% if pcr_svg_url %} location.hash = "#pcrResults";
+      {% else %} location.hash = "#cardVerification";
+      {% endif %}
+    {% elif request.POST.action == "run_digestion" %}
+      {% if digestion_svg_url %} location.hash = "#digestionResults";
+      {% else %} location.hash = "#cardVerification";
+      {% endif %}
+    {% endif %}
+  });
+</script>
 {% endblock %}

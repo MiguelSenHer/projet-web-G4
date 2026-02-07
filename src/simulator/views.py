@@ -226,7 +226,11 @@ class RunSimulationView(TemplateView):
                 uploaded_concentration_file=request.FILES.get("concentration_file"),
                 clear_concentration=clear_requested,
             )
-
+            if clear_requested or request.POST.get("default_mass_concentration", "").strip() == "":
+                self.job.has_dilution_results = False
+            else:
+                self.job.has_dilution_results = not bool(self.job.error_message)
+            self.job.save(update_fields=['has_dilution_results'])
             return self.get(request, *args, **kwargs)
 
         if action == "run_pcr":
@@ -236,13 +240,27 @@ class RunSimulationView(TemplateView):
                 uploaded_primers_file=request.FILES.get("primers_file"),
                 clear_primers=clear_requested,
             )
-                
+            pcr_pairs = request.POST.get("pcr_pairs", "").strip()
+            if clear_requested or pcr_pairs == "" or not self.job.primers_file:
+                self.job.has_pcr_results = False
+            else:
+                self.job.has_pcr_results = not bool(self.job.error_message)
+
+            self.job.save(update_fields=['has_pcr_results'])
             return self.get(request, *args, **kwargs)
         
         if action == "run_digestion":
             self.job.run_simulation(
                 digestion_params=request.POST
             )
+            enzymes = request.POST.get("enzymes", "").strip()
+            if enzymes == "":
+                self.job.has_digestion_results = False
+            else:
+                self.job.has_digestion_results = not bool(self.job.error_message)
+
+            self.job.save(update_fields=["has_digestion_results"])
+
             return self.get(request, *args, **kwargs)
 
         return self.get(request, *args, **kwargs)
@@ -269,27 +287,39 @@ class RunSimulationView(TemplateView):
         dilution_tabs = []
         csv_files = []
 
-        for label, name in filenames:
-            file_path = str(outputs_dir / name)
-            if not storage.exists(file_path):
-                continue
-            csv_files.append({"label": label, "url": storage.url(file_path)})
+        if job.has_dilution_results:
+            for label, name in filenames:
+                file_path = str(outputs_dir / name)
+                if not storage.exists(file_path):
+                    continue
+                csv_files.append({"label": label, "url": storage.url(file_path)})
 
-            try:
-                with storage.open(file_path, "r") as f:
-                    df = pd.read_csv(f, sep=",", dtype=str).fillna("")
-                    html_table = df.to_html(classes="table table-striped-columns table-bordered table-sm", index=False) 
-            except Exception:
-                html_table = "<p class='text-danger'>Could not load table.</p>"
-            
-            dilution_tabs.append({
-                "name": name,
-                "label": label,
-                "html": html_table
-            })
+                try:
+                    with storage.open(file_path, "r") as f:
+                        df = pd.read_csv(f, sep=",", dtype=str).fillna("")
+                        html_table = df.to_html(classes="table table-striped-columns table-bordered table-sm", index=False) 
+                except Exception:
+                    html_table = "<p class='text-danger'>Could not load table.</p>"
+                
+                dilution_tabs.append({
+                    "name": name,
+                    "label": label,
+                    "html": html_table
+                })
 
         context["csv_files"] = csv_files
         context["dilution_tabs"] = dilution_tabs
+
+        if job.has_pcr_results:
+            pcr_svg_path = outputs_dir / "pcr.svg"
+            if storage.exists(str(pcr_svg_path)):
+                context["pcr_svg_url"] = storage.url(str(pcr_svg_path))
+
+        if job.has_digestion_results:
+            digestion_svg_path = outputs_dir / "digestion.svg"
+            if storage.exists(str(digestion_svg_path)):
+                context["digestion_svg_url"] = storage.url(str(digestion_svg_path))
+
         context["job_id"] = job.job_id
         context["status"] = job.status
         context["error"] = job.error_message
@@ -298,12 +328,6 @@ class RunSimulationView(TemplateView):
         context["primers_file_name"] = job.primers_file.name.split("/")[-1] if job.primers_file else None
         context["primers_file_url"] = job.primers_file.url if job.primers_file else None
         context["outputs_zip_url"] = job.outputs_zip.url if job.outputs_zip else None
-        pcr_path = str(outputs_dir / "pcr.svg")
-        if storage.exists(pcr_path):
-            context["pcr_svg_url"] = storage.url(pcr_path)
-        digestion_path = str(outputs_dir / "digestion.svg")
-        if storage.exists(digestion_path):
-            context["digestion_svg_url"] = storage.url(digestion_path)
 
         return context
 
@@ -374,7 +398,7 @@ class DownloadOutputsByJobView(LoginRequiredMixin, View):
     def get(self, request, job_id, *args, **kwargs):
         job = get_object_or_404(SimulationJob, job_id=job_id, user=request.user)
 
-        if job.status != "SUCCESS" or not job.outputs_zip:
+        if not job.outputs_zip:
             raise Http404
 
         return FileResponse(job.outputs_zip.open("rb"), as_attachment=True, filename=f"{job.job_id}_results.zip")
