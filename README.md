@@ -116,8 +116,10 @@ python manage.py loaddata plasmids/fixtures/public_collections.json
 python manage.py loaddata browse/fixtures/browse_data.json
 ```
 
-## ACCESS TO CREATED USERS ACCOUNTS 
-- User accounts
+## ACCESS TO CREATED USERS ACCOUNTS
+
+User accounts
+
 - julie.fares23@gmail.com
 - julie.fares25@gmail.com
 - marie.dupont26@gmail.com
@@ -125,6 +127,7 @@ python manage.py loaddata browse/fixtures/browse_data.json
 - mimu.mumu@gmail.com
 - Lola.Lavoisier@gmail.com
 - justine.roger@gmail.com
+
 The password associated to these accounts is 1234567#
 
 ---
