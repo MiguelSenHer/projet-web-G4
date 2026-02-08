@@ -102,3 +102,29 @@ http://localhost:8025
 Mailpit SMTP server runs on 127.0.0.1:1025.
 ---
 
+## Load data from fixtures to recreate the DB
+```
+python manage.py loaddata accounts/fixtures/users.json
+```
+```
+python manage.py loaddata accounts/fixtures/accounts.json
+```
+```
+python manage.py loaddata plasmids/fixtures/public_collections.json
+```
+```
+python manage.py loaddata browse/fixtures/browse_data.json
+```
+
+## ACCESS TO CREATED USERS ACCOUNTS 
+- User accounts
+- julie.fares23@gmail.com
+- julie.fares25@gmail.com
+- marie.dupont26@gmail.com
+- paul.dupont@gmail.com
+- mimu.mumu@gmail.com
+- Lola.Lavoisier@gmail.com
+- justine.roger@gmail.com
+The password associated to these accounts is 1234567#
+
+---
