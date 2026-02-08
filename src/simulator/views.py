@@ -11,7 +11,6 @@ from .forms import UploadTemplateForm, UploadInputsForm
 from .models import SimulationJob
 import shutil
 from django.conf import settings
-from zipfile import ZipFile
 from django.contrib import messages
 from django.db.models import Q
 from plasmids.models import Plasmid

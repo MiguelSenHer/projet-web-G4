@@ -79,25 +79,23 @@
   </div>
 
 
+  
   <div class="container mt-4">
-    <h2 class="panel-title mb-2">TEAM COLLECTIONS</h2>
-
-    <div class="row g-4">
-      <div class="col-lg-12">
-        <div class="card team-card">
-          <div class="card-body">
-
-            {% if collections %}
-              <ul class="mb-0 list-unstyled">
-                {% for c in collections %}
-                  <li class="d-flex justify-content-between align-items-center mb-2">
-
-                    <!-- Collection info -->
+  <h2 class="panel-title mb-2">TEAM COLLECTIONS</h2>
+  <div class="row g-4">
+    <div class="col-lg-12">
+      <div class="card team-card shadow-sm">
+        <div class="card-body">
+          {% if collections %}
+            <ul class="mb-0 list-unstyled">
+              {% for c in collections %}
+                {% with plasmids=c.plasmids.all %}
+                <li class="mb-3 p-3 border rounded bg-white">
+                  <div class="d-flex justify-content-between align-items-start">
                     <div>
                       <strong>{{ c.name }}</strong>
                       <div class="text-muted small">
-                        Owner: {{ c.owner.get_full_name|default:c.owner.email }}
-                        ·
+                        Owner: {{ c.owner.get_full_name|default:c.owner.email }} ·
                         {% if c.is_public %}
                           <span class="badge bg-success">Public - Available for team</span>
                         {% else %}
@@ -106,124 +104,138 @@
                       </div>
                     </div>
 
-                    <!-- Actions -->
                     <div class="d-flex gap-2">
-
-                      <!-- Chef d'équipe : retirer la collection -->
                       {% if membership.role == "LEADER" %}
-                        <form method="post" class="d-inline">
+                        <form method="post" class="d-inline" onsubmit="return confirm('Remove this collection from the team?');">
                           {% csrf_token %}
                           <input type="hidden" name="action" value="detach_collection">
                           <input type="hidden" name="collection_id" value="{{ c.id }}">
-                          <button class="btn btn-sm btn-outline-danger">
-                            Remove
-                          </button>
+                          <button class="btn btn-sm btn-outline-danger">Remove</button>
                         </form>
-                      {% endif %}
-
-                    </div>
-                  </li>
-                {% endfor %}
-              </ul>
-            {% else %}
-              <p class="text-muted small mb-0">
-                No collections for this team yet.
-              </p>
-            {% endif %}
-
-            <!-- Chef d'équipe : ajouter une collection existante -->
-            {% if membership.role == "LEADER" and available_collections %}
-              <hr>
-              <h6 class="mb-2">Add an existing collection</h6>
-
-              <form method="post" class="d-flex gap-2">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="attach_collection">
-
-                <select name="collection_id" class="form-select" required>
-                  {% for c in available_collections %}
-                    <option value="{{ c.id }}">{{ c.name }}</option>
-                  {% endfor %}
-                </select>
-
-                <button class="btn btn-outline-primary">
-                  Add
-                </button>
-              </form>
-            {% endif %}
-
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="container mt-4">
-  <h2 class="panel-title mb-2">TEAM MAPPING COLLECTIONS</h2>
-
-  <div class="row g-4">
-    <div class="col-lg-12">
-      <div class="card team-card">
-        <div class="card-body">
-
-          {% if mapping_collections %}
-            <ul class="mb-0 list-unstyled">
-              {% for mc in mapping_collections %}
-                <li class="d-flex justify-content-between align-items-center mb-2">
-
-                  <div>
-                    <strong>{{ mc.name }}</strong>
-                    <div class="text-muted small">
-                      Owner: {{ mc.owner.get_full_name|default:mc.owner.email }}
-                      ·
-                      {% if mc.is_public %}
-                        <span class="badge bg-success">Public - Available for team</span>
-                      {% else %}
-                        <span class="badge bg-secondary">Private - Available for team</span>
                       {% endif %}
                     </div>
                   </div>
 
-                  {% if membership.role == "LEADER" %}
-                    <form method="post" class="d-inline">
-                      {% csrf_token %}
-                      <input type="hidden" name="action" value="detach_mapping_collection">
-                      <input type="hidden" name="mapping_collection_id" value="{{ mc.id }}">
-                      <button class="btn btn-sm btn-outline-danger">
-                        Remove
+                  {% if plasmids %}
+                    <div class="mt-2 pt-2 border-top">
+                      <button class="btn btn-link p-0 text-muted small text-decoration-none" type="button" 
+                              data-bs-toggle="collapse" data-bs-target="#plasmids-{{ c.id }}">
+                        <i class="bi bi-chevron-down"></i> Plasmids ({{ plasmids|length }})
                       </button>
-                    </form>
+                      <div class="collapse mt-2" id="plasmids-{{ c.id }}">
+                        <div class="d-flex flex-wrap gap-2">
+                          {% for p in plasmids %}
+                            <a class="border rounded-pill px-3 py-1 small text-decoration-none bg-light" 
+                               href="{% url 'plasmids:plasmid_view' p.id %}">
+                              {{ p.name }}
+                            </a>
+                          {% endfor %}
+                        </div>
+                      </div>
+                    </div>
                   {% endif %}
-
                 </li>
+                {% endwith %}
               {% endfor %}
             </ul>
           {% else %}
-            <p class="text-muted small mb-0">
-              No mapping collections for this team yet.
-            </p>
+            <p class="text-muted small mb-0">No collections for this team yet.</p>
+          {% endif %}
+
+          {% if membership.role == "LEADER" and available_collections %}
+            <hr>
+            <h6 class="mb-2 small fw-bold">Add an existing collection</h6>
+            <form method="post" class="d-flex gap-2">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="attach_collection">
+              <select name="collection_id" class="form-select form-select-sm" required>
+                {% for c in available_collections %}
+                  <option value="{{ c.id }}">{{ c.name }}</option>
+                {% endfor %}
+              </select>
+              <button class="btn btn-sm btn-outline-primary">Add</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <div class="container mt-4">
+  <h2 class="panel-title mb-2">TEAM MAPPING COLLECTIONS</h2>
+  <div class="row g-4">
+    <div class="col-lg-12">
+      <div class="card team-card shadow-sm">
+        <div class="card-body">
+          {% if mapping_collections %}
+            <ul class="mb-0 list-unstyled">
+              {% for mc in mapping_collections %}
+                {% with tables=mc.tables.all %}
+                <li class="mb-3 p-3 border rounded bg-white">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                      <strong>{{ mc.name }}</strong>
+                      <div class="text-muted small">
+                        Owner: {{ mc.owner.get_full_name|default:mc.owner.email }} ·
+                        {% if mc.is_public %}
+                          <span class="badge bg-success">Public - Available for team</span>
+                        {% else %}
+                          <span class="badge bg-secondary">Private - Available for team</span>
+                        {% endif %}
+                      </div>
+                    </div>
+
+                    {% if membership.role == "LEADER" %}
+                      <form method="post" class="d-inline" onsubmit="return confirm('Remove this mapping from the team?');">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="detach_mapping_collection">
+                        <input type="hidden" name="mapping_collection_id" value="{{ mc.id }}">
+                        <button class="btn btn-sm btn-outline-danger">Remove</button>
+                      </form>
+                    {% endif %}
+                  </div>
+
+                  {% if tables %}
+                    <div class="mt-2 pt-2 border-top">
+                      <button class="btn btn-link p-0 text-muted small text-decoration-none" type="button" 
+                              data-bs-toggle="collapse" data-bs-target="#mapping-{{ mc.id }}">
+                        <i class="bi bi-chevron-down"></i> Tables ({{ tables|length }})
+                      </button>
+                      <div class="collapse mt-2" id="mapping-{{ mc.id }}">
+                        <div class="d-flex flex-wrap gap-2">
+                          {% for t in tables %}
+                            <a class="border rounded-pill px-3 py-1 small text-decoration-none bg-light" 
+                               href="{% url 'plasmids:mapping_view' t.id %}" target="_blank">
+                              {{ t.name }}
+                            </a>
+                          {% endfor %}
+                        </div>
+                      </div>
+                    </div>
+                  {% endif %}
+                </li>
+                {% endwith %}
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted small mb-0">No mapping collections for this team yet.</p>
           {% endif %}
 
           {% if membership.role == "LEADER" and available_mapping_collections %}
             <hr>
-            <h6 class="mb-2">Add an existing mapping collection</h6>
-
+            <h6 class="mb-2 small fw-bold">Add an existing mapping collection</h6>
             <form method="post" class="d-flex gap-2">
               {% csrf_token %}
               <input type="hidden" name="action" value="attach_mapping_collection">
-
-              <select name="mapping_collection_id" class="form-select" required>
+              <select name="mapping_collection_id" class="form-select form-select-sm" required>
                 {% for mc in available_mapping_collections %}
                   <option value="{{ mc.id }}">{{ mc.name }}</option>
                 {% endfor %}
               </select>
-
-              <button class="btn btn-outline-primary">
-                Add
-              </button>
+              <button class="btn btn-sm btn-outline-primary">Add</button>
             </form>
           {% endif %}
-
         </div>
       </div>
     </div>

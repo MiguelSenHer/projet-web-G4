@@ -192,15 +192,24 @@ class PlasmidView(TemplateView):
     def dispatch(self, request, *args, **kwargs):
         if "plasmid_id" in self.kwargs:
             self.plasmid = get_object_or_404(Plasmid, id=self.kwargs["plasmid_id"])
+            collection = self.plasmid.collection
             
-            if not self.plasmid.collection.is_public:
-                if self.plasmid.collection.owner != request.user:
-                    raise Http404
+            is_public = collection.is_public
+            is_staff = request.user.is_staff
+            is_owner = (collection.owner == request.user)
+            is_team_member = False
+            # Allow only if the collection is public, or if the user is the owner, an admin, or a team member of the associated team
+            if collection.team and request.user.is_authenticated:
+                is_team_member = collection.team.memberships.filter(user=request.user).exists()
+
+            if not (is_public or is_staff or is_owner or is_team_member):
+                raise Http404
 
             if not self.plasmid.gb_abspath().exists():
                 raise Http404
 
             return super().dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         return self.get(request, *args, **kwargs)
@@ -229,17 +238,27 @@ class PlasmidView(TemplateView):
 class MappingView(View):
     def get(self, request, mapping_id, *args, **kwargs):
         mapping = get_object_or_404(MappingTable, id=mapping_id)
-        if not mapping.collection.is_public:
-            if not request.user.is_authenticated or mapping.collection.owner_id != request.user.id:
-                raise Http404
+        collection = mapping.collection
+        # Only allow access if the collection is public, or if the user is the owner, an admin, or a team member
+        is_public = collection.is_public
+        is_owner = request.user.is_authenticated and (collection.owner == request.user)
+        is_admin = request.user.is_staff
+        
+        is_team_member = False
+        if collection.team and request.user.is_authenticated:
+            is_team_member = collection.team.memberships.filter(user=request.user).exists()
+
+        # Si aucune des conditions n'est remplie -> 404
+        if not (is_public or is_owner or is_admin or is_team_member):
+            raise Http404
 
         file_path = mapping.mapping_abspath()
-        
         if not file_path.exists():
             raise Http404
 
         return FileResponse(open(file_path, "rb"), content_type="text/csv")
     
+
 # View to download a plasmid collection as a ZIP file
 def DownloadCollectionView(request, collection_id):
     collection = get_object_or_404(Collection, id=collection_id)
