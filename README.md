@@ -100,7 +100,7 @@ This project uses Mailpit to capture emails locally (password reset, etc.) witho
 
 ## 1. Installation
 - Go to the official Mailpit GitHub releases: https://github.com/axllent/mailpit/releases
-- Download  the archive correspond to your machine architecture (darwin is macOS), then extract it
+- Download  the archive corresponding to your machine architecture (darwin is macOS), then extract it
 
 ## 2. Run Mailpit
 - Open a terminal into the extracted folder then run the executable file :
@@ -111,7 +111,7 @@ On Windows:
 .\mailpit.exe
 ```
 
-On macOS and Linux
+On macOS and Linux :
 
 ```
 ./mailpit
