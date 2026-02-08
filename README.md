@@ -50,10 +50,24 @@ projet-web-G4/
 python3.11 -m venv .venv
 ```
 
+```
+python -m venv .venv
+```
+
 ### 2. Activate the virtual environment
+
+Activate the virtual environment depending on your operating system:
+
+On Linux / macOS:
 
 ```
 source .venv/bin/activate
+```
+
+On Windows (PowerShell / CMD):
+
+```
+.venv\Scripts\activate
 ```
 
 ### 3. Upgrade pip and install dependencies
