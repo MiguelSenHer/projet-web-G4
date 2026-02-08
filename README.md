@@ -92,16 +92,16 @@ python src/manage.py migrate
 
 ## Load data from fixtures to recreate the DB (the order of loading matters)
 ```
-python manage.py loaddata accounts/fixtures/users.json
+python src/manage.py loaddata src/accounts/fixtures/users.json
 ```
 ```
-python manage.py loaddata accounts/fixtures/accounts.json
+python src/manage.py loaddata src/accounts/fixtures/accounts.json
 ```
 ```
-python manage.py loaddata plasmids/fixtures/public_collections.json
+python src/manage.py loaddata src/plasmids/fixtures/public_collections.json
 ```
 ```
-python manage.py loaddata browse/fixtures/browse_data.json
+python src/manage.py loaddata src/browse/fixtures/browse_data.json
 ```
 
 ---
