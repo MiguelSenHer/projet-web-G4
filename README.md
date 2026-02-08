@@ -65,6 +65,15 @@ python -m pip install -r requirements.txt
 ```
 
 ---
+### Apply migrations
+
+```
+python src/manage.py makemigrations
+```
+
+```
+python src/manage.py migrate
+```
 
 ## Run the development server
 
