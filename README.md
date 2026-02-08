@@ -149,13 +149,13 @@ python manage.py loaddata browse/fixtures/browse_data.json
 
 User accounts
 
-- julie.fares23@gmail.com
-- julie.fares25@gmail.com
-- marie.dupont26@gmail.com
-- paul.dupont@gmail.com
-- mimu.mumu@gmail.com
-- Lola.Lavoisier@gmail.com
-- justine.roger@gmail.com
+- julie.fares23@gmail.com    classic user
+- julie.fares25@gmail.com    ADMIN
+- marie.dupont26@gmail.com   classic user
+- paul.dupont@gmail.com      classic user
+- mimu.mumu@gmail.com        classic user
+- Lola.Lavoisier@gmail.com   classic user
+- justine.roger@gmail.com    ADMIN
 
 The password associated to these accounts is 1234567#
 
