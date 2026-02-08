@@ -3,7 +3,6 @@
 - Julie FARES
 - Cherif SEDDIK
 - Miguel SENOVILLA
-- Dylane MAUREL
 
 Link to github repository : https://github.com/MiguelSenHer/projet-web-G4
 ---
