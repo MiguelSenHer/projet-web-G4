@@ -98,24 +98,40 @@ http://127.0.0.1:8000/
 ## Simulate SMTP server - Mailpit (Local Email Testing)
 This project uses Mailpit to capture emails locally (password reset, etc.) without sending real emails.
 
-## 1. Installation (Ex. Windows)
-- Go to the official Mailpit GitHub: https://github.com/axllent/mailpit
-- Click Releases and download mailpit-windows-amd64.zip
-- Extract it and get mailpit.exe
+## 1. Installation
+- Go to the official Mailpit GitHub releases: https://github.com/axllent/mailpit/releases
+- Download  the archive correspond to your machine architecture (darwin is macOS), then extract it
 
 ## 2. Run Mailpit
-- Open CMD in the folder and run:
+- Open a terminal into the extracted folder then run the executable file :
+
+On Windows:
 
 ```
 .\mailpit.exe
 ```
+
+On macOS and Linux
+
+```
+./mailpit
+```
+
+Note : on macOS, you might need to run this command before : 
+
+```
+xattr -d com.apple.quarantine mailpit
+```
+
+For any other problems refer to the tool's documentation: https://mailpit.axllent.org/docs/install/
+
 
 - Open your browser at:
 http://localhost:8025
 Mailpit SMTP server runs on 127.0.0.1:1025.
 ---
 
-## Load data from fixtures to recreate the DB
+## Load data from fixtures to recreate the DB (the order of loading matters)
 ```
 python manage.py loaddata accounts/fixtures/users.json
 ```
