@@ -96,7 +96,12 @@ This project uses Mailpit to capture emails locally (password reset, etc.) witho
 - Extract it and get mailpit.exe
 
 ## 2. Run Mailpit
-- Open CMD in the folder and run:.\mailpit.exe
+- Open CMD in the folder and run:
+
+```
+.\mailpit.exe
+```
+
 - Open your browser at:
 http://localhost:8025
 Mailpit SMTP server runs on 127.0.0.1:1025.
