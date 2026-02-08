@@ -27,9 +27,9 @@ projet-web-G4/
 │   ├── simulator/
 │   ├── designer/
 │   ├── browse/
+│   ├── plasmids/
 │   └── frontend/
 │
-├── db.sqlite3
 └── requirements.txt
 ```
 ---
@@ -88,25 +88,23 @@ python src/manage.py makemigrations
 python src/manage.py migrate
 ```
 
-## Run the development server
-
-```
-python src/manage.py runserver
-```
-
-Open your browser at:
-
-http://127.0.0.1:8000/
-
 ---
 
-## Applications
+## Load data from fixtures to recreate the DB (the order of loading matters)
+```
+python manage.py loaddata accounts/fixtures/users.json
+```
+```
+python manage.py loaddata accounts/fixtures/accounts.json
+```
+```
+python manage.py loaddata plasmids/fixtures/public_collections.json
+```
+```
+python manage.py loaddata browse/fixtures/browse_data.json
+```
 
-- **frontend**: landing page and navigation
-- **simulator**: campaign simulation workflow (template upload, validation, inputs)
-- **browse**: assembly browsing
-- **designer**: template designer
-- **accounts**: user authentication and permissions
+---
 
 
 ## Simulate SMTP server - Mailpit (Local Email Testing)
@@ -143,21 +141,30 @@ For any other problems refer to the tool's documentation: https://mailpit.axllen
 - Open your browser at:
 http://localhost:8025
 Mailpit SMTP server runs on 127.0.0.1:1025.
+
 ---
 
-## Load data from fixtures to recreate the DB (the order of loading matters)
+## Run the development server
+
 ```
-python manage.py loaddata accounts/fixtures/users.json
+python src/manage.py runserver
 ```
-```
-python manage.py loaddata accounts/fixtures/accounts.json
-```
-```
-python manage.py loaddata plasmids/fixtures/public_collections.json
-```
-```
-python manage.py loaddata browse/fixtures/browse_data.json
-```
+
+Open your browser at:
+
+http://127.0.0.1:8000/
+
+---
+
+## Applications
+
+- **frontend**: landing page and navigation
+- **simulator**: campaign simulation workflow (template upload, validation, inputs, outputs)
+- **browse**: template assembly browsing
+- **designer**: template designer
+- **accounts**: user authentication and permissions
+- **plasmids**: plasmid visualiser, collections of plasmids and corresponding tables
+---
 
 ## ACCESS TO CREATED USERS ACCOUNTS
 
